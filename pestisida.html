@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#3b82f6">
+  <meta name="description" content="Manajemen Pestisida AWB — Stok Opname & Daily Usage">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pestisida AWB">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <title>Manajemen Pestisida AWB</title>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --bg: #f0f0ee;
+      --card: #fff;
+      --border: #e5e5e5;
+      --text: #1a1a18;
+      --muted: #666;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg); color: var(--text);
+      line-height: 1.45; -webkit-font-smoothing: antialiased;
+      overscroll-behavior-y: none;
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    }
+
+    /* App header — full width like HPT when installed */
+    .app-header {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: #fff;
+      padding: 1.25rem 1rem 1.1rem;
+      padding-top: calc(1.25rem + env(safe-area-inset-top));
+      text-align: center;
+    }
+    .app-header h1 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.25rem; letter-spacing: -0.3px; }
+    .app-header p { font-size: 0.8rem; opacity: 0.92; margin: 0; }
+    .auth-status { font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.95; }
+    .auth-status.ok { color: #bbf7d0; }
+    .auth-status.syncing { color: #e0f2fe; }
+    .auth-status.error { color: #fecaca; }
+
+    .header-actions {
+      display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; padding: 0.75rem; }
+
+    .btn {
+      padding: 0.65rem 0.9rem; border: none; border-radius: 10px; cursor: pointer;
+      font-size: 0.8125rem; font-weight: 700; display: inline-flex; align-items: center;
+      gap: 4px; min-height: 44px; touch-action: manipulation;
+    }
+    .btn:active { transform: scale(0.97); opacity: 0.92; }
+    .btn-primary { background: #fff; color: var(--primary); }
+    .btn-sync { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.35); }
+    .btn-logout { background: #fee2e2; color: #dc2626; }
+    .btn-success { background: #10b981; color: #fff; }
+    .btn-danger { background: #fee2e2; color: #dc2626; }
+    .btn-export { background: #8b5cf6; color: #fff; }
+    .btn-muted { background: #f5f5f3; color: var(--text); border: 1.5px solid var(--border); }
+
+    .tabs {
+      display: flex; gap: 6px; margin-bottom: 0.75rem; flex-wrap: wrap;
+      background: var(--card); padding: 0.5rem; border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1; min-width: 100px; padding: 0.7rem 0.5rem; background: transparent;
+      color: var(--muted); border: none; border-radius: 8px; cursor: pointer;
+      font-weight: 600; font-size: 0.8rem; min-height: 44px;
+    }
+    .tab-btn.active { background: var(--primary); color: #fff; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1rem; margin-bottom: 0.75rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; }
+
+    .form-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;
+    }
+    .form-grid input, .form-grid select {
+      padding: 0.75rem; border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 0.9375rem; width: 100%; min-height: 48px; background: #fff;
+      -webkit-appearance: none; appearance: none; font-family: inherit;
+    }
+    .form-grid input:focus, .form-grid select:focus {
+      outline: none; border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    .form-grid .span2 { grid-column: span 2; }
+
+    .table-wrap {
+      overflow-x: auto; border-radius: 12px; border: 1px solid var(--border);
+      background: #fff; -webkit-overflow-scrolling: touch; margin-bottom: 0.75rem;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      padding: 0.7rem 0.6rem; text-align: left; font-size: 0.75rem; font-weight: 700;
+      background: #f7f7f5; color: #444; border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    td { padding: 0.7rem 0.6rem; font-size: 0.8125rem; border-bottom: 1px solid #eee; }
+    .tc { text-align: center; }
+    .ok { color: #10b981; }
+    .bad { color: #ef4444; }
+    .muted { color: #999; }
+
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 10px;
+      font-size: 0.75rem; font-weight: 600; background: #e0e7ff; color: #4338ca;
+    }
+    .stok { display: inline-block; padding: 3px 10px; border-radius: 10px; font-weight: 700; font-size: 0.8125rem; background: #d1fae5; color: #065f46; }
+    .stok.minus { background: #fee2e2; color: #b91c1c; }
+    .stok.nol { background: #f3f4f6; color: #6b7280; }
+
+    .empty { padding: 2rem; text-align: center; color: #999; font-size: 0.875rem; background: #fafafa; border-radius: 12px; }
+
+    .alert {
+      padding: 0.75rem; border-radius: 10px; font-size: 0.75rem;
+      border-left: 4px solid var(--primary); background: #eff6ff; color: #1e40af; margin-top: 0.5rem;
+    }
+
+    .install-banner {
+      display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;
+      padding: 0.75rem; margin-bottom: 0.75rem; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+    }
+    .install-banner.show { display: flex; }
+    .install-banner p { flex: 1; font-size: 0.8125rem; color: #1e40af; margin: 0; }
+
+    .toast {
+      position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 16px; right: 16px;
+      max-width: 400px; margin: 0 auto; background: #1f2937; color: #fff;
+      padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.8125rem; z-index: 999;
+      display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    .toast.show { display: block; }
+    .toast.ok { border-left: 4px solid #10b981; }
+    .toast.err { border-left: 4px solid #ef4444; }
+    .toast.info { border-left: 4px solid #0ea5e9; }
+
+    @media (min-width: 640px) {
+      .form-grid { grid-template-columns: repeat(3, 1fr); }
+      .form-grid .span2 { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>📋 Manajemen Pestisida AWB</h1>
+  <p>Master Data · Stok Opname · Penggunaan Harian</p>
+  <div class="auth-status" id="authStatus"></div>
+  <div class="header-actions">
+    <button class="btn btn-sync" id="pushBtn" onclick="syncToSheets(true)" style="display:none">⬆️ Sync</button>
+    <button class="btn btn-sync" id="pullBtn" onclick="pullFromSheets()" style="display:none">⬇️ Muat</button>
+    <button class="btn btn-primary" id="authBtn" onclick="handleAuthClick()">☁️ Connect Sheets</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="install-banner" id="installBanner">
+    <p>📲 Install ke layar utama agar tampil seperti aplikasi (tanpa bar Chrome).</p>
+    <button class="btn btn-primary" style="background:var(--primary);color:#fff" onclick="installPWA()">Install</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('pestisidaList', this)">🧪 Daftar</button>
+    <button class="tab-btn" onclick="switchTab('inventory', this)">📦 Stok</button>
+    <button class="tab-btn" onclick="switchTab('usage', this)">💊 Penggunaan</button>
+  </div>
+
+  <div id="pestisidaList" class="tab-content active">
+    <div class="card">
+      <h3>Tambah Pestisida Baru</h3>
+      <div class="form-grid">
+        <input type="text" id="listNama" placeholder="Nama (Matador)">
+        <input type="number" id="listIsi" placeholder="Isi (250)" min="0" step="0.1">
+        <select id="listSatuan">
+          <option>ML</option><option>Liter</option><option>Gr</option>
+          <option>Kg</option><option>Botol</option><option>Galon</option><option>Bungkus</option>
+        </select>
+        <input type="number" id="listStokAwal" placeholder="Stok Awal" min="0" step="0.1">
+        <button class="btn btn-success span2" onclick="addPestisida()">➕ Tambah</button>
+      </div>
+    </div>
+    <button class="btn btn-export" onclick="exportCSV('list')" style="margin-bottom:0.75rem">⬇️ Export CSV</button>
+    <div id="listContent"></div>
+    <div class="alert">Stok Saat Ini = Stok Awal + mutasi. Isi = kemasan (contoh 250 ML). Auto-sync setelah Connect.</div>
+  </div>
+
+  <div id="inventory" class="tab-content">
+    <div class="card">
+      <h3>Catat Mutasi Stok</h3>
+      <div class="form-grid">
+        <input type="date" id="invTanggal">
+        <select id="invNama"><option value="">- Pestisida -</option></select>
+        <select id="invJenis">
+          <option value="Masuk">➕ Masuk</option>
+          <option value="Keluar">➖ Keluar</option>
+          <option value="Penyesuaian">✏️ Penyesuaian</option>
+        </select>
+        <input type="number" id="invJumlah" placeholder="Jumlah" min="0" step="0.1">
+        <input type="text" id="invKeterangan" placeholder="Keterangan" class="span2">
+        <button class="btn btn-success span2" onclick="addInventory()">➕ Catat</button>
+      </div>
+    </div>
+    <button class="btn btn-export" onclick="exportCSV('inventory')" style="margin-bottom:0.75rem">⬇️ Export CSV</button>
+    <div id="inventoryContent"></div>
+  </div>
+
+  <div id="usage" class="tab-content">
+    <div class="card">
+      <h3>Penggunaan Harian</h3>
+      <div class="form-grid">
+        <input type="date" id="usageTanggal">
+        <select id="usageGH"><option>GH 1</option><option>GH 2</option></select>
+        <select id="usageJenis" onchange="updateKategoriObat()">
+          <option value="">- Jenis -</option>
+          <option value="Preventif - Insektisida">Preventif - Insektisida</option>
+          <option value="Preventif - Akarisida">Preventif - Akarisida</option>
+          <option value="Preventif - Fungisida">Preventif - Fungisida</option>
+          <option value="Kuratif - Insektisida">Kuratif - Insektisida</option>
+          <option value="Kuratif - Akarisida">Kuratif - Akarisida</option>
+          <option value="Kuratif - Fungisida">Kuratif - Fungisida</option>
+        </select>
+        <select id="usageObat"><option value="">- Bahan Aktif -</option></select>
+        <input type="number" id="usageKonsentrasi" placeholder="Konsentrasi" step="0.1">
+        <input type="number" id="usageAir" placeholder="Vol Air (L)" step="0.1">
+        <input type="number" id="usageVolObat" placeholder="Vol Obat" step="0.1">
+        <input type="text" id="usageSasaran" placeholder="Sasaran HPT">
+        <input type="number" id="usageBuka" placeholder="Buka baru" min="0">
+        <input type="text" id="usageKeterangan" placeholder="Keterangan" class="span2">
+        <button class="btn btn-success span2" onclick="addUsage()">➕ Catat</button>
+      </div>
+    </div>
+    <button class="btn btn-export" onclick="exportCSV('usage')" style="margin-bottom:0.75rem">⬇️ Export CSV</button>
+    <div id="usageContent"></div>
+  </div>
+</div>
+
+<div id="syncToast" class="toast"></div>
+
+<script>
+const obatDatabase = {
+  'Preventif - Insektisida': ['Matador','Decis','Prevathon','Curacron'],
+  'Preventif - Akarisida': ['Vertimec','Sulfur 95'],
+  'Preventif - Fungisida': ['Baycor','Benlate','Antracol'],
+  'Kuratif - Insektisida': ['Matador','Decis','Curacron','Neem Oil'],
+  'Kuratif - Akarisida': ['Vertimec','Sulfur 95'],
+  'Kuratif - Fungisida': ['Baycor','Thiram','Mancozeb','Karbendazim','Propineb']
+};
+
+let pestisidaList = JSON.parse(localStorage.getItem('pestisida_list') || '[]').map(p => ({ stokAwal:0, isi:'', ...p }));
+let inventory = JSON.parse(localStorage.getItem('pestisida_inventory') || '[]');
+let dailyUsage = JSON.parse(localStorage.getItem('pestisida_usage') || '[]');
+let isAuthenticated = JSON.parse(localStorage.getItem('pestisida_auth') || 'false');
+let scriptUrl = localStorage.getItem('pestisida_script_url') || '';
+
+const dirty = { list:false, inventory:false, usage:false };
+let isSyncing=false, pendingSync=false, autoSyncTimer=null, lastSyncAt=0;
+const DEBOUNCE_MS=2500, MIN_SYNC_INTERVAL=4000;
+
+// ===== PWA install =====
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  document.getElementById('installBanner').classList.remove('show');
+  showToast('✓ App terinstall!', 'ok');
+});
+async function installPWA() {
+  if (!deferredPrompt) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      alert('Di iPhone/iPad:\n1. Tap tombol Share (kotak panah)\n2. Pilih "Add to Home Screen"\n3. Tap Add');
+    } else {
+      alert('Install belum tersedia.\n\nCoba:\n• Chrome menu ⋮ → Install app / Add to Home screen\n• Pastikan dibuka lewat HTTPS\n• Belum pernah di-install sebelumnya');
+    }
+    return;
+  }
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('installBanner').classList.remove('show');
+}
+
+document.getElementById('usageTanggal').valueAsDate = new Date();
+document.getElementById('invTanggal').valueAsDate = new Date();
+updateAuthStatus();
+
+function showToast(msg, type) {
+  const el = document.getElementById('syncToast');
+  el.textContent = msg; el.className = 'toast show ' + (type||'info');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function getMaster(n) { return pestisidaList.find(p => p.nama === n); }
+function getMutasiSorted() {
+  return inventory.slice().sort((a,b) => a.tanggal!==b.tanggal ? (a.tanggal<b.tanggal?-1:1) : a.id-b.id);
+}
+function getStokSekarang(n) {
+  let s = parseFloat((getMaster(n)||{}).stokAwal)||0;
+  getMutasiSorted().filter(t=>t.nama===n).forEach(t => { s += t.delta; });
+  return s;
+}
+function markDirty() {
+  for (let i=0;i<arguments.length;i++) if (dirty[arguments[i]]!==undefined) dirty[arguments[i]]=true;
+  scheduleAutoSync();
+}
+function scheduleAutoSync() {
+  if (!isAuthenticated || !scriptUrl) return;
+  clearTimeout(autoSyncTimer);
+  autoSyncTimer = setTimeout(() => {
+    const w = Math.max(0, MIN_SYNC_INTERVAL - (Date.now()-lastSyncAt));
+    if (w>0) autoSyncTimer = setTimeout(()=>syncToSheets(false), w);
+    else syncToSheets(false);
+  }, DEBOUNCE_MS);
+}
+
+function addPestisida() {
+  const nama = document.getElementById('listNama').value.trim();
+  if (!nama) return alert('Isi nama');
+  if (pestisidaList.some(p => p.nama.toLowerCase()===nama.toLowerCase())) return alert('Sudah ada');
+  const isi = document.getElementById('listIsi').value;
+  pestisidaList.push({
+    id: Date.now(), nama,
+    isi: isi!=='' ? parseFloat(isi) : '',
+    satuan: document.getElementById('listSatuan').value,
+    stokAwal: parseFloat(document.getElementById('listStokAwal').value)||0
+  });
+  localStorage.setItem('pestisida_list', JSON.stringify(pestisidaList));
+  markDirty('list');
+  document.getElementById('listNama').value='';
+  document.getElementById('listIsi').value='';
+  document.getElementById('listStokAwal').value='';
+  renderPestisidaList();
+}
+function deletePestisida(id) {
+  const item = pestisidaList.find(p=>p.id===id); if (!item) return;
+  const n = inventory.filter(t=>t.nama===item.nama).length;
+  if (!confirm('Hapus "'+item.nama+'"?'+(n?'\n'+n+' mutasi ikut terhapus!':''))) return;
+  pestisidaList = pestisidaList.filter(p=>p.id!==id);
+  inventory = inventory.filter(t=>t.nama!==item.nama);
+  localStorage.setItem('pestisida_list', JSON.stringify(pestisidaList));
+  localStorage.setItem('pestisida_inventory', JSON.stringify(inventory));
+  markDirty('list','inventory');
+  renderPestisidaList();
+}
+function formatIsi(p) { return (p.isi===''||p.isi==null) ? '-' : (p.isi+' '+(p.satuan||'')); }
+
+function renderPestisidaList() {
+  if (!pestisidaList.length) {
+    document.getElementById('listContent').innerHTML = '<div class="empty">Belum ada pestisida.</div>';
+  } else {
+    document.getElementById('listContent').innerHTML = '<div class="table-wrap"><table><thead><tr>'+
+      '<th class="tc">#</th><th>Nama</th><th class="tc">Isi</th><th class="tc">Satuan</th><th class="tc">Awal</th><th class="tc">Saat Ini</th><th class="tc">Aksi</th></tr></thead><tbody>'+
+      pestisidaList.map((p,i)=>{
+        const stok=getStokSekarang(p.nama);
+        const cls=stok<0?'stok minus':(stok===0?'stok nol':'stok');
+        return '<tr><td class="tc muted">'+(i+1)+'</td><td style="font-weight:600">'+p.nama+'</td>'+
+          '<td class="tc"><span class="badge">'+formatIsi(p)+'</span></td>'+
+          '<td class="tc muted">'+(p.satuan||'-')+'</td><td class="tc muted">'+p.stokAwal+'</td>'+
+          '<td class="tc"><span class="'+cls+'">'+stok+'</span></td>'+
+          '<td class="tc"><button class="btn btn-danger" onclick="deletePestisida('+p.id+')">Hapus</button></td></tr>';
+      }).join('')+'</tbody></table></div>';
+  }
+  document.getElementById('invNama').innerHTML = '<option value="">- Pestisida -</option>'+
+    pestisidaList.map(p=>{
+      const l=p.isi?p.nama+' ('+p.isi+' '+p.satuan+')':p.nama;
+      return '<option value="'+p.nama+'">'+l+'</option>';
+    }).join('');
+  updateKategoriObat();
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  el.classList.add('active');
+  if (tab==='pestisidaList') renderPestisidaList();
+  else if (tab==='inventory') renderInventory();
+  else renderUsage();
+}
+function updateKategoriObat() {
+  const jenis=document.getElementById('usageJenis').value;
+  const sel=document.getElementById('usageObat');
+  const prev=sel.value;
+  sel.innerHTML='<option value="">- Bahan Aktif -</option>';
+  let opts=(jenis&&obatDatabase[jenis])?obatDatabase[jenis].slice():[];
+  pestisidaList.forEach(p=>{ if(!opts.some(o=>o.toLowerCase()===p.nama.toLowerCase())) opts.push(p.nama); });
+  opts.forEach(o=>{ const op=document.createElement('option'); op.value=o; op.textContent=o; if(o===prev)op.selected=true; sel.appendChild(op); });
+}
+
+function updateAuthStatus() {
+  const s=document.getElementById('authStatus'), a=document.getElementById('authBtn');
+  const p=document.getElementById('pushBtn'), l=document.getElementById('pullBtn');
+  if (isAuthenticated && scriptUrl) {
+    s.innerHTML='✓ Terhubung — auto-sync'; s.className='auth-status ok';
+    a.textContent='Putuskan'; a.className='btn btn-logout';
+    p.style.display=l.style.display='inline-flex';
+  } else {
+    s.innerHTML=''; s.className='auth-status';
+    a.textContent='☁️ Connect Sheets'; a.className='btn btn-primary';
+    p.style.display=l.style.display='none';
+  }
+}
+function handleAuthClick() {
+  if (isAuthenticated) {
+    isAuthenticated=false; localStorage.setItem('pestisida_auth','false');
+    updateAuthStatus(); showToast('Koneksi diputus','info'); return;
+  }
+  const url=prompt('URL Web App Apps Script (/exec):\nWho has access = Anyone', scriptUrl||'');
+  if(!url||!url.trim()) return;
+  scriptUrl=url.trim().replace(/\/$/,'');
+  if(scriptUrl.indexOf('/exec')<0) return alert('URL harus mengandung /exec');
+  localStorage.setItem('pestisida_script_url',scriptUrl);
+  localStorage.setItem('pestisida_auth','true');
+  isAuthenticated=true; dirty.list=dirty.inventory=dirty.usage=true;
+  updateAuthStatus(); showToast('✓ Tersambung','info');
+  setTimeout(()=>{ pullFromSheets(true).finally(()=>{ dirty.list=dirty.inventory=dirty.usage=true; syncToSheets(false); }); },300);
+}
+
+async function syncToSheets(force) {
+  force=!!force;
+  if(!scriptUrl){ if(force) alert('Belum connect'); return; }
+  if(isSyncing){ pendingSync=true; return; }
+  const payload={}; let has=false;
+  if(force||dirty.list){ payload.list=pestisidaList; has=true; }
+  if(force||dirty.inventory){ payload.inventory=inventory; has=true; }
+  if(force||dirty.usage){ payload.usage=dailyUsage; has=true; }
+  if(!has) return;
+  isSyncing=true; pendingSync=false; lastSyncAt=Date.now();
+  const st=document.getElementById('authStatus');
+  if(st){ st.innerHTML='⟳ Sync...'; st.className='auth-status syncing'; }
+  if(force) showToast('☁️ Sync...','info');
+  try {
+    await fetch(scriptUrl,{ method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload) });
+    if(payload.list) dirty.list=false;
+    if(payload.inventory) dirty.inventory=false;
+    if(payload.usage) dirty.usage=false;
+    if(st){ st.innerHTML='✓ Terhubung — auto-sync'; st.className='auth-status ok'; }
+    if(force) showToast('✓ Terkirim','ok');
+  } catch(e) {
+    if(st){ st.innerHTML='✗ Gagal sync'; st.className='auth-status error'; }
+    showToast('Gagal: '+e.message,'err');
+  } finally {
+    isSyncing=false;
+    if(pendingSync){ pendingSync=false; setTimeout(()=>syncToSheets(false),600); }
+  }
+}
+async function pullFromSheets(silent) {
+  silent=!!silent;
+  if(!scriptUrl){ if(!silent) alert('Belum connect'); return; }
+  if(!silent && !confirm('Muat dari Sheets akan TIMPA data lokal. Lanjut?')) return;
+  if(!silent) showToast('⬇️ Memuat...','info');
+  try {
+    const res=await fetch(scriptUrl+'?action=getAll',{redirect:'follow'});
+    const data=JSON.parse(await res.text());
+    if(data.error) throw new Error(data.error);
+    if(data.list){ pestisidaList=data.list.map(p=>({stokAwal:0,isi:'',...p})); localStorage.setItem('pestisida_list',JSON.stringify(pestisidaList)); }
+    if(data.inventory){ inventory=data.inventory; localStorage.setItem('pestisida_inventory',JSON.stringify(inventory)); }
+    if(data.usage){ dailyUsage=data.usage; localStorage.setItem('pestisida_usage',JSON.stringify(dailyUsage)); }
+    dirty.list=dirty.inventory=dirty.usage=false;
+    renderPestisidaList(); renderInventory(); renderUsage();
+    if(!silent) showToast('✓ Dimuat','ok');
+  } catch(e) {
+    showToast('Gagal: '+e.message,'err');
+    if(!silent) alert(e.message);
+  }
+}
+
+function addInventory() {
+  const nama=document.getElementById('invNama').value.trim();
+  const jenis=document.getElementById('invJenis').value;
+  const jumlah=parseFloat(document.getElementById('invJumlah').value);
+  if(!nama) return alert('Pilih pestisida');
+  if(isNaN(jumlah)||jumlah===0) return alert('Isi jumlah ≠ 0');
+  let delta;
+  if(jenis==='Masuk') delta=Math.abs(jumlah);
+  else if(jenis==='Keluar'){
+    delta=-Math.abs(jumlah);
+    if(Math.abs(jumlah)>getStokSekarang(nama)) return alert('Stok tidak cukup');
+  } else {
+    delta=jumlah;
+    if(getStokSekarang(nama)+delta<0) return alert('Stok jadi negatif');
+  }
+  inventory.push({
+    id:Date.now(),
+    tanggal:document.getElementById('invTanggal').value||new Date().toISOString().split('T')[0],
+    nama,jenis,jumlah:Math.abs(jumlah),delta,
+    keterangan:document.getElementById('invKeterangan').value.trim(),
+    satuan:(getMaster(nama)||{}).satuan||''
+  });
+  localStorage.setItem('pestisida_inventory',JSON.stringify(inventory));
+  markDirty('inventory');
+  document.getElementById('invJumlah').value='';
+  document.getElementById('invKeterangan').value='';
+  document.getElementById('invTanggal').valueAsDate=new Date();
+  renderInventory();
+}
+function addUsage() {
+  const jenis=document.getElementById('usageJenis').value.trim();
+  const obat=document.getElementById('usageObat').value.trim();
+  if(!jenis) return alert('Pilih jenis');
+  if(!obat) return alert('Pilih obat');
+  dailyUsage.push({
+    id:Date.now(),
+    tanggal:document.getElementById('usageTanggal').value,
+    gh:document.getElementById('usageGH').value,
+    jenisPenyemprotan:jenis, namaObat:obat,
+    konsentrasi:parseFloat(document.getElementById('usageKonsentrasi').value)||0,
+    volAirBaku:parseFloat(document.getElementById('usageAir').value)||0,
+    volObat:parseFloat(document.getElementById('usageVolObat').value)||0,
+    sasaran:document.getElementById('usageSasaran').value,
+    bukaObatBaru:document.getElementById('usageBuka').value||0,
+    keterangan:document.getElementById('usageKeterangan').value||'-'
+  });
+  localStorage.setItem('pestisida_usage',JSON.stringify(dailyUsage));
+  markDirty('usage');
+  ['usageObat','usageJenis','usageKonsentrasi','usageAir','usageVolObat','usageSasaran','usageBuka','usageKeterangan'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('usageTanggal').valueAsDate=new Date();
+  updateKategoriObat(); renderUsage();
+}
+function deleteItem(type,id) {
+  if(type==='inventory'){
+    inventory=inventory.filter(i=>i.id!==id);
+    localStorage.setItem('pestisida_inventory',JSON.stringify(inventory));
+    markDirty('inventory'); renderInventory();
+  } else {
+    dailyUsage=dailyUsage.filter(i=>i.id!==id);
+    localStorage.setItem('pestisida_usage',JSON.stringify(dailyUsage));
+    markDirty('usage'); renderUsage();
+  }
+}
+
+function renderInventory() {
+  if(!inventory.length){ document.getElementById('inventoryContent').innerHTML='<div class="empty">Belum ada mutasi.</div>'; return; }
+  const saldo={}; pestisidaList.forEach(p=>saldo[p.nama]=parseFloat(p.stokAwal)||0);
+  const rows=getMutasiSorted().map(t=>{
+    saldo[t.nama]=(saldo[t.nama]||0)+t.delta;
+    const badge=t.jenis==='Masuk'?'<span class="ok">Masuk</span>':(t.jenis==='Keluar'?'<span class="bad">Keluar</span>':'<span style="color:#d97706">Sesuai</span>');
+    const j=t.delta>0?'<td class="tc ok">+'+t.jumlah+'</td>':'<td class="tc bad">-'+t.jumlah+'</td>';
+    const s=saldo[t.nama];
+    return '<tr><td>'+t.tanggal+'</td><td style="font-weight:600">'+t.nama+'</td><td class="tc">'+badge+'</td>'+j+
+      '<td class="tc muted">'+(t.satuan||'')+'</td><td class="tc '+(s<0?'bad':'')+'" style="font-weight:700">'+s+'</td>'+
+      '<td class="muted">'+((t.keterangan||''))+'</td>'+
+      '<td class="tc"><button class="btn btn-danger" onclick="deleteItem(\'inventory\','+t.id+')">Hapus</button></td></tr>';
+  });
+  document.getElementById('inventoryContent').innerHTML='<div class="table-wrap"><table><thead><tr>'+
+    '<th>Tgl</th><th>Nama</th><th class="tc">Jenis</th><th class="tc">Jml</th><th class="tc">Sat</th><th class="tc">Setelah</th><th>Ket</th><th class="tc">Aksi</th>'+
+    '</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>';
+}
+function renderUsage() {
+  if(!dailyUsage.length){ document.getElementById('usageContent').innerHTML='<div class="empty">Belum ada penggunaan.</div>'; return; }
+  document.getElementById('usageContent').innerHTML='<div class="table-wrap"><table style="font-size:12px"><thead><tr>'+
+    '<th>Tgl</th><th class="tc">GH</th><th>Jenis</th><th>Obat</th><th class="tc">Kons</th><th class="tc">Air</th><th class="tc">Vol</th><th>Sasaran</th><th class="tc">Aksi</th>'+
+    '</tr></thead><tbody>'+dailyUsage.map(i=>
+      '<tr><td>'+i.tanggal+'</td><td class="tc">'+i.gh+'</td><td>'+i.jenisPenyemprotan+'</td><td style="font-weight:600">'+i.namaObat+'</td>'+
+      '<td class="tc">'+i.konsentrasi+'</td><td class="tc">'+i.volAirBaku+'</td><td class="tc">'+i.volObat+'</td><td>'+i.sasaran+'</td>'+
+      '<td class="tc"><button class="btn btn-danger" onclick="deleteItem(\'usage\','+i.id+')">Hapus</button></td></tr>'
+    ).join('')+'</tbody></table></div>';
+}
+
+function exportCSV(type) {
+  let data, fn;
+  if(type==='list'){
+    data=pestisidaList.map(p=>({nama:p.nama,isi:p.isi,satuan:p.satuan,stokAwal:p.stokAwal,stokSaatIni:getStokSekarang(p.nama)}));
+    fn='daftar-pestisida.csv';
+  } else if(type==='inventory'){
+    const saldo={}; pestisidaList.forEach(p=>saldo[p.nama]=parseFloat(p.stokAwal)||0);
+    data=getMutasiSorted().map(t=>{ saldo[t.nama]=(saldo[t.nama]||0)+t.delta; return {tanggal:t.tanggal,nama:t.nama,jenis:t.jenis,jumlah:t.jumlah,satuan:t.satuan,stokSetelah:saldo[t.nama],keterangan:t.keterangan}; });
+    fn='stok-opname.csv';
+  } else { data=dailyUsage; fn='penggunaan.csv'; }
+  if(!data||!data.length) return alert('Tidak ada data');
+  const h=Object.keys(data[0]);
+  const csv=[h.join(',')].concat(data.map(r=>h.map(k=>typeof r[k]==='string'?'"'+r[k]+'"':r[k]).join(','))).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=fn; a.click();
+}
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/service-worker.js').then(()=>console.log('SW ok')).catch(e=>console.log('SW fail',e));
+}
+
+renderPestisidaList(); renderInventory(); renderUsage();
+</script>
+</body>
+</html>

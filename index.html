@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#378add">
+  <meta name="description" content="Portal Aplikasi IPM PT. Agri Wangi Berry Ciwidey">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="IPM AWB">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <title>IPM PT. Agri Wangi Berry</title>
+  <style>
+    :root {
+      --primary: #378add;
+      --bg: #f0f0ee;
+      --card: #ffffff;
+      --border: #d8d8d0;
+      --text: #1a1a18;
+      --muted: #666;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { font-size: 16px; }
+    body {
+      margin: 0; min-height: 100vh; min-height: 100dvh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.5;
+      -webkit-font-smoothing: antialiased; overscroll-behavior-y: none;
+      display: flex; flex-direction: column;
+    }
+    .app-header {
+      background: linear-gradient(135deg, #378add 0%, #2d6fb8 100%);
+      color: #fff; padding: 2rem 1rem 2.5rem;
+      padding-top: calc(2rem + env(safe-area-inset-top));
+      text-align: center; display: flex; flex-direction: column;
+      align-items: center; gap: 0.5rem;
+      position: relative; overflow: hidden;
+    }
+    .app-header::after {
+      content: ''; position: absolute; inset: auto 0 -1px 0;
+      height: 24px; background: var(--bg); border-radius: 24px 24px 0 0;
+    }
+    .app-header-logo {
+      width: 100px; height: 100px;
+      display: flex; align-items: center; justify-content: center;
+      background: #fff; border-radius: 22px; padding: 8px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.14);
+    }
+    .app-header-logo img {
+      max-width: 100%; max-height: 100%; object-fit: contain;
+    }
+    .app-header h1 {
+      font-size: 1.25rem; margin: 0; font-weight: 700;
+      letter-spacing: -0.3px; max-width: 95%;
+    }
+    .app-header p { font-size: 0.875rem; margin: 0; opacity: 0.92; font-weight: 500; }
+    .container { flex: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 0 1rem 2rem; position: relative; z-index: 1; }
+    .section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 1.5rem 0 0.75rem; padding-left: 0.25rem; }
+    .app-card {
+      display: flex; align-items: center; gap: 1rem;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.125rem 1rem; margin-bottom: 0.875rem;
+      text-decoration: none; color: inherit;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: transform 0.15s, box-shadow 0.15s;
+      position: relative; overflow: hidden;
+    }
+    .app-card:active { transform: scale(0.98); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .app-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
+    .app-card.hpt::before { background: #16a34a; }
+    .app-card.pest::before { background: #7c3aed; }
+    .app-card-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; flex-shrink: 0; color: #fff; }
+    .app-card.hpt .app-card-icon { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+    .app-card.pest .app-card-icon { background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); }
+    .app-card-body { flex: 1; min-width: 0; }
+    .app-card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--text); }
+    .app-card-desc { font-size: 0.8125rem; color: var(--muted); line-height: 1.35; }
+    .app-card-arrow { font-size: 1.25rem; color: #bbb; flex-shrink: 0; margin-left: 0.25rem; }
+    .info-card { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 0.875rem 1rem; margin-top: 1.5rem; font-size: 0.8125rem; color: #1e40af; line-height: 1.5; }
+    .info-card strong { color: #1e3a8a; }
+    .footer { text-align: center; padding: 1rem; padding-bottom: calc(1rem + env(safe-area-inset-bottom)); font-size: 0.75rem; color: #999; }
+    .install-banner { display: none; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 0.875rem; margin-top: 1rem; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .install-banner.show { display: flex; }
+    .install-banner p { flex: 1; font-size: 0.8125rem; color: #9a3412; margin: 0; min-width: 180px; }
+    .install-banner button { background: #f97316; color: #fff; border: none; border-radius: 10px; padding: 0.6rem 1rem; font-size: 0.8125rem; font-weight: 700; cursor: pointer; min-height: 40px; }
+    .toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 16px; right: 16px; max-width: 400px; margin: 0 auto; background: #1f2937; color: #fff; padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.8125rem; z-index: 999; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.25); border-left: 4px solid #378add; }
+    .toast.show { display: block; }
+    @media (min-width: 640px) {
+      .app-header { padding-top: 2.5rem; padding-bottom: 3rem; }
+      .app-header h1 { font-size: 1.5rem; }
+      .app-header-logo { width: 120px; height: 120px; }
+      .app-card { padding: 1.25rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-header-logo">
+    <img src="LOGO_AWB.png" alt="Logo IPM PT. Agri Wangi Berry" onerror="this.style.display='none'">
+  </div>
+  <h1>IPM PT. Agri Wangi Berry</h1>
+  <p>Integrated Pest Management · Ciwidey</p>
+</div>
+
+<div class="container">
+  <div class="section-title">Pilih Aplikasi</div>
+
+  <a class="app-card hpt" href="./monitoring.html">
+    <div class="app-card-icon">🌿</div>
+    <div class="app-card-body">
+      <div class="app-card-title">Monitoring HPT</div>
+      <div class="app-card-desc">Form monitoring hama &amp; penyakit strawberry per greenhouse / block</div>
+    </div>
+    <div class="app-card-arrow">›</div>
+  </a>
+
+  <a class="app-card pest" href="./pestisida.html">
+    <div class="app-card-icon">🧪</div>
+    <div class="app-card-body">
+      <div class="app-card-title">Manajemen Pestisida</div>
+      <div class="app-card-desc">Master data, stok opname, dan catatan penggunaan harian</div>
+    </div>
+    <div class="app-card-arrow">›</div>
+  </a>
+
+  <div class="info-card">
+    💡 <strong>Tips:</strong> Kedua aplikasi tersambung ke <em>Google Sheet yang berbeda</em>. Data monitoring HPT dan pestisida tersimpan terpisah.
+  </div>
+
+  <div class="install-banner" id="installBanner">
+    <p>📲 Install ke layar utama agar tampil seperti aplikasi.</p>
+    <button onclick="installPWA()">Install</button>
+  </div>
+</div>
+
+<div class="footer">© PT. Agri Wangi Berry · Ciwidey</div>
+<div class="toast" id="toast"></div>
+
+<script>
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBanner').classList.add('show');
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    document.getElementById('installBanner').classList.remove('show');
+    showToast('✓ App berhasil di-install!');
+  });
+  async function installPWA() {
+    if (!deferredPrompt) {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS) alert('Di iPhone/iPad:\n1. Tap Share (kotak panah)\n2. Pilih "Add to Home Screen"\n3. Tap Add');
+      else alert('Install belum tersedia.\n\nCoba: Chrome ⋮ → Install app / Add to Home screen');
+      return;
+    }
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById('installBanner').classList.remove('show');
+  }
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 2800);
+  }
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(() => console.log('✓ SW registered'))
+      .catch((e) => console.log('SW failed:', e));
+  }
+</script>
+
+</body>
+</html>

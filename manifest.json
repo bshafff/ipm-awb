@@ -1,0 +1,16 @@
+{
+  "name": "AWB Apps - PT. Agri Wangi Berry",
+  "short_name": "AWB Apps",
+  "description": "Portal aplikasi monitoring HPT dan manajemen pestisida",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#378add",
+  "theme_color": "#378add",
+  "lang": "id",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
