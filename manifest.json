@@ -1,7 +1,7 @@
 {
-  "name": "AWB Apps - PT. Agri Wangi Berry",
-  "short_name": "AWB Apps",
-  "description": "Portal aplikasi monitoring HPT dan manajemen pestisida",
+  "name": "IPM - PT. Agri Wangi Berry",
+  "short_name": "IPM AWB",
+  "description": "Aplikasi monitoring HPT dan manajemen pestisida",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
