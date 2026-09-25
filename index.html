@@ -3,178 +3,993 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#378add">
-  <meta name="description" content="Portal Aplikasi IPM PT. Agri Wangi Berry Ciwidey">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="IPM AWB">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./icon-192.png">
-  <link rel="apple-touch-icon" href="./icon-192.png">
-  <title>IPM PT. Agri Wangi Berry</title>
+  <title>HPT Monitoring System - PT. Agri Wangi Berry</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <style>
     :root {
       --primary: #378add;
+      --primary-dark: #2d6fb8;
+      --danger: #c62828;
+      --danger-light: #ffebee;
+      --success: #2e7d32;
+      --success-light: #e8f5e9;
       --bg: #f0f0ee;
       --card: #ffffff;
       --border: #d8d8d0;
       --text: #1a1a18;
-      --muted: #666;
+      --text-secondary: #666666;
+      --hint-bg: #f0f6fb;
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html { font-size: 16px; }
-    body {
-      margin: 0; min-height: 100vh; min-height: 100dvh;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg); color: var(--text); line-height: 1.5;
-      -webkit-font-smoothing: antialiased; overscroll-behavior-y: none;
-      display: flex; flex-direction: column;
-    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+
     .app-header {
       background: linear-gradient(135deg, #378add 0%, #2d6fb8 100%);
-      color: #fff; padding: 2rem 1rem 2.5rem;
-      padding-top: calc(2rem + env(safe-area-inset-top));
-      text-align: center; display: flex; flex-direction: column;
-      align-items: center; gap: 0.5rem;
-      position: relative; overflow: hidden;
+      color: white; padding: 1.2rem 1rem; text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
     }
-    .app-header::after {
-      content: ''; position: absolute; inset: auto 0 -1px 0;
-      height: 24px; background: var(--bg); border-radius: 24px 24px 0 0;
+    .app-header-logo { width: 90px; height: auto; }
+    .app-header-logo img { max-width: 100%; height: auto; object-fit: contain; }
+    .app-header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.3px; }
+    .app-header p { font-size: 0.8rem; opacity: 0.9; }
+
+    .auth-status { font-size: 0.75rem; opacity: 0.95; }
+    .auth-status.ok { color: #bbf7d0; }
+
+    .header-actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 0.25rem; }
+    .hdr-btn {
+      padding: 0.4rem 0.75rem; border-radius: 8px; cursor: pointer;
+      font-size: 0.75rem; font-weight: 700; min-height: 34px;
+      border: none; display: inline-flex; align-items: center; gap: 4px;
     }
-    .app-header-logo {
-      width: 100px; height: 100px;
-      display: flex; align-items: center; justify-content: center;
-      background: #fff; border-radius: 22px; padding: 8px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.14);
-    }
-    .app-header-logo img {
-      max-width: 100%; max-height: 100%; object-fit: contain;
-    }
-    .app-header h1 {
-      font-size: 1.25rem; margin: 0; font-weight: 700;
-      letter-spacing: -0.3px; max-width: 95%;
-    }
-    .app-header p { font-size: 0.875rem; margin: 0; opacity: 0.92; font-weight: 500; }
-    .container { flex: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 0 1rem 2rem; position: relative; z-index: 1; }
-    .section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 1.5rem 0 0.75rem; padding-left: 0.25rem; }
-    .app-card {
-      display: flex; align-items: center; gap: 1rem;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 1.125rem 1rem; margin-bottom: 0.875rem;
-      text-decoration: none; color: inherit;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      transition: transform 0.15s, box-shadow 0.15s;
-      position: relative; overflow: hidden;
-    }
-    .app-card:active { transform: scale(0.98); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-    .app-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
-    .app-card.hpt::before { background: #16a34a; }
-    .app-card.pest::before { background: #7c3aed; }
-    .app-card-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; flex-shrink: 0; color: #fff; }
-    .app-card.hpt .app-card-icon { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
-    .app-card.pest .app-card-icon { background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); }
-    .app-card-body { flex: 1; min-width: 0; }
-    .app-card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--text); }
-    .app-card-desc { font-size: 0.8125rem; color: var(--muted); line-height: 1.35; }
-    .app-card-arrow { font-size: 1.25rem; color: #bbb; flex-shrink: 0; margin-left: 0.25rem; }
-    .info-card { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 0.875rem 1rem; margin-top: 1.5rem; font-size: 0.8125rem; color: #1e40af; line-height: 1.5; }
-    .info-card strong { color: #1e3a8a; }
-    .footer { text-align: center; padding: 1rem; padding-bottom: calc(1rem + env(safe-area-inset-bottom)); font-size: 0.75rem; color: #999; }
-    .install-banner { display: none; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 0.875rem; margin-top: 1rem; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
-    .install-banner.show { display: flex; }
-    .install-banner p { flex: 1; font-size: 0.8125rem; color: #9a3412; margin: 0; min-width: 180px; }
-    .install-banner button { background: #f97316; color: #fff; border: none; border-radius: 10px; padding: 0.6rem 1rem; font-size: 0.8125rem; font-weight: 700; cursor: pointer; min-height: 40px; }
-    .toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 16px; right: 16px; max-width: 400px; margin: 0 auto; background: #1f2937; color: #fff; padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.8125rem; z-index: 999; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.25); border-left: 4px solid #378add; }
+    .hdr-btn-connect { background: #fff; color: var(--primary); }
+    .hdr-btn-sync { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.35); }
+    .hdr-btn-logout { background: #fee2e2; color: #dc2626; }
+
+    .nav-tabs { display: flex; background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 40; }
+    .tab-btn { flex: 1; padding: 12px 5px; text-align: center; font-size: 0.85rem; font-weight: 700; border: none; background: none; cursor: pointer; color: var(--text-secondary); border-bottom: 3px solid transparent; }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    .container { padding: 12px; padding-bottom: 90px; max-width: 800px; margin: 0 auto; }
+
+    .toast { display: none; padding: 0.875rem 1rem; border-radius: 10px; margin-bottom: 0.75rem; text-align: center; font-size: 0.875rem; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     .toast.show { display: block; }
-    @media (min-width: 640px) {
-      .app-header { padding-top: 2.5rem; padding-bottom: 3rem; }
-      .app-header h1 { font-size: 1.5rem; }
-      .app-header-logo { width: 120px; height: 120px; }
-      .app-card { padding: 1.25rem 1.25rem; }
+    .toast-success { background: var(--success-light); color: var(--success); border-left: 4px solid var(--success); }
+    .toast-delete { background: var(--danger-light); color: var(--danger); border-left: 4px solid var(--danger); }
+    .toast-warning { background: #fff3e0; color: #e65100; border-left: 4px solid #e65100; }
+    .toast-info { background: #e0f2fe; color: #0369a1; border-left: 4px solid #0ea5e9; }
+
+    .header-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1rem; margin-bottom: 1rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.875rem;
     }
+    .header-item { display: flex; flex-direction: column; gap: 0.375rem; }
+    .header-label { font-size: 0.8125rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; }
+    .header-input {
+      padding: 0.75rem; border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 0.95rem; background: var(--card); color: var(--text); width: 100%; min-height: 44px;
+    }
+    .header-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(55, 138, 221, 0.12); }
+
+    .pest-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; margin-bottom: 0.875rem; overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .pest-header {
+      background: #f7f7f5; padding: 0.875rem 1rem; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .pest-name { font-weight: 700; font-size: 0.95rem; color: var(--text); }
+    .pest-score { font-size: 1.15rem; font-weight: 800; color: var(--primary); }
+    .pest-content { padding: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.875rem; }
+
+    .input-group { display: flex; flex-direction: column; gap: 0.375rem; }
+    .input-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); }
+    .input-group input {
+      padding: 0.75rem 0.25rem; text-align: center; border: 1.5px solid var(--border);
+      border-radius: 8px; font-size: 0.95rem; font-weight: 700; width: 100%;
+    }
+    .input-group input:focus { outline: none; border-color: var(--primary); }
+
+    .number-input-wrapper { display: flex; align-items: center; gap: 0.4rem; width: 100%; }
+    .number-input-wrapper input { flex: 1; min-width: 0; }
+
+    .btn-step {
+      width: 40px; height: 40px; border-radius: 8px;
+      background: var(--primary); color: #fff; font-size: 1.2rem; font-weight: 700;
+      border: none; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0; touch-action: manipulation;
+    }
+    .btn-step:active { background: var(--primary-dark); transform: scale(0.95); }
+
+    .formula-hint {
+      grid-column: 1 / -1; font-size: 0.75rem; color: #666; padding: 0.5rem 0.75rem;
+      background: var(--hint-bg); border-radius: 8px; border-left: 3px solid var(--primary);
+    }
+
+    .filter-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; background: var(--card); padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 12px; }
+    .filter-group { display: flex; flex-direction: column; gap: 2px; }
+    .filter-group label { font-size: 10px; font-weight: 700; color: var(--text-secondary); }
+    .filter-group input, .filter-group select { padding: 6px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
+
+    /* ===== CUSTOM MULTI-SELECT DROPDOWN LOKASI ===== */
+    .custom-multiselect { position: relative; }
+    .custom-select-trigger {
+      padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px;
+      background: #ffffff; font-size: 12px; font-weight: 600; color: var(--text);
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center; min-height: 32px;
+    }
+    .custom-select-trigger .arrow { font-size: 9px; color: #666; transition: transform 0.2s; }
+    .custom-multiselect.open .custom-select-trigger .arrow { transform: rotate(180deg); }
+    
+    .custom-dropdown-panel {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: #ffffff; border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15); z-index: 100; padding: 10px;
+      display: none; min-width: 210px;
+    }
+    .custom-multiselect.open .custom-dropdown-panel { display: block; }
+    
+    .dropdown-actions { display: flex; gap: 8px; margin-bottom: 10px; }
+    .btn-action-link {
+      flex: 1; padding: 6px 8px; background: #eff6ff; color: #2563eb;
+      border: none; border-radius: 6px; font-size: 11px; font-weight: 700;
+      cursor: pointer; text-align: center; transition: background 0.15s;
+    }
+    .btn-action-link:hover { background: #dbeafe; }
+    
+    .dropdown-list { max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 2px; }
+    .dropdown-item {
+      display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700;
+      color: #1e293b; cursor: pointer; user-select: none; padding: 2px 0;
+    }
+    .dropdown-item input[type="checkbox"] {
+      width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer; border-radius: 4px;
+    }
+
+    /* ===== SECTION TITLE ===== */
+    .section-title {
+      font-size: 0.85rem; font-weight: 800; color: var(--text);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin: 14px 0 8px; padding-left: 8px;
+      border-left: 4px solid var(--primary);
+    }
+    .section-title.disease { border-left-color: #7c3aed; }
+
+    /* ===== SUMMARY CARDS ===== */
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 12px; }
+    .summary-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 10px 8px;
+      border-left: 5px solid var(--primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .summary-card .header {
+      font-size: 11px; font-weight: 700; color: var(--text);
+      display: flex; align-items: center; gap: 4px; margin-bottom: 4px;
+    }
+    .summary-card .value { font-size: 18px; font-weight: 800; color: var(--primary); line-height: 1.1; }
+    .summary-card .sub { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+    /* warna border per-pest */
+    .pest-spidermites { border-left-color: #dc2626; }
+    .pest-aphids      { border-left-color: #ec4899; }
+    .pest-thrips      { border-left-color: #f97316; }
+    .pest-ulat        { border-left-color: #f59e0b; }
+    .pest-tikus       { border-left-color: #78350f; }
+    .pest-siput       { border-left-color: #8b5cf6; }
+    .pest-kutu        { border-left-color: #0ea5e9; }
+    .pest-mildew      { border-left-color: #6366f1; }
+    .pest-botrytis    { border-left-color: #a16207; }
+    .pest-antrak      { border-left-color: #b91c1c; }
+    .pest-layu        { border-left-color: #4b5563; }
+
+    .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+    .chart-container { position: relative; height: 300px; width: 100%; }
+
+    table.history-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; background: #fff; border-radius: 8px; overflow: hidden; }
+    table.history-table th, table.history-table td { padding: 10px; border: 1px solid var(--border); text-align: left; }
+    table.history-table th { background: #f1f5f9; font-weight: 700; }
+
+    .button-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;
+      padding: 0.75rem; background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px); border-top: 1px solid var(--border); z-index: 50;
+    }
+    .btn-bar {
+      padding: 0.75rem 0.5rem; border-radius: 10px; border: none;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer; min-height: 44px;
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+    }
+    .btn-bar:active { transform: scale(0.97); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-secondary { background: #f5f5f3; color: var(--text); border: 1px solid var(--border); }
+    .btn-danger { background: var(--danger-light); color: var(--danger); border: 1px solid #ffcdd2; }
   </style>
 </head>
 <body>
 
 <div class="app-header">
-  <div class="app-header-logo">
-    <img src="LOGO_AWB.png" alt="Logo IPM PT. Agri Wangi Berry" onerror="this.style.display='none'">
+  <div class="app-header-logo"><img src="LOGO_AWB.png" alt="AWB Logo" onerror="this.style.display='none'"></div>
+  <h1>FORM MONITORING IPM</h1>
+  <p>PT. Agri Wangi Berry</p>
+  <div class="auth-status" id="authStatus"></div>
+  <div class="header-actions">
+    <button class="hdr-btn hdr-btn-sync" id="pushBtn" onclick="syncToSheets(true)" style="display:none">⬆️ Sync</button>
+    <button class="hdr-btn hdr-btn-sync" id="pullBtn" onclick="fetchDashboardData()" style="display:none">⬇️ Muat</button>
+    <button class="hdr-btn hdr-btn-connect" id="authBtn" onclick="handleAuthClick()">☁️ Connect Sheets</button>
   </div>
-  <h1>IPM PT. Agri Wangi Berry</h1>
-  <p>Integrated Pest Management · Ciwidey</p>
+</div>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('form')">📝 Form Input</button>
+  <button class="tab-btn" onclick="switchTab('dashboard')">📊 Dashboard Trend</button>
+  <button class="tab-btn" onclick="switchTab('history')">📜 Riwayat</button>
 </div>
 
 <div class="container">
-  <div class="section-title">Pilih Aplikasi</div>
+  <div class="toast toast-success" id="successMsg">✓ Data berhasil disimpan!</div>
+  <div class="toast toast-delete" id="deleteMsg">✓ Data berhasil dihapus!</div>
+  <div class="toast toast-warning" id="warningMsg"></div>
+  <div class="toast toast-info" id="infoMsg"></div>
 
-  <a class="app-card hpt" href="./monitoring.html">
-    <div class="app-card-icon">🌿</div>
-    <div class="app-card-body">
-      <div class="app-card-title">Monitoring HPT</div>
-      <div class="app-card-desc">Form monitoring hama &amp; penyakit strawberry per greenhouse / block</div>
+  <!-- TAB 1: FORM INPUT -->
+  <div id="tab-form" class="tab-content">
+    <div class="header-card">
+      <div class="header-item">
+        <div class="header-label">Tanggal</div>
+        <input type="date" id="tanggal" class="header-input" onchange="validateDate()">
+      </div>
+      <div class="header-item">
+        <div class="header-label">Lokasi</div>
+        <select id="lokasi" class="header-input" onchange="validateDate()">
+          <option value="">Pilih lokasi</option>
+          <option value="GH1-B1">Greenhouse 1 Block 1</option>
+          <option value="GH1-B2">Greenhouse 1 Block 2</option>
+          <option value="GH1-B3">Greenhouse 1 Block 3</option>
+          <option value="GH2-B1">Greenhouse 2 Block 1</option>
+          <option value="GH2-B2">Greenhouse 2 Block 2</option>
+          <option value="GH2-B3">Greenhouse 2 Block 3</option>
+        </select>
+      </div>
+      <div class="header-item">
+        <div class="header-label">Jumlah Sampel</div>
+        <input type="number" id="sampel" class="header-input" value="360" min="1" oninput="calculateAll()">
+      </div>
     </div>
-    <div class="app-card-arrow">›</div>
-  </a>
 
-  <a class="app-card pest" href="./pestisida.html">
-    <div class="app-card-icon">🧪</div>
-    <div class="app-card-body">
-      <div class="app-card-title">Manajemen Pestisida</div>
-      <div class="app-card-desc">Master data, stok opname, dan catatan penggunaan harian</div>
+    <!-- 1. SPIDERMITES -->
+    <div class="pest-card">
+      <div class="pest-header"><span class="pest-name">🕷️ SPIDERMITES</span><span class="pest-score" id="spider_score">0,00%</span></div>
+      <div class="pest-content">
+        <div class="input-group"><label>Score 1 (×1)</label><input type="number" id="spider_t1" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Score 2 (×2)</label><input type="number" id="spider_t2" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Score 3 (×3)</label><input type="number" id="spider_t3" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Score 4 (×4)</label><input type="number" id="spider_t4" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Score 5 (×5)</label><input type="number" id="spider_t5" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="formula-hint">💡 Formula: (S1×1 + S2×2 + S3×3 + S4×4 + S5×5) ÷ (sampel × 5)</div>
+      </div>
     </div>
-    <div class="app-card-arrow">›</div>
-  </a>
 
-  <div class="info-card">
-    💡 <strong>Tips:</strong> Kedua aplikasi tersambung ke <em>Google Sheet yang berbeda</em>. Data monitoring HPT dan pestisida tersimpan terpisah.
+    <!-- 2. APHIDS -->
+    <div class="pest-card">
+      <div class="pest-header"><span class="pest-name">🦟 APHIDS</span><span class="pest-score" id="aphids_score">0,00%</span></div>
+      <div class="pest-content">
+        <div class="input-group"><label>Score 1 (×1)</label><input type="number" id="aphids_t1" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Score 2 (×2)</label><input type="number" id="aphids_t2" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Score 3 (×3)</label><input type="number" id="aphids_t3" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="formula-hint">💡 Formula: (S1×1 + S2×2 + S3×3) ÷ (sampel × 5)</div>
+      </div>
+    </div>
+
+    <!-- 3. THRIPS -->
+    <div class="pest-card">
+      <div class="pest-header"><span class="pest-name">🪰 THRIPS (Ulangan)</span><span class="pest-score" id="thrips_score">0,00%</span></div>
+      <div class="pest-content">
+        <div class="input-group"><label>Ulangan 1</label><input type="number" id="thrips_u1" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Ulangan 2</label><input type="number" id="thrips_u2" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Ulangan 3</label><input type="number" id="thrips_u3" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Ulangan 4</label><input type="number" id="thrips_u4" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Ulangan 5</label><input type="number" id="thrips_u5" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Ulangan 6</label><input type="number" id="thrips_u6" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Ulangan 7</label><input type="number" id="thrips_u7" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="formula-hint">💡 Formula: (U1+U2+U3+U4+U5+U6+U7) ÷ 700 tanaman</div>
+      </div>
+    </div>
+
+    <!-- 4. ULAT -->
+    <div class="pest-card">
+      <div class="pest-header"><span class="pest-name">🐛 ULAT</span><span class="pest-score" id="ulat_score">0,00%</span></div>
+      <div class="pest-content">
+        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="ulat_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+      </div>
+    </div>
+
+    <!-- 5. TIKUS -->
+    <div class="pest-card">
+      <div class="pest-header"><span class="pest-name">🐭 TIKUS</span><span class="pest-score" id="tikus_score">0,00%</span></div>
+      <div class="pest-content">
+        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="tikus_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+      </div>
+    </div>
+
+    <!-- 6. SIPUT -->
+    <div class="pest-card">
+      <div class="pest-header"><span class="pest-name">🐌 SIPUT</span><span class="pest-score" id="siput_score">0,00%</span></div>
+      <div class="pest-content">
+        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="siput_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+      </div>
+    </div>
+
+    <!-- 7. KUTU KEBUL -->
+    <div class="pest-card">
+      <div class="pest-header"><span class="pest-name">🪰 KUTU KEBUL</span><span class="pest-score" id="kutu_score">0,00%</span></div>
+      <div class="pest-content">
+        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="kutu_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+      </div>
+    </div>
+
+    <!-- 8. MILDEW -->
+    <div class="pest-card">
+      <div class="pest-header"><span class="pest-name">🍄 MILDEW</span><span class="pest-score" id="mildew_score">0,00%</span></div>
+      <div class="pest-content">
+        <div class="input-group"><label>Score 1 (×1)</label><input type="number" id="mildew_t1" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Score 2 (×2)</label><input type="number" id="mildew_t2" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Score 3 (×3)</label><input type="number" id="mildew_t3" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="input-group"><label>Score 4 (×4)</label><input type="number" id="mildew_t4" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="formula-hint">💡 Formula: (S1×1 + S2×2 + S3×3 + S4×4) ÷ (sampel × 4)</div>
+      </div>
+    </div>
+
+    <!-- 9. BOTRYTIS -->
+    <div class="pest-card">
+      <div class="pest-header"><span class="pest-name">🍂 BOTRYTIS</span><span class="pest-score" id="botrytis_score">0,00%</span></div>
+      <div class="pest-content">
+        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="botrytis_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+      </div>
+    </div>
+
+    <!-- 10. ANTRAKNOSA -->
+    <div class="pest-card">
+      <div class="pest-header"><span class="pest-name">🍁 ANTRAKNOSA</span><span class="pest-score" id="antrak_score">0,00%</span></div>
+      <div class="pest-content">
+        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="antrak_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+      </div>
+    </div>
+
+    <!-- 11. LAYU MATI -->
+    <div class="pest-card">
+      <div class="pest-header"><span class="pest-name">🥀 LAYU MATI</span><span class="pest-score" id="layu_score">0,00%</span></div>
+      <div class="pest-content">
+        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="layu_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
+        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+      </div>
+    </div>
   </div>
 
-  <div class="install-banner" id="installBanner">
-    <p>📲 Install ke layar utama agar tampil seperti aplikasi.</p>
-    <button onclick="installPWA()">Install</button>
+  <!-- TAB 2: DASHBOARD TREND -->
+  <div id="tab-dashboard" class="tab-content" style="display:none;">
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>Dari Tanggal</label>
+        <input type="date" id="fromDate" onchange="renderDashboard()">
+      </div>
+      <div class="filter-group">
+        <label>Sampai Tanggal</label>
+        <input type="date" id="toDate" onchange="renderDashboard()">
+      </div>
+      
+      <!-- LOKASI CUSTOM MULTI-SELECT DROPDOWN -->
+      <div class="filter-group custom-multiselect" id="locationMultiselect">
+        <label>Lokasi (Pilih Multi)</label>
+        <div class="custom-select-trigger" onclick="toggleLocationDropdown(event)">
+          <span id="locationSelectText">Semua Lokasi Terpilih</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="custom-dropdown-panel" onclick="event.stopPropagation()">
+          <div class="dropdown-actions">
+            <button type="button" class="btn-action-link" onclick="selectAllLocations(true)">Pilih Semua</button>
+            <button type="button" class="btn-action-link" onclick="selectAllLocations(false)">Hapus Semua</button>
+          </div>
+          <div class="dropdown-list" id="locationCheckboxList">
+            <!-- Checkbox diisi via JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Grafik Tren</label>
+        <select id="pestSelect" onchange="renderDashboard()">
+          <optgroup label="HAMA">
+            <option value="spidermites">🕷️ Spidermites</option>
+            <option value="aphids">🦟 Aphids</option>
+            <option value="thrips">🪰 Thrips</option>
+            <option value="ulat">🐛 Ulat</option>
+            <option value="tikus">🐭 Tikus</option>
+            <option value="siput">🐌 Siput</option>
+            <option value="kutu">🪰 Kutu Kebul</option>
+          </optgroup>
+          <optgroup label="PENYAKIT">
+            <option value="mildew">🍄 Mildew</option>
+            <option value="botrytis">🍂 Botrytis</option>
+            <option value="antrak">🍁 Antraknosa</option>
+            <option value="layu">🥀 Layu Mati</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+
+    <!-- Ringkasan HAMA -->
+    <div class="section-title">🐛 Ringkasan HAMA</div>
+    <div class="summary-grid" id="summaryHama"></div>
+
+    <!-- Ringkasan PENYAKIT -->
+    <div class="section-title disease">🍄 Ringkasan PENYAKIT</div>
+    <div class="summary-grid" id="summaryPenyakit"></div>
+
+    <div class="chart-card">
+      <div class="chart-container"><canvas id="trendChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TAB 3: RIWAYAT -->
+  <div id="tab-history" class="tab-content" style="display:none;">
+    <div style="margin-bottom:12px; display:flex; justify-content:flex-end;">
+      <button class="btn-bar btn-secondary" onclick="fetchDashboardData()">🔄 Sync / Refresh Data</button>
+    </div>
+    <table class="history-table">
+      <thead><tr><th>Tanggal</th><th>Lokasi</th><th>Aksi</th></tr></thead>
+      <tbody id="historyTableBody"><tr><td colspan="3" style="text-align:center;">Belum ada data</td></tr></tbody>
+    </table>
   </div>
 </div>
 
-<div class="footer">© PT. Agri Wangi Berry · Ciwidey</div>
-<div class="toast" id="toast"></div>
+<div class="button-bar" id="formActionBar">
+  <button class="btn-bar btn-secondary" onclick="clearForm()">🗑️ Bersihkan</button>
+  <button class="btn-bar btn-danger" onclick="deleteFromSheets()">❌ Hapus</button>
+  <button class="btn-bar btn-primary" onclick="submitForm()">✓ Simpan</button>
+</div>
 
 <script>
-  let deferredPrompt = null;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('installBanner').classList.add('show');
+  const TODAY = new Date().toISOString().split('T')[0];
+  const CONFIG = {
+    APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw6INkIU6CuITJnHOAxC72VaKoqwLqqrea1bd5kbiPOHcR-lthbDw_L465XqS2uFBGvbQ/exec'
+  };
+
+  let scriptUrl = localStorage.getItem('hpt_script_url') || CONFIG.APPS_SCRIPT_URL || '';
+  let isAuthenticated = JSON.parse(localStorage.getItem('hpt_auth') || 'false');
+  let hptData = {};
+  let trendChartInstance = null;
+
+  // State untuk Lokasi Multi-Select
+  let availableLocations = ["GH1-B1", "GH1-B2", "GH1-B3", "GH2-B1", "GH2-B2", "GH2-B3"];
+  let selectedLocations = [...availableLocations];
+
+  // ====== DAFTAR LENGKAP 11 OPT (7 hama + 4 penyakit) ======
+  const pestConfig = {
+    // ----- HAMA -----
+    spidermites: { name: 'Spidermites', icon: '🕷️', group: 'hama' },
+    aphids:      { name: 'Aphids',      icon: '🦟', group: 'hama' },
+    thrips:      { name: 'Thrips',      icon: '🪰', group: 'hama' },
+    ulat:        { name: 'Ulat',        icon: '🐛', group: 'hama' },
+    tikus:       { name: 'Tikus',       icon: '🐭', group: 'hama' },
+    siput:       { name: 'Siput',       icon: '🐌', group: 'hama' },
+    kutu:        { name: 'Kutu Kebul',  icon: '🪰', group: 'hama' },
+    // ----- PENYAKIT -----
+    mildew:      { name: 'Mildew',      icon: '🍄', group: 'penyakit' },
+    botrytis:    { name: 'Botrytis',    icon: '🍂', group: 'penyakit' },
+    antrak:      { name: 'Antraknosa',  icon: '🍁', group: 'penyakit' },
+    layu:        { name: 'Layu Mati',   icon: '🥀', group: 'penyakit' }
+  };
+
+  window.onload = function() {
+    initForm();
+    document.getElementById('fromDate').value = '2026-09-01';
+    document.getElementById('toDate').value = TODAY;
+    updateLocationListUI();
+    fetchDashboardData();
+  };
+
+  // Tutup dropdown lokasi jika klik di luar area
+  document.addEventListener('click', function(e) {
+    const ms = document.getElementById('locationMultiselect');
+    if (ms && !ms.contains(e.target)) {
+      ms.classList.remove('open');
+    }
   });
-  window.addEventListener('appinstalled', () => {
-    deferredPrompt = null;
-    document.getElementById('installBanner').classList.remove('show');
-    showToast('✓ App berhasil di-install!');
-  });
-  async function installPWA() {
-    if (!deferredPrompt) {
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      if (isIOS) alert('Di iPhone/iPad:\n1. Tap Share (kotak panah)\n2. Pilih "Add to Home Screen"\n3. Tap Add');
-      else alert('Install belum tersedia.\n\nCoba: Chrome ⋮ → Install app / Add to Home screen');
+
+  function toggleLocationDropdown(e) {
+    e.stopPropagation();
+    const ms = document.getElementById('locationMultiselect');
+    ms.classList.toggle('open');
+  }
+
+  function updateLocationListUI() {
+    const container = document.getElementById('locationCheckboxList');
+    container.innerHTML = '';
+
+    if (availableLocations.length === 0) {
+      container.innerHTML = '<div style="font-size:12px; color:#888; padding:4px;">Tidak ada lokasi</div>';
+      updateLocationTriggerText();
       return;
     }
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    document.getElementById('installBanner').classList.remove('show');
+
+    availableLocations.forEach(loc => {
+      const label = document.createElement('label');
+      label.className = 'dropdown-item';
+
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.value = loc;
+      chk.checked = selectedLocations.includes(loc);
+      chk.onchange = () => {
+        if (chk.checked) {
+          if (!selectedLocations.includes(loc)) selectedLocations.push(loc);
+        } else {
+          selectedLocations = selectedLocations.filter(l => l !== loc);
+        }
+        updateLocationTriggerText();
+        renderDashboard();
+      };
+
+      const span = document.createElement('span');
+      span.textContent = loc;
+
+      label.appendChild(chk);
+      label.appendChild(span);
+      container.appendChild(label);
+    });
+
+    updateLocationTriggerText();
   }
-  function showToast(msg) {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(el._t);
-    el._t = setTimeout(() => el.classList.remove('show'), 2800);
+
+  function updateLocationTriggerText() {
+    const txtElem = document.getElementById('locationSelectText');
+    if (availableLocations.length === 0) {
+      txtElem.textContent = 'Tidak Ada Lokasi';
+    } else if (selectedLocations.length === availableLocations.length) {
+      txtElem.textContent = 'Semua Lokasi Terpilih';
+    } else if (selectedLocations.length === 0) {
+      txtElem.textContent = 'Tidak Ada Lokasi Terpilih';
+    } else if (selectedLocations.length === 1) {
+      txtElem.textContent = selectedLocations[0];
+    } else {
+      txtElem.textContent = `${selectedLocations.length} Lokasi Terpilih`;
+    }
   }
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(() => console.log('✓ SW registered'))
-      .catch((e) => console.log('SW failed:', e));
+
+  function selectAllLocations(select) {
+    if (select) {
+      selectedLocations = [...availableLocations];
+    } else {
+      selectedLocations = [];
+    }
+    updateLocationListUI();
+    renderDashboard();
+  }
+
+  // ===== TOMBOL STEP (+) DAN (-) =====
+  function enhanceNumberInputs() {
+    const numberInputs = document.querySelectorAll('.pest-card input[type="number"]');
+    numberInputs.forEach(input => {
+      if (input.parentElement.classList.contains('number-input-wrapper')) return;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'number-input-wrapper';
+
+      const minusBtn = document.createElement('button');
+      minusBtn.type = 'button'; minusBtn.className = 'btn-step'; minusBtn.textContent = '−';
+
+      const plusBtn = document.createElement('button');
+      plusBtn.type = 'button'; plusBtn.className = 'btn-step'; plusBtn.textContent = '+';
+
+      input.parentNode.insertBefore(wrapper, input);
+      wrapper.appendChild(minusBtn); wrapper.appendChild(input); wrapper.appendChild(plusBtn);
+
+      minusBtn.addEventListener('click', () => {
+        let val = parseFloat(input.value) || 0;
+        if (val > 0) { input.value = val - 1; calculateAll(); }
+      });
+      plusBtn.addEventListener('click', () => {
+        let val = parseFloat(input.value) || 0;
+        input.value = val + 1; calculateAll();
+      });
+    });
+  }
+
+  function initForm() {
+    enhanceNumberInputs();
+    const tglInput = document.getElementById('tanggal');
+    tglInput.value = TODAY;
+    tglInput.max = TODAY;
+    validateDate();
+    updateAuthStatus();
+    calculateAll();
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+
+    if (tab === 'form') {
+      document.getElementById('tab-form').style.display = 'block';
+      document.getElementById('formActionBar').style.display = 'grid';
+      document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    } else if (tab === 'dashboard') {
+      document.getElementById('tab-dashboard').style.display = 'block';
+      document.getElementById('formActionBar').style.display = 'none';
+      document.querySelectorAll('.tab-btn')[1].classList.add('active');
+      renderDashboard();
+    } else {
+      document.getElementById('tab-history').style.display = 'block';
+      document.getElementById('formActionBar').style.display = 'none';
+      document.querySelectorAll('.tab-btn')[2].classList.add('active');
+      renderHistoryTable();
+    }
+  }
+
+  function showToast(id, customMsg) {
+    const msg = document.getElementById(id);
+    if (!msg) return;
+    if (customMsg) msg.textContent = customMsg;
+    msg.classList.add('show');
+    clearTimeout(msg._t);
+    msg._t = setTimeout(() => msg.classList.remove('show'), 2500);
+  }
+
+  function isFutureDate(dateStr) {
+    return dateStr && new Date(dateStr) > new Date(TODAY + 'T23:59:59');
+  }
+
+  function validateDate() {
+    const tgl = document.getElementById('tanggal').value;
+    const warning = document.getElementById('warningMsg');
+    if (isFutureDate(tgl)) {
+      warning.textContent = '⚠️ Tanggal belum tersedia. Maksimal hari ini!';
+      warning.classList.add('show');
+    } else {
+      warning.classList.remove('show');
+    }
+  }
+
+  function calculateAll() {
+    const sampel = parseFloat(document.getElementById('sampel').value) || 360;
+    const fmt = (val) => val.toFixed(2).replace('.', ',') + '%';
+
+    const s1 = parseFloat(document.getElementById('spider_t1').value) || 0;
+    const s2 = parseFloat(document.getElementById('spider_t2').value) || 0;
+    const s3 = parseFloat(document.getElementById('spider_t3').value) || 0;
+    const s4 = parseFloat(document.getElementById('spider_t4').value) || 0;
+    const s5 = parseFloat(document.getElementById('spider_t5').value) || 0;
+    document.getElementById('spider_score').textContent = fmt(((s1*1 + s2*2 + s3*3 + s4*4 + s5*5) / (sampel * 5)) * 100);
+
+    const a1 = parseFloat(document.getElementById('aphids_t1').value) || 0;
+    const a2 = parseFloat(document.getElementById('aphids_t2').value) || 0;
+    const a3 = parseFloat(document.getElementById('aphids_t3').value) || 0;
+    document.getElementById('aphids_score').textContent = fmt(((a1*1 + a2*2 + a3*3) / (sampel * 5)) * 100);
+
+    let thripsTot = 0;
+    for (let i = 1; i <= 7; i++) thripsTot += parseFloat(document.getElementById('thrips_u' + i).value) || 0;
+    document.getElementById('thrips_score').textContent = fmt((thripsTot / 700) * 100);
+
+    ['ulat','tikus','siput','kutu','botrytis','antrak','layu'].forEach(key => {
+      const val = parseFloat(document.getElementById(key + '_affected').value) || 0;
+      document.getElementById(key + '_score').textContent = fmt((val / sampel) * 100);
+    });
+
+    const m1 = parseFloat(document.getElementById('mildew_t1').value) || 0;
+    const m2 = parseFloat(document.getElementById('mildew_t2').value) || 0;
+    const m3 = parseFloat(document.getElementById('mildew_t3').value) || 0;
+    const m4 = parseFloat(document.getElementById('mildew_t4').value) || 0;
+    document.getElementById('mildew_score').textContent = fmt(((m1*1 + m2*2 + m3*3 + m4*4) / (sampel * 4)) * 100);
+  }
+
+  function getFormData() {
+    const ids = ['tanggal','lokasi','sampel','spider_t1','spider_t2','spider_t3','spider_t4','spider_t5',
+      'aphids_t1','aphids_t2','aphids_t3','thrips_u1','thrips_u2','thrips_u3','thrips_u4','thrips_u5','thrips_u6','thrips_u7',
+      'ulat_affected','tikus_affected','siput_affected','kutu_affected','mildew_t1','mildew_t2','mildew_t3','mildew_t4',
+      'botrytis_affected','antrak_affected','layu_affected'];
+    const data = {};
+    ids.forEach(id => { data[id] = document.getElementById(id).value; });
+    return data;
+  }
+
+  function setFormData(data) {
+    Object.keys(data).forEach(k => {
+      const elem = document.getElementById(k);
+      if (elem) elem.value = data[k] ?? '';
+    });
+    calculateAll();
+  }
+
+  function clearForm(confirmUser = true) {
+    if (confirmUser && !confirm('Kosongkan form input?')) return;
+    document.querySelectorAll('.pest-card input[type="number"]').forEach(i => i.value = '');
+    calculateAll();
+  }
+
+  function updateAuthStatus() {
+    const s = document.getElementById('authStatus');
+    const a = document.getElementById('authBtn');
+    const p = document.getElementById('pushBtn');
+    const l = document.getElementById('pullBtn');
+    if (isAuthenticated && scriptUrl) {
+      s.innerHTML = '✓ Terhubung ke Sheets';
+      s.className = 'auth-status ok';
+      a.textContent = 'Putuskan';
+      a.className = 'hdr-btn hdr-btn-logout';
+      p.style.display = l.style.display = 'inline-flex';
+    } else {
+      s.innerHTML = '';
+      s.className = 'auth-status';
+      a.textContent = '☁️ Connect Sheets';
+      a.className = 'hdr-btn hdr-btn-connect';
+      p.style.display = l.style.display = 'none';
+    }
+  }
+
+  function handleAuthClick() {
+    if (isAuthenticated) {
+      isAuthenticated = false;
+      localStorage.setItem('hpt_auth', 'false');
+      updateAuthStatus();
+      showToast('infoMsg', 'Koneksi diputus');
+      return;
+    }
+    const url = prompt('Masukkan URL Apps Script Web App (/exec):', scriptUrl || '');
+    if (!url || !url.trim()) return;
+    scriptUrl = url.trim();
+    localStorage.setItem('hpt_script_url', scriptUrl);
+    localStorage.setItem('hpt_auth', 'true');
+    isAuthenticated = true;
+    updateAuthStatus();
+    showToast('infoMsg', '✓ Tersambung ke Sheets');
+    fetchDashboardData();
+  }
+
+  async function submitForm() {
+    const data = getFormData();
+    if (!data.tanggal || !data.lokasi) return alert('Pilih tanggal dan lokasi dulu!');
+    localStorage.setItem('hpt_' + data.tanggal + '_' + data.lokasi, JSON.stringify(data));
+
+    if (scriptUrl) {
+      showToast('infoMsg', '☁️ Mengirim data...');
+      try {
+        await fetch(scriptUrl, {
+          method: 'POST', mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ ...data, action: 'submit' })
+        });
+        showToast('successMsg', '✓ Tersimpan & Tersinkronisasi!');
+        setTimeout(fetchDashboardData, 800);
+      } catch (e) {
+        showToast('warningMsg', 'Gagal kirim: ' + e.message);
+      }
+    } else {
+      showToast('successMsg', '✓ Tersimpan di browser (Lokal)');
+    }
+  }
+
+  async function syncToSheets(silent) { return submitForm(); }
+
+  async function deleteFromSheets() {
+    const tgl = document.getElementById('tanggal').value;
+    const lok = document.getElementById('lokasi').value;
+    if (!tgl || !lok) return alert('Pilih tanggal dan lokasi!');
+    if (!confirm(`Hapus data ${tgl} (${lok})?`)) return;
+
+    localStorage.removeItem('hpt_' + tgl + '_' + lok);
+    if (scriptUrl) {
+      fetch(scriptUrl, {
+        method: 'POST', mode: 'no-cors',
+        body: JSON.stringify({ action: 'delete', tanggal: tgl, lokasi: lok })
+      }).catch(() => {});
+    }
+    clearForm(false);
+    showToast('deleteMsg', '✓ Data dihapus');
+    setTimeout(fetchDashboardData, 800);
+  }
+
+  async function fetchDashboardData() {
+    if (!scriptUrl) return;
+    try {
+      const res = await fetch(scriptUrl + '?action=list');
+      hptData = await res.json();
+
+      const fetchedLocs = Object.keys(hptData);
+      if (fetchedLocs.length > 0) {
+        availableLocations = fetchedLocs;
+      }
+
+      // Pastikan lokasi terpilih sesuai dengan daftar lokasi yang ada
+      selectedLocations = selectedLocations.filter(l => availableLocations.includes(l));
+      if (selectedLocations.length === 0) {
+        selectedLocations = [...availableLocations];
+      }
+
+      updateLocationListUI();
+      renderDashboard();
+      renderHistoryTable();
+    } catch (e) {
+      console.log("Offline / Fetch error:", e);
+    }
+  }
+
+  // ====== KARTU RINGKASAN (dipisah HAMA vs PENYAKIT) ======
+  function buildSummaryCards(aggregatedData, group) {
+    let html = '';
+    Object.keys(pestConfig).forEach(key => {
+      const cfg = pestConfig[key];
+      if (cfg.group !== group) return;
+
+      const vals = aggregatedData.map(d => d[key] || 0);
+      const avg = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+      const max = vals.length ? Math.max(...vals) : 0;
+
+      const pct = avg * 100;
+      let valColor = 'var(--success)';
+      if (pct >= 5) valColor = 'var(--danger)';
+      else if (pct >= 3) valColor = '#e65100';
+
+      html += `
+        <div class="summary-card pest-${key}">
+          <div class="header">${cfg.icon} ${cfg.name}</div>
+          <div class="value" style="color:${valColor}">${pct.toFixed(2)}%</div>
+          <div class="sub">Max: ${(max * 100).toFixed(2)}%</div>
+        </div>`;
+    });
+    return html || '<div style="font-size:12px;color:#999;padding:8px;">Belum ada data</div>';
+  }
+
+  function renderDashboard() {
+    const fromDate = document.getElementById('fromDate').value;
+    const toDate = document.getElementById('toDate').value;
+    const selectedPest = document.getElementById('pestSelect').value || 'spidermites';
+
+    // 1. Ambil daftar lokasi yang dipilih dari state custom multi-select
+    const targetLocs = selectedLocations.length > 0 ? selectedLocations : availableLocations;
+
+    // 2. Kumpulkan seluruh data agregat untuk Summary Card
+    const aggregatedData = [];
+    targetLocs.forEach(loc => {
+      (hptData[loc] || []).forEach(item => {
+        if ((!fromDate || item.date >= fromDate) && (!toDate || item.date <= toDate)) {
+          aggregatedData.push({ ...item, lokasi: loc });
+        }
+      });
+    });
+
+    document.getElementById('summaryHama').innerHTML     = buildSummaryCards(aggregatedData, 'hama');
+    document.getElementById('summaryPenyakit').innerHTML = buildSummaryCards(aggregatedData, 'penyakit');
+
+    // 3. Ambil daftar tanggal unik yang terurut
+    const allDatesSet = new Set();
+    aggregatedData.forEach(item => allDatesSet.add(item.date));
+    const sortedDates = Array.from(allDatesSet).sort();
+
+    // Palet warna untuk garis tiap lokasi
+    const colorPalette = [
+      '#378add', '#e65100', '#2e7d32', '#7c3aed', 
+      '#db2777', '#0891b2', '#ca8a04', '#dc2626'
+    ];
+
+    // 4. Buat Multi-Dataset (1 Garis per Lokasi)
+    const datasets = targetLocs.map((loc, idx) => {
+      const locColor = colorPalette[idx % colorPalette.length];
+      
+      const locDataMap = {};
+      (hptData[loc] || []).forEach(item => {
+        if ((!fromDate || item.date >= fromDate) && (!toDate || item.date <= toDate)) {
+          locDataMap[item.date] = (item[selectedPest] || 0) * 100;
+        }
+      });
+
+      const dataValues = sortedDates.map(d => locDataMap[d] !== undefined ? locDataMap[d] : null);
+
+      return {
+        label: loc,                  // Nama lokasi (GH1-B1, GH1-B2, dst.)
+        data: dataValues,            // Data persentase
+        borderColor: locColor,
+        backgroundColor: locColor,
+        fill: false,                 // Garis tanpa arsiran bawah
+        tension: 0.2,
+        spanGaps: true               // Sambungkan garis jika ada tanggal kosong
+      };
+    });
+
+    // 5. Render grafik dengan multi-dataset
+    renderChart(sortedDates, datasets, pestConfig[selectedPest]);
+  }
+
+  function renderChart(dates, datasets, cfg) {
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    if (trendChartInstance) trendChartInstance.destroy();
+
+    const labels = dates.map(d => d.slice(5));
+
+    trendChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: true,
+            text: `Tren Multi-Lokasi: ${cfg ? cfg.name : 'HPT'} (%)`,
+            font: { weight: 'bold', size: 14 }
+          },
+          legend: {
+            display: true,
+            position: 'top'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Persentase (%)' }
+          }
+        }
+      }
+    });
+  }
+
+  function renderHistoryTable() {
+    const tbody = document.getElementById('historyTableBody');
+    let rowsHtml = '';
+    Object.keys(hptData).forEach(loc => {
+      hptData[loc].forEach(item => {
+        rowsHtml += `<tr>
+          <td><b>${item.date}</b></td>
+          <td>${loc}</td>
+          <td>
+            <button style="padding:4px 8px;border-radius:6px;background:#e0f2fe;border:none;color:#0369a1;font-weight:bold;cursor:pointer;margin-right:4px;" onclick="editRecord('${item.date}','${loc}')">✏️ Edit</button>
+            <button style="padding:4px 8px;border-radius:6px;background:#fee2e2;border:none;color:#dc2626;font-weight:bold;cursor:pointer;" onclick="deleteRecord('${item.date}','${loc}')">🗑️ Hapus</button>
+          </td>
+        </tr>`;
+      });
+    });
+    tbody.innerHTML = rowsHtml || '<tr><td colspan="3" style="text-align:center;">Tidak ada riwayat</td></tr>';
+  }
+
+  async function deleteRecord(tgl, lok) {
+    if (!confirm(`Hapus data ${tgl} (${lok})?`)) return;
+    await fetch(scriptUrl, {
+      method: 'POST', mode: 'no-cors',
+      body: JSON.stringify({ action: 'delete', tanggal: tgl, lokasi: lok })
+    });
+    showToast('deleteMsg', 'Data dihapus!');
+    setTimeout(fetchDashboardData, 800);
+  }
+
+  async function editRecord(tanggal, lokasi) {
+    if (!scriptUrl) return showToast('warningMsg', 'Belum connect ke Sheets');
+    try {
+      const res = await fetch(scriptUrl + '?action=get&tanggal=' + encodeURIComponent(tanggal) + '&lokasi=' + encodeURIComponent(lokasi));
+      const data = await res.json();
+      if (data.status === 'error') return showToast('warningMsg', data.message);
+
+      switchTab('form');
+      setFormData(data);
+      document.getElementById('tanggal').value = tanggal;
+      document.getElementById('lokasi').value = lokasi;
+      showToast('infoMsg', '✏️ Mode edit: ' + tanggal + ' / ' + lokasi);
+    } catch (e) {
+      showToast('warningMsg', 'Gagal memuat data: ' + e.message);
+    }
   }
 </script>
 
