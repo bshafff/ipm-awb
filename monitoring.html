@@ -125,7 +125,6 @@
     .filter-group label { font-size: 10px; font-weight: 700; color: var(--text-secondary); }
     .filter-group input, .filter-group select { padding: 6px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
 
-    /* ===== SECTION TITLE ===== */
     .section-title {
       font-size: 0.85rem; font-weight: 800; color: var(--text);
       text-transform: uppercase; letter-spacing: 0.5px;
@@ -134,7 +133,6 @@
     }
     .section-title.disease { border-left-color: #7c3aed; }
 
-    /* ===== SUMMARY CARDS ===== */
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 12px; }
     .summary-card {
       background: var(--card); border: 1px solid var(--border);
@@ -149,7 +147,6 @@
     .summary-card .value { font-size: 18px; font-weight: 800; color: var(--primary); line-height: 1.1; }
     .summary-card .sub { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
 
-    /* warna border per-pest */
     .pest-spidermites { border-left-color: #dc2626; }
     .pest-aphids      { border-left-color: #ec4899; }
     .pest-thrips      { border-left-color: #f97316; }
@@ -778,22 +775,44 @@
     });
   }
 
+  // ====== RIWAYAT — urut Timestamp TERBARU di atas ======
   function renderHistoryTable() {
     const tbody = document.getElementById('historyTableBody');
-    let rowsHtml = '';
+
+    // 1) Flatten semua data jadi array 1 dimensi
+    const flat = [];
     Object.keys(hptData).forEach(loc => {
-      hptData[loc].forEach(item => {
-        rowsHtml += `<tr>
-          <td><b>${item.date}</b></td>
-          <td>${loc}</td>
-          <td>
-            <button style="padding:4px 8px;border-radius:6px;background:#e0f2fe;border:none;color:#0369a1;font-weight:bold;cursor:pointer;margin-right:4px;" onclick="editRecord('${item.date}','${loc}')">✏️ Edit</button>
-            <button style="padding:4px 8px;border-radius:6px;background:#fee2e2;border:none;color:#dc2626;font-weight:bold;cursor:pointer;" onclick="deleteRecord('${item.date}','${loc}')">🗑️ Hapus</button>
-          </td>
-        </tr>`;
+      (hptData[loc] || []).forEach(item => {
+        flat.push({
+          date: item.date,
+          ts: item.ts || 0,
+          lokasi: loc
+        });
       });
     });
-    tbody.innerHTML = rowsHtml || '<tr><td colspan="3" style="text-align:center;">Tidak ada riwayat</td></tr>';
+
+    // 2) Sort: Timestamp terbaru di atas.
+    //    Kalau ts tidak tersedia (data lama), fallback ke tanggal.
+    flat.sort((a, b) => {
+      if (b.ts !== a.ts) return b.ts - a.ts;                       // ts desc
+      if (a.date !== b.date) return b.date.localeCompare(a.date);  // date desc
+      return a.lokasi.localeCompare(b.lokasi);
+    });
+
+    // 3) Render
+    if (!flat.length) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Tidak ada riwayat</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = flat.map(r => `<tr>
+      <td><b>${r.date}</b></td>
+      <td>${r.lokasi}</td>
+      <td>
+        <button style="padding:4px 8px;border-radius:6px;background:#e0f2fe;border:none;color:#0369a1;font-weight:bold;cursor:pointer;margin-right:4px;" onclick="editRecord('${r.date}','${r.lokasi}')">✏️ Edit</button>
+        <button style="padding:4px 8px;border-radius:6px;background:#fee2e2;border:none;color:#dc2626;font-weight:bold;cursor:pointer;" onclick="deleteRecord('${r.date}','${r.lokasi}')">🗑️ Hapus</button>
+      </td>
+    </tr>`).join('');
   }
 
   async function deleteRecord(tgl, lok) {
