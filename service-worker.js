@@ -1,11 +1,9 @@
-const CACHE_NAME = 'awb-apps-v2';
+const CACHE_NAME = 'awb-apps-v3';
 const ASSETS = [
   './',
   './index.html',
-  './monitoring/',
-  './monitoring/index.html',
-  './pestisida/',
-  './pestisida/index.html',
+  './monitoring.html',
+  './pestisida.html',
   './manifest.json',
   './LOGO_AWB.png',
   './icon-192.png',
