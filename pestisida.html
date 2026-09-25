@@ -9,9 +9,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Pestisida AWB">
-  <link rel="manifest" href="/manifest.json">
-  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
-  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
   <title>Manajemen Pestisida AWB</title>
   <style>
     :root {
@@ -33,7 +33,6 @@
       padding-bottom: calc(16px + env(safe-area-inset-bottom));
     }
 
-    /* App header — full width like HPT when installed */
     .app-header {
       background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       color: #fff;
@@ -596,7 +595,7 @@ function exportCSV(type) {
 }
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/service-worker.js').then(()=>console.log('SW ok')).catch(e=>console.log('SW fail',e));
+  navigator.serviceWorker.register('./service-worker.js').then(()=>console.log('SW ok')).catch(e=>console.log('SW fail',e));
 }
 
 renderPestisidaList(); renderInventory(); renderUsage();
