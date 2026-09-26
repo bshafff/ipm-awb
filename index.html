@@ -1,6 +1,6 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
+ <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>HPT Monitoring System - PT. Agri Wangi Berry</title>
@@ -20,10 +20,10 @@
       --text-secondary: #666666;
       --hint-bg: #f0f6fb;
     }
-
+ 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
-
+ 
     .app-header {
       background: linear-gradient(135deg, #378add 0%, #2d6fb8 100%);
       color: white; padding: 1.2rem 1rem; text-align: center;
@@ -33,10 +33,10 @@
     .app-header-logo img { max-width: 100%; height: auto; object-fit: contain; }
     .app-header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.3px; }
     .app-header p { font-size: 0.8rem; opacity: 0.9; }
-
+ 
     .auth-status { font-size: 0.75rem; opacity: 0.95; }
     .auth-status.ok { color: #bbf7d0; }
-
+ 
     .header-actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 0.25rem; }
     .hdr-btn {
       padding: 0.4rem 0.75rem; border-radius: 8px; cursor: pointer;
@@ -46,20 +46,20 @@
     .hdr-btn-connect { background: #fff; color: var(--primary); }
     .hdr-btn-sync { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.35); }
     .hdr-btn-logout { background: #fee2e2; color: #dc2626; }
-
+ 
     .nav-tabs { display: flex; background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 40; }
     .tab-btn { flex: 1; padding: 12px 5px; text-align: center; font-size: 0.85rem; font-weight: 700; border: none; background: none; cursor: pointer; color: var(--text-secondary); border-bottom: 3px solid transparent; }
     .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-
+ 
     .container { padding: 12px; padding-bottom: 90px; max-width: 800px; margin: 0 auto; }
-
+ 
     .toast { display: none; padding: 0.875rem 1rem; border-radius: 10px; margin-bottom: 0.75rem; text-align: center; font-size: 0.875rem; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     .toast.show { display: block; }
     .toast-success { background: var(--success-light); color: var(--success); border-left: 4px solid var(--success); }
     .toast-delete { background: var(--danger-light); color: var(--danger); border-left: 4px solid var(--danger); }
     .toast-warning { background: #fff3e0; color: #e65100; border-left: 4px solid #e65100; }
     .toast-info { background: #e0f2fe; color: #0369a1; border-left: 4px solid #0ea5e9; }
-
+ 
     .header-card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 12px; padding: 1rem; margin-bottom: 1rem;
@@ -73,7 +73,7 @@
       font-size: 0.95rem; background: var(--card); color: var(--text); width: 100%; min-height: 44px;
     }
     .header-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(55, 138, 221, 0.12); }
-
+ 
     .pest-card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 12px; margin-bottom: 0.875rem; overflow: hidden;
@@ -86,7 +86,7 @@
     .pest-name { font-weight: 700; font-size: 0.95rem; color: var(--text); }
     .pest-score { font-size: 1.15rem; font-weight: 800; color: var(--primary); }
     .pest-content { padding: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.875rem; }
-
+ 
     .input-group { display: flex; flex-direction: column; gap: 0.375rem; }
     .input-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); }
     .input-group input {
@@ -94,10 +94,10 @@
       border-radius: 8px; font-size: 0.95rem; font-weight: 700; width: 100%;
     }
     .input-group input:focus { outline: none; border-color: var(--primary); }
-
+ 
     .number-input-wrapper { display: flex; align-items: center; gap: 0.4rem; width: 100%; }
     .number-input-wrapper input { flex: 1; min-width: 0; }
-
+ 
     .btn-step {
       width: 40px; height: 40px; border-radius: 8px;
       background: var(--primary); color: #fff; font-size: 1.2rem; font-weight: 700;
@@ -105,17 +105,17 @@
       cursor: pointer; flex-shrink: 0; touch-action: manipulation;
     }
     .btn-step:active { background: var(--primary-dark); transform: scale(0.95); }
-
+ 
     .formula-hint {
       grid-column: 1 / -1; font-size: 0.75rem; color: #666; padding: 0.5rem 0.75rem;
       background: var(--hint-bg); border-radius: 8px; border-left: 3px solid var(--primary);
     }
-
+ 
     .filter-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; background: var(--card); padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 12px; }
     .filter-group { display: flex; flex-direction: column; gap: 2px; }
     .filter-group label { font-size: 10px; font-weight: 700; color: var(--text-secondary); }
     .filter-group input, .filter-group select { padding: 6px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
-
+ 
     /* ===== CUSTOM MULTI-SELECT DROPDOWN LOKASI ===== */
     .custom-multiselect { position: relative; }
     .custom-select-trigger {
@@ -150,7 +150,7 @@
     .dropdown-item input[type="checkbox"] {
       width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer; border-radius: 4px;
     }
-
+ 
     /* ===== SECTION TITLE ===== */
     .section-title {
       font-size: 0.85rem; font-weight: 800; color: var(--text);
@@ -159,7 +159,7 @@
       border-left: 4px solid var(--primary);
     }
     .section-title.disease { border-left-color: #7c3aed; }
-
+ 
     /* ===== SUMMARY CARDS ===== */
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 12px; }
     .summary-card {
@@ -174,7 +174,7 @@
     }
     .summary-card .value { font-size: 18px; font-weight: 800; color: var(--primary); line-height: 1.1; }
     .summary-card .sub { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
-
+ 
     /* warna border per-pest */
     .pest-spidermites { border-left-color: #dc2626; }
     .pest-aphids      { border-left-color: #ec4899; }
@@ -187,14 +187,14 @@
     .pest-botrytis    { border-left-color: #a16207; }
     .pest-antrak      { border-left-color: #b91c1c; }
     .pest-layu        { border-left-color: #4b5563; }
-
+ 
     .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
     .chart-container { position: relative; height: 300px; width: 100%; }
-
+ 
     table.history-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; background: #fff; border-radius: 8px; overflow: hidden; }
     table.history-table th, table.history-table td { padding: 10px; border: 1px solid var(--border); text-align: left; }
     table.history-table th { background: #f1f5f9; font-weight: 700; }
-
+ 
     .button-bar {
       position: fixed; bottom: 0; left: 0; right: 0;
       display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem;
@@ -211,271 +211,307 @@
     .btn-secondary { background: #f5f5f3; color: var(--text); border: 1px solid var(--border); }
     .btn-danger { background: var(--danger-light); color: var(--danger); border: 1px solid #ffcdd2; }
   </style>
-</head>
-<body>
-
-<div class="app-header">
-  <div class="app-header-logo"><img src="LOGO_AWB.png" alt="AWB Logo" onerror="this.style.display='none'"></div>
-  <h1>FORM MONITORING IPM</h1>
-  <p>PT. Agri Wangi Berry</p>
-  <div class="auth-status" id="authStatus"></div>
-  <div class="header-actions">
+ </head>
+ <body>
+  <div class="app-header">
+   <div class="app-header-logo">
+    <img src="LOGO_AWB.png" alt="AWB Logo" onerror="this.style.display='none'">
+   </div>
+   <h1>FORM MONITORING IPM</h1>
+   <p>PT. Agri Wangi Berry</p>
+   <div class="auth-status" id="authStatus"></div>
+   <div class="header-actions">
     <button class="hdr-btn hdr-btn-sync" id="pushBtn" onclick="syncToSheets(true)" style="display:none">⬆️ Sync</button>
     <button class="hdr-btn hdr-btn-sync" id="pullBtn" onclick="fetchDashboardData()" style="display:none">⬇️ Muat</button>
     <button class="hdr-btn hdr-btn-connect" id="authBtn" onclick="handleAuthClick()">☁️ Connect Sheets</button>
+   </div>
   </div>
-</div>
-
-<div class="nav-tabs">
-  <button class="tab-btn active" onclick="switchTab('form')">📝 Form Input</button>
-  <button class="tab-btn" onclick="switchTab('dashboard')">📊 Dashboard Trend</button>
-  <button class="tab-btn" onclick="switchTab('history')">📜 Riwayat</button>
-</div>
-
-<div class="container">
-  <div class="toast toast-success" id="successMsg">✓ Data berhasil disimpan!</div>
-  <div class="toast toast-delete" id="deleteMsg">✓ Data berhasil dihapus!</div>
-  <div class="toast toast-warning" id="warningMsg"></div>
-  <div class="toast toast-info" id="infoMsg"></div>
-
-  <!-- TAB 1: FORM INPUT -->
-  <div id="tab-form" class="tab-content">
+  <div class="nav-tabs">
+   <button class="tab-btn active" onclick="switchTab('form')">📝 Form Input</button>
+   <button class="tab-btn" onclick="switchTab('dashboard')">📊 Dashboard Trend</button>
+   <button class="tab-btn" onclick="switchTab('history')">📜 Riwayat</button>
+  </div>
+  <div class="container">
+   <div class="toast toast-success" id="successMsg">✓ Data berhasil disimpan!</div>
+   <div class="toast toast-delete" id="deleteMsg">✓ Data berhasil dihapus!</div>
+   <div class="toast toast-warning" id="warningMsg"></div>
+   <div class="toast toast-info" id="infoMsg"></div>
+   <!-- TAB 1: FORM INPUT -->
+   <div id="tab-form" class="tab-content">
     <div class="header-card">
-      <div class="header-item">
-        <div class="header-label">Tanggal</div>
-        <input type="date" id="tanggal" class="header-input" onchange="validateDate()">
-      </div>
-      <div class="header-item">
-        <div class="header-label">Lokasi</div>
-        <select id="lokasi" class="header-input" onchange="validateDate()">
-          <option value="">Pilih lokasi</option>
-          <option value="GH1-B1">Greenhouse 1 Block 1</option>
-          <option value="GH1-B2">Greenhouse 1 Block 2</option>
-          <option value="GH1-B3">Greenhouse 1 Block 3</option>
-          <option value="GH2-B1">Greenhouse 2 Block 1</option>
-          <option value="GH2-B2">Greenhouse 2 Block 2</option>
-          <option value="GH2-B3">Greenhouse 2 Block 3</option>
-        </select>
-      </div>
-      <div class="header-item">
-        <div class="header-label">Jumlah Sampel</div>
-        <input type="number" id="sampel" class="header-input" value="360" min="1" oninput="calculateAll()">
-      </div>
+     <div class="header-item">
+      <div class="header-label">Tanggal</div>
+      <input type="date" id="tanggal" class="header-input" onchange="validateDate()">
+     </div>
+     <div class="header-item">
+      <div class="header-label">Lokasi</div>
+      <select id="lokasi" class="header-input" onchange="validateDate()"> <option value="">Pilih lokasi</option> <option value="GH1-B1">Greenhouse 1 Block 1</option> <option value="GH1-B2">Greenhouse 1 Block 2</option> <option value="GH1-B3">Greenhouse 1 Block 3</option> <option value="GH2-B1">Greenhouse 2 Block 1</option> <option value="GH2-B2">Greenhouse 2 Block 2</option> <option value="GH2-B3">Greenhouse 2 Block 3</option> </select>
+     </div>
+     <div class="header-item">
+      <div class="header-label">Jumlah Sampel</div>
+      <input type="number" id="sampel" class="header-input" value="360" min="1" oninput="calculateAll()">
+     </div>
     </div>
-
     <!-- 1. SPIDERMITES -->
     <div class="pest-card">
-      <div class="pest-header"><span class="pest-name">🕷️ SPIDERMITES</span><span class="pest-score" id="spider_score">0,00%</span></div>
-      <div class="pest-content">
-        <div class="input-group"><label>Score 1 (×1)</label><input type="number" id="spider_t1" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Score 2 (×2)</label><input type="number" id="spider_t2" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Score 3 (×3)</label><input type="number" id="spider_t3" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Score 4 (×4)</label><input type="number" id="spider_t4" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Score 5 (×5)</label><input type="number" id="spider_t5" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="formula-hint">💡 Formula: (S1×1 + S2×2 + S3×3 + S4×4 + S5×5) ÷ (sampel × 5)</div>
+     <div class="pest-header">
+      <span class="pest-name">🕷️ SPIDERMITES</span><span class="pest-score" id="spider_score">0,00%</span>
+     </div>
+     <div class="pest-content">
+      <div class="input-group">
+       <label>Score 1 (×1)</label><input type="number" id="spider_t1" min="0" placeholder="0" oninput="calculateAll()">
       </div>
+      <div class="input-group">
+       <label>Score 2 (×2)</label><input type="number" id="spider_t2" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="input-group">
+       <label>Score 3 (×3)</label><input type="number" id="spider_t3" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="input-group">
+       <label>Score 4 (×4)</label><input type="number" id="spider_t4" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="input-group">
+       <label>Score 5 (×5)</label><input type="number" id="spider_t5" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="formula-hint">💡 Formula: (S1×1 + S2×2 + S3×3 + S4×4 + S5×5) ÷ (sampel × 5)</div>
+     </div>
     </div>
-
     <!-- 2. APHIDS -->
     <div class="pest-card">
-      <div class="pest-header"><span class="pest-name">🦟 APHIDS</span><span class="pest-score" id="aphids_score">0,00%</span></div>
-      <div class="pest-content">
-        <div class="input-group"><label>Score 1 (×1)</label><input type="number" id="aphids_t1" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Score 2 (×2)</label><input type="number" id="aphids_t2" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Score 3 (×3)</label><input type="number" id="aphids_t3" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="formula-hint">💡 Formula: (S1×1 + S2×2 + S3×3) ÷ (sampel × 5)</div>
+     <div class="pest-header">
+      <span class="pest-name">🦟 APHIDS</span><span class="pest-score" id="aphids_score">0,00%</span>
+     </div>
+     <div class="pest-content">
+      <div class="input-group">
+       <label>Score 1 (×1)</label><input type="number" id="aphids_t1" min="0" placeholder="0" oninput="calculateAll()">
       </div>
+      <div class="input-group">
+       <label>Score 2 (×2)</label><input type="number" id="aphids_t2" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="input-group">
+       <label>Score 3 (×3)</label><input type="number" id="aphids_t3" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="formula-hint">💡 Formula: (S1×1 + S2×2 + S3×3) ÷ (sampel × 5)</div>
+     </div>
     </div>
-
     <!-- 3. THRIPS -->
     <div class="pest-card">
-      <div class="pest-header"><span class="pest-name">🪰 THRIPS (Ulangan)</span><span class="pest-score" id="thrips_score">0,00%</span></div>
-      <div class="pest-content">
-        <div class="input-group"><label>Ulangan 1</label><input type="number" id="thrips_u1" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Ulangan 2</label><input type="number" id="thrips_u2" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Ulangan 3</label><input type="number" id="thrips_u3" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Ulangan 4</label><input type="number" id="thrips_u4" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Ulangan 5</label><input type="number" id="thrips_u5" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Ulangan 6</label><input type="number" id="thrips_u6" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Ulangan 7</label><input type="number" id="thrips_u7" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="formula-hint">💡 Formula: (U1+U2+U3+U4+U5+U6+U7) ÷ 700 tanaman</div>
+     <div class="pest-header">
+      <span class="pest-name">🪰 THRIPS (Ulangan)</span><span class="pest-score" id="thrips_score">0,00%</span>
+     </div>
+     <div class="pest-content">
+      <div class="input-group">
+       <label>Ulangan 1</label><input type="number" id="thrips_u1" min="0" placeholder="0" oninput="calculateAll()">
       </div>
+      <div class="input-group">
+       <label>Ulangan 2</label><input type="number" id="thrips_u2" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="input-group">
+       <label>Ulangan 3</label><input type="number" id="thrips_u3" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="input-group">
+       <label>Ulangan 4</label><input type="number" id="thrips_u4" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="input-group">
+       <label>Ulangan 5</label><input type="number" id="thrips_u5" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="input-group">
+       <label>Ulangan 6</label><input type="number" id="thrips_u6" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="input-group">
+       <label>Ulangan 7</label><input type="number" id="thrips_u7" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="formula-hint">💡 Formula: (U1+U2+U3+U4+U5+U6+U7) ÷ 700 tanaman</div>
+     </div>
     </div>
-
     <!-- 4. ULAT -->
     <div class="pest-card">
-      <div class="pest-header"><span class="pest-name">🐛 ULAT</span><span class="pest-score" id="ulat_score">0,00%</span></div>
-      <div class="pest-content">
-        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="ulat_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     <div class="pest-header">
+      <span class="pest-name">🐛 ULAT</span><span class="pest-score" id="ulat_score">0,00%</span>
+     </div>
+     <div class="pest-content">
+      <div class="input-group">
+       <label>Tanaman terserang</label><input type="number" id="ulat_affected" min="0" placeholder="0" oninput="calculateAll()">
       </div>
+      <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     </div>
     </div>
-
     <!-- 5. TIKUS -->
     <div class="pest-card">
-      <div class="pest-header"><span class="pest-name">🐭 TIKUS</span><span class="pest-score" id="tikus_score">0,00%</span></div>
-      <div class="pest-content">
-        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="tikus_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     <div class="pest-header">
+      <span class="pest-name">🐭 TIKUS</span><span class="pest-score" id="tikus_score">0,00%</span>
+     </div>
+     <div class="pest-content">
+      <div class="input-group">
+       <label>Tanaman terserang</label><input type="number" id="tikus_affected" min="0" placeholder="0" oninput="calculateAll()">
       </div>
+      <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     </div>
     </div>
-
     <!-- 6. SIPUT -->
     <div class="pest-card">
-      <div class="pest-header"><span class="pest-name">🐌 SIPUT</span><span class="pest-score" id="siput_score">0,00%</span></div>
-      <div class="pest-content">
-        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="siput_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     <div class="pest-header">
+      <span class="pest-name">🐌 SIPUT</span><span class="pest-score" id="siput_score">0,00%</span>
+     </div>
+     <div class="pest-content">
+      <div class="input-group">
+       <label>Tanaman terserang</label><input type="number" id="siput_affected" min="0" placeholder="0" oninput="calculateAll()">
       </div>
+      <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     </div>
     </div>
-
     <!-- 7. KUTU KEBUL -->
     <div class="pest-card">
-      <div class="pest-header"><span class="pest-name">🪰 KUTU KEBUL</span><span class="pest-score" id="kutu_score">0,00%</span></div>
-      <div class="pest-content">
-        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="kutu_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     <div class="pest-header">
+      <span class="pest-name">🪰 KUTU KEBUL</span><span class="pest-score" id="kutu_score">0,00%</span>
+     </div>
+     <div class="pest-content">
+      <div class="input-group">
+       <label>Tanaman terserang</label><input type="number" id="kutu_affected" min="0" placeholder="0" oninput="calculateAll()">
       </div>
+      <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     </div>
     </div>
-
     <!-- 8. MILDEW -->
     <div class="pest-card">
-      <div class="pest-header"><span class="pest-name">🍄 MILDEW</span><span class="pest-score" id="mildew_score">0,00%</span></div>
-      <div class="pest-content">
-        <div class="input-group"><label>Score 1 (×1)</label><input type="number" id="mildew_t1" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Score 2 (×2)</label><input type="number" id="mildew_t2" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Score 3 (×3)</label><input type="number" id="mildew_t3" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="input-group"><label>Score 4 (×4)</label><input type="number" id="mildew_t4" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="formula-hint">💡 Formula: (S1×1 + S2×2 + S3×3 + S4×4) ÷ (sampel × 4)</div>
+     <div class="pest-header">
+      <span class="pest-name">🍄 MILDEW</span><span class="pest-score" id="mildew_score">0,00%</span>
+     </div>
+     <div class="pest-content">
+      <div class="input-group">
+       <label>Score 1 (×1)</label><input type="number" id="mildew_t1" min="0" placeholder="0" oninput="calculateAll()">
       </div>
+      <div class="input-group">
+       <label>Score 2 (×2)</label><input type="number" id="mildew_t2" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="input-group">
+       <label>Score 3 (×3)</label><input type="number" id="mildew_t3" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="input-group">
+       <label>Score 4 (×4)</label><input type="number" id="mildew_t4" min="0" placeholder="0" oninput="calculateAll()">
+      </div>
+      <div class="formula-hint">💡 Formula: (S1×1 + S2×2 + S3×3 + S4×4) ÷ (sampel × 4)</div>
+     </div>
     </div>
-
     <!-- 9. BOTRYTIS -->
     <div class="pest-card">
-      <div class="pest-header"><span class="pest-name">🍂 BOTRYTIS</span><span class="pest-score" id="botrytis_score">0,00%</span></div>
-      <div class="pest-content">
-        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="botrytis_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     <div class="pest-header">
+      <span class="pest-name">🍂 BOTRYTIS</span><span class="pest-score" id="botrytis_score">0,00%</span>
+     </div>
+     <div class="pest-content">
+      <div class="input-group">
+       <label>Tanaman terserang</label><input type="number" id="botrytis_affected" min="0" placeholder="0" oninput="calculateAll()">
       </div>
+      <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     </div>
     </div>
-
     <!-- 10. ANTRAKNOSA -->
     <div class="pest-card">
-      <div class="pest-header"><span class="pest-name">🍁 ANTRAKNOSA</span><span class="pest-score" id="antrak_score">0,00%</span></div>
-      <div class="pest-content">
-        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="antrak_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     <div class="pest-header">
+      <span class="pest-name">🍁 ANTRAKNOSA</span><span class="pest-score" id="antrak_score">0,00%</span>
+     </div>
+     <div class="pest-content">
+      <div class="input-group">
+       <label>Tanaman terserang</label><input type="number" id="antrak_affected" min="0" placeholder="0" oninput="calculateAll()">
       </div>
+      <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     </div>
     </div>
-
     <!-- 11. LAYU MATI -->
     <div class="pest-card">
-      <div class="pest-header"><span class="pest-name">🥀 LAYU MATI</span><span class="pest-score" id="layu_score">0,00%</span></div>
-      <div class="pest-content">
-        <div class="input-group"><label>Tanaman terserang</label><input type="number" id="layu_affected" min="0" placeholder="0" oninput="calculateAll()"></div>
-        <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     <div class="pest-header">
+      <span class="pest-name">🥀 LAYU MATI</span><span class="pest-score" id="layu_score">0,00%</span>
+     </div>
+     <div class="pest-content">
+      <div class="input-group">
+       <label>Tanaman terserang</label><input type="number" id="layu_affected" min="0" placeholder="0" oninput="calculateAll()">
       </div>
+      <div class="formula-hint">💡 Insidensi = tanaman terserang ÷ sampel</div>
+     </div>
     </div>
-  </div>
-
-  <!-- TAB 2: DASHBOARD TREND -->
-  <div id="tab-dashboard" class="tab-content" style="display:none;">
+   </div>
+   <!-- TAB 2: DASHBOARD TREND -->
+   <div id="tab-dashboard" class="tab-content" style="display:none;">
     <div class="filter-bar">
-      <div class="filter-group">
-        <label>Dari Tanggal</label>
-        <input type="date" id="fromDate" onchange="renderDashboard()">
+     <div class="filter-group">
+      <label>Dari Tanggal</label> <input type="date" id="fromDate" onchange="renderDashboard()">
+     </div>
+     <div class="filter-group">
+      <label>Sampai Tanggal</label> <input type="date" id="toDate" onchange="renderDashboard()">
+     </div>
+     <!-- LOKASI CUSTOM MULTI-SELECT DROPDOWN -->
+     <div class="filter-group custom-multiselect" id="locationMultiselect">
+      <label>Lokasi (Pilih Multi)</label>
+      <div class="custom-select-trigger" onclick="toggleLocationDropdown(event)">
+       <span id="locationSelectText">Semua Lokasi Terpilih</span> <span class="arrow">▼</span>
       </div>
-      <div class="filter-group">
-        <label>Sampai Tanggal</label>
-        <input type="date" id="toDate" onchange="renderDashboard()">
+      <div class="custom-dropdown-panel" onclick="event.stopPropagation()">
+       <div class="dropdown-actions">
+        <button type="button" class="btn-action-link" onclick="selectAllLocations(true)">Pilih Semua</button>
+        <button type="button" class="btn-action-link" onclick="selectAllLocations(false)">Hapus Semua</button>
+       </div>
+       <div class="dropdown-list" id="locationCheckboxList">
+        <!-- Checkbox diisi via JS -->
+       </div>
       </div>
-      
-      <!-- LOKASI CUSTOM MULTI-SELECT DROPDOWN -->
-      <div class="filter-group custom-multiselect" id="locationMultiselect">
-        <label>Lokasi (Pilih Multi)</label>
-        <div class="custom-select-trigger" onclick="toggleLocationDropdown(event)">
-          <span id="locationSelectText">Semua Lokasi Terpilih</span>
-          <span class="arrow">▼</span>
-        </div>
-        <div class="custom-dropdown-panel" onclick="event.stopPropagation()">
-          <div class="dropdown-actions">
-            <button type="button" class="btn-action-link" onclick="selectAllLocations(true)">Pilih Semua</button>
-            <button type="button" class="btn-action-link" onclick="selectAllLocations(false)">Hapus Semua</button>
-          </div>
-          <div class="dropdown-list" id="locationCheckboxList">
-            <!-- Checkbox diisi via JS -->
-          </div>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <label>Grafik Tren</label>
-        <select id="pestSelect" onchange="renderDashboard()">
-          <optgroup label="HAMA">
-            <option value="spidermites">🕷️ Spidermites</option>
-            <option value="aphids">🦟 Aphids</option>
-            <option value="thrips">🪰 Thrips</option>
-            <option value="ulat">🐛 Ulat</option>
-            <option value="tikus">🐭 Tikus</option>
-            <option value="siput">🐌 Siput</option>
-            <option value="kutu">🪰 Kutu Kebul</option>
-          </optgroup>
-          <optgroup label="PENYAKIT">
-            <option value="mildew">🍄 Mildew</option>
-            <option value="botrytis">🍂 Botrytis</option>
-            <option value="antrak">🍁 Antraknosa</option>
-            <option value="layu">🥀 Layu Mati</option>
-          </optgroup>
-        </select>
-      </div>
+     </div>
+     <div class="filter-group">
+      <label>Grafik Tren</label> <select id="pestSelect" onchange="renderDashboard()"> <optgroup label="HAMA"> <option value="spidermites">🕷️ Spidermites</option> <option value="aphids">🦟 Aphids</option> <option value="thrips">🪰 Thrips</option> <option value="ulat">🐛 Ulat</option> <option value="tikus">🐭 Tikus</option> <option value="siput">🐌 Siput</option> <option value="kutu">🪰 Kutu Kebul</option> </optgroup> <optgroup label="PENYAKIT"> <option value="mildew">🍄 Mildew</option> <option value="botrytis">🍂 Botrytis</option> <option value="antrak">🍁 Antraknosa</option> <option value="layu">🥀 Layu Mati</option> </optgroup> </select>
+     </div>
     </div>
-
     <!-- Ringkasan HAMA -->
     <div class="section-title">🐛 Ringkasan HAMA</div>
     <div class="summary-grid" id="summaryHama"></div>
-
     <!-- Ringkasan PENYAKIT -->
     <div class="section-title disease">🍄 Ringkasan PENYAKIT</div>
     <div class="summary-grid" id="summaryPenyakit"></div>
-
     <div class="chart-card">
-      <div class="chart-container"><canvas id="trendChart"></canvas></div>
+     <div class="chart-container">
+      <canvas id="trendChart"></canvas>
+     </div>
     </div>
-  </div>
-
-  <!-- TAB 3: RIWAYAT -->
-  <div id="tab-history" class="tab-content" style="display:none;">
+   </div>
+   <!-- TAB 3: RIWAYAT -->
+   <div id="tab-history" class="tab-content" style="display:none;">
     <div style="margin-bottom:12px; display:flex; justify-content:flex-end;">
-      <button class="btn-bar btn-secondary" onclick="fetchDashboardData()">🔄 Sync / Refresh Data</button>
+     <button class="btn-bar btn-secondary" onclick="fetchDashboardData()">🔄 Sync / Refresh Data</button>
     </div>
     <table class="history-table">
-      <thead><tr><th>Tanggal</th><th>Lokasi</th><th>Aksi</th></tr></thead>
-      <tbody id="historyTableBody"><tr><td colspan="3" style="text-align:center;">Belum ada data</td></tr></tbody>
+     <thead>
+      <tr>
+       <th>Tanggal</th>
+       <th>Lokasi</th>
+       <th>Aksi</th>
+      </tr>
+     </thead>
+     <tbody id="historyTableBody">
+      <tr>
+       <td colspan="3" style="text-align:center;">Belum ada data</td>
+      </tr>
+     </tbody>
     </table>
+   </div>
   </div>
-</div>
-
-<div class="button-bar" id="formActionBar">
-  <button class="btn-bar btn-secondary" onclick="clearForm()">🗑️ Bersihkan</button>
-  <button class="btn-bar btn-danger" onclick="deleteFromSheets()">❌ Hapus</button>
-  <button class="btn-bar btn-primary" onclick="submitForm()">✓ Simpan</button>
-</div>
-
-<script>
+  <div class="button-bar" id="formActionBar">
+   <button class="btn-bar btn-secondary" onclick="clearForm()">🗑️ Bersihkan</button>
+   <button class="btn-bar btn-danger" onclick="deleteFromSheets()">❌ Hapus</button>
+   <button class="btn-bar btn-primary" onclick="submitForm()">✓ Simpan</button>
+  </div>
+  <script>
   const TODAY = new Date().toISOString().split('T')[0];
   const CONFIG = {
     APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw6INkIU6CuITJnHOAxC72VaKoqwLqqrea1bd5kbiPOHcR-lthbDw_L465XqS2uFBGvbQ/exec'
   };
-
+ 
   let scriptUrl = localStorage.getItem('hpt_script_url') || CONFIG.APPS_SCRIPT_URL || '';
   let isAuthenticated = JSON.parse(localStorage.getItem('hpt_auth') || 'false');
   let hptData = {};
   let trendChartInstance = null;
-
+ 
   // State untuk Lokasi Multi-Select
   let availableLocations = ["GH1-B1", "GH1-B2", "GH1-B3", "GH2-B1", "GH2-B2", "GH2-B3"];
   let selectedLocations = [...availableLocations];
-
+ 
   // ====== DAFTAR LENGKAP 11 OPT (7 hama + 4 penyakit) ======
   const pestConfig = {
     // ----- HAMA -----
@@ -492,7 +528,7 @@
     antrak:      { name: 'Antraknosa',  icon: '🍁', group: 'penyakit' },
     layu:        { name: 'Layu Mati',   icon: '🥀', group: 'penyakit' }
   };
-
+ 
   window.onload = function() {
     initForm();
     document.getElementById('fromDate').value = '2026-09-01';
@@ -500,7 +536,7 @@
     updateLocationListUI();
     fetchDashboardData();
   };
-
+ 
   // Tutup dropdown lokasi jika klik di luar area
   document.addEventListener('click', function(e) {
     const ms = document.getElementById('locationMultiselect');
@@ -508,27 +544,27 @@
       ms.classList.remove('open');
     }
   });
-
+ 
   function toggleLocationDropdown(e) {
     e.stopPropagation();
     const ms = document.getElementById('locationMultiselect');
     ms.classList.toggle('open');
   }
-
+ 
   function updateLocationListUI() {
     const container = document.getElementById('locationCheckboxList');
     container.innerHTML = '';
-
+ 
     if (availableLocations.length === 0) {
       container.innerHTML = '<div style="font-size:12px; color:#888; padding:4px;">Tidak ada lokasi</div>';
       updateLocationTriggerText();
       return;
     }
-
+ 
     availableLocations.forEach(loc => {
       const label = document.createElement('label');
       label.className = 'dropdown-item';
-
+ 
       const chk = document.createElement('input');
       chk.type = 'checkbox';
       chk.value = loc;
@@ -542,18 +578,18 @@
         updateLocationTriggerText();
         renderDashboard();
       };
-
+ 
       const span = document.createElement('span');
       span.textContent = loc;
-
+ 
       label.appendChild(chk);
       label.appendChild(span);
       container.appendChild(label);
     });
-
+ 
     updateLocationTriggerText();
   }
-
+ 
   function updateLocationTriggerText() {
     const txtElem = document.getElementById('locationSelectText');
     if (availableLocations.length === 0) {
@@ -568,7 +604,7 @@
       txtElem.textContent = `${selectedLocations.length} Lokasi Terpilih`;
     }
   }
-
+ 
   function selectAllLocations(select) {
     if (select) {
       selectedLocations = [...availableLocations];
@@ -578,7 +614,7 @@
     updateLocationListUI();
     renderDashboard();
   }
-
+ 
   // ===== TOMBOL STEP (+) DAN (-) =====
   function enhanceNumberInputs() {
     const numberInputs = document.querySelectorAll('.pest-card input[type="number"]');
@@ -586,16 +622,16 @@
       if (input.parentElement.classList.contains('number-input-wrapper')) return;
       const wrapper = document.createElement('div');
       wrapper.className = 'number-input-wrapper';
-
+ 
       const minusBtn = document.createElement('button');
       minusBtn.type = 'button'; minusBtn.className = 'btn-step'; minusBtn.textContent = '−';
-
+ 
       const plusBtn = document.createElement('button');
       plusBtn.type = 'button'; plusBtn.className = 'btn-step'; plusBtn.textContent = '+';
-
+ 
       input.parentNode.insertBefore(wrapper, input);
       wrapper.appendChild(minusBtn); wrapper.appendChild(input); wrapper.appendChild(plusBtn);
-
+ 
       minusBtn.addEventListener('click', () => {
         let val = parseFloat(input.value) || 0;
         if (val > 0) { input.value = val - 1; calculateAll(); }
@@ -606,7 +642,7 @@
       });
     });
   }
-
+ 
   function initForm() {
     enhanceNumberInputs();
     const tglInput = document.getElementById('tanggal');
@@ -616,11 +652,11 @@
     updateAuthStatus();
     calculateAll();
   }
-
+ 
   function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-
+ 
     if (tab === 'form') {
       document.getElementById('tab-form').style.display = 'block';
       document.getElementById('formActionBar').style.display = 'grid';
@@ -637,7 +673,7 @@
       renderHistoryTable();
     }
   }
-
+ 
   function showToast(id, customMsg) {
     const msg = document.getElementById(id);
     if (!msg) return;
@@ -646,11 +682,11 @@
     clearTimeout(msg._t);
     msg._t = setTimeout(() => msg.classList.remove('show'), 2500);
   }
-
+ 
   function isFutureDate(dateStr) {
     return dateStr && new Date(dateStr) > new Date(TODAY + 'T23:59:59');
   }
-
+ 
   function validateDate() {
     const tgl = document.getElementById('tanggal').value;
     const warning = document.getElementById('warningMsg');
@@ -661,39 +697,39 @@
       warning.classList.remove('show');
     }
   }
-
+ 
   function calculateAll() {
     const sampel = parseFloat(document.getElementById('sampel').value) || 360;
     const fmt = (val) => val.toFixed(2).replace('.', ',') + '%';
-
+ 
     const s1 = parseFloat(document.getElementById('spider_t1').value) || 0;
     const s2 = parseFloat(document.getElementById('spider_t2').value) || 0;
     const s3 = parseFloat(document.getElementById('spider_t3').value) || 0;
     const s4 = parseFloat(document.getElementById('spider_t4').value) || 0;
     const s5 = parseFloat(document.getElementById('spider_t5').value) || 0;
     document.getElementById('spider_score').textContent = fmt(((s1*1 + s2*2 + s3*3 + s4*4 + s5*5) / (sampel * 5)) * 100);
-
+ 
     const a1 = parseFloat(document.getElementById('aphids_t1').value) || 0;
     const a2 = parseFloat(document.getElementById('aphids_t2').value) || 0;
     const a3 = parseFloat(document.getElementById('aphids_t3').value) || 0;
     document.getElementById('aphids_score').textContent = fmt(((a1*1 + a2*2 + a3*3) / (sampel * 5)) * 100);
-
+ 
     let thripsTot = 0;
     for (let i = 1; i <= 7; i++) thripsTot += parseFloat(document.getElementById('thrips_u' + i).value) || 0;
     document.getElementById('thrips_score').textContent = fmt((thripsTot / 700) * 100);
-
+ 
     ['ulat','tikus','siput','kutu','botrytis','antrak','layu'].forEach(key => {
       const val = parseFloat(document.getElementById(key + '_affected').value) || 0;
       document.getElementById(key + '_score').textContent = fmt((val / sampel) * 100);
     });
-
+ 
     const m1 = parseFloat(document.getElementById('mildew_t1').value) || 0;
     const m2 = parseFloat(document.getElementById('mildew_t2').value) || 0;
     const m3 = parseFloat(document.getElementById('mildew_t3').value) || 0;
     const m4 = parseFloat(document.getElementById('mildew_t4').value) || 0;
     document.getElementById('mildew_score').textContent = fmt(((m1*1 + m2*2 + m3*3 + m4*4) / (sampel * 4)) * 100);
   }
-
+ 
   function getFormData() {
     const ids = ['tanggal','lokasi','sampel','spider_t1','spider_t2','spider_t3','spider_t4','spider_t5',
       'aphids_t1','aphids_t2','aphids_t3','thrips_u1','thrips_u2','thrips_u3','thrips_u4','thrips_u5','thrips_u6','thrips_u7',
@@ -703,7 +739,7 @@
     ids.forEach(id => { data[id] = document.getElementById(id).value; });
     return data;
   }
-
+ 
   function setFormData(data) {
     Object.keys(data).forEach(k => {
       const elem = document.getElementById(k);
@@ -711,13 +747,13 @@
     });
     calculateAll();
   }
-
+ 
   function clearForm(confirmUser = true) {
     if (confirmUser && !confirm('Kosongkan form input?')) return;
     document.querySelectorAll('.pest-card input[type="number"]').forEach(i => i.value = '');
     calculateAll();
   }
-
+ 
   function updateAuthStatus() {
     const s = document.getElementById('authStatus');
     const a = document.getElementById('authBtn');
@@ -737,7 +773,7 @@
       p.style.display = l.style.display = 'none';
     }
   }
-
+ 
   function handleAuthClick() {
     if (isAuthenticated) {
       isAuthenticated = false;
@@ -756,12 +792,12 @@
     showToast('infoMsg', '✓ Tersambung ke Sheets');
     fetchDashboardData();
   }
-
+ 
   async function submitForm() {
     const data = getFormData();
     if (!data.tanggal || !data.lokasi) return alert('Pilih tanggal dan lokasi dulu!');
     localStorage.setItem('hpt_' + data.tanggal + '_' + data.lokasi, JSON.stringify(data));
-
+ 
     if (scriptUrl) {
       showToast('infoMsg', '☁️ Mengirim data...');
       try {
@@ -779,15 +815,15 @@
       showToast('successMsg', '✓ Tersimpan di browser (Lokal)');
     }
   }
-
+ 
   async function syncToSheets(silent) { return submitForm(); }
-
+ 
   async function deleteFromSheets() {
     const tgl = document.getElementById('tanggal').value;
     const lok = document.getElementById('lokasi').value;
     if (!tgl || !lok) return alert('Pilih tanggal dan lokasi!');
     if (!confirm(`Hapus data ${tgl} (${lok})?`)) return;
-
+ 
     localStorage.removeItem('hpt_' + tgl + '_' + lok);
     if (scriptUrl) {
       fetch(scriptUrl, {
@@ -799,24 +835,24 @@
     showToast('deleteMsg', '✓ Data dihapus');
     setTimeout(fetchDashboardData, 800);
   }
-
+ 
   async function fetchDashboardData() {
     if (!scriptUrl) return;
     try {
       const res = await fetch(scriptUrl + '?action=list');
       hptData = await res.json();
-
+ 
       const fetchedLocs = Object.keys(hptData);
       if (fetchedLocs.length > 0) {
         availableLocations = fetchedLocs;
       }
-
+ 
       // Pastikan lokasi terpilih sesuai dengan daftar lokasi yang ada
       selectedLocations = selectedLocations.filter(l => availableLocations.includes(l));
       if (selectedLocations.length === 0) {
         selectedLocations = [...availableLocations];
       }
-
+ 
       updateLocationListUI();
       renderDashboard();
       renderHistoryTable();
@@ -824,23 +860,23 @@
       console.log("Offline / Fetch error:", e);
     }
   }
-
+ 
   // ====== KARTU RINGKASAN (dipisah HAMA vs PENYAKIT) ======
   function buildSummaryCards(aggregatedData, group) {
     let html = '';
     Object.keys(pestConfig).forEach(key => {
       const cfg = pestConfig[key];
       if (cfg.group !== group) return;
-
+ 
       const vals = aggregatedData.map(d => d[key] || 0);
       const avg = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
       const max = vals.length ? Math.max(...vals) : 0;
-
+ 
       const pct = avg * 100;
       let valColor = 'var(--success)';
       if (pct >= 5) valColor = 'var(--danger)';
       else if (pct >= 3) valColor = '#e65100';
-
+ 
       html += `
         <div class="summary-card pest-${key}">
           <div class="header">${cfg.icon} ${cfg.name}</div>
@@ -850,15 +886,15 @@
     });
     return html || '<div style="font-size:12px;color:#999;padding:8px;">Belum ada data</div>';
   }
-
+ 
   function renderDashboard() {
     const fromDate = document.getElementById('fromDate').value;
     const toDate = document.getElementById('toDate').value;
     const selectedPest = document.getElementById('pestSelect').value || 'spidermites';
-
+ 
     // 1. Ambil daftar lokasi yang dipilih dari state custom multi-select
     const targetLocs = selectedLocations.length > 0 ? selectedLocations : availableLocations;
-
+ 
     // 2. Kumpulkan seluruh data agregat untuk Summary Card
     const aggregatedData = [];
     targetLocs.forEach(loc => {
@@ -868,21 +904,21 @@
         }
       });
     });
-
+ 
     document.getElementById('summaryHama').innerHTML     = buildSummaryCards(aggregatedData, 'hama');
     document.getElementById('summaryPenyakit').innerHTML = buildSummaryCards(aggregatedData, 'penyakit');
-
+ 
     // 3. Ambil daftar tanggal unik yang terurut
     const allDatesSet = new Set();
     aggregatedData.forEach(item => allDatesSet.add(item.date));
     const sortedDates = Array.from(allDatesSet).sort();
-
+ 
     // Palet warna untuk garis tiap lokasi
     const colorPalette = [
       '#378add', '#e65100', '#2e7d32', '#7c3aed', 
       '#db2777', '#0891b2', '#ca8a04', '#dc2626'
     ];
-
+ 
     // 4. Buat Multi-Dataset (1 Garis per Lokasi)
     const datasets = targetLocs.map((loc, idx) => {
       const locColor = colorPalette[idx % colorPalette.length];
@@ -893,9 +929,9 @@
           locDataMap[item.date] = (item[selectedPest] || 0) * 100;
         }
       });
-
+ 
       const dataValues = sortedDates.map(d => locDataMap[d] !== undefined ? locDataMap[d] : null);
-
+ 
       return {
         label: loc,                  // Nama lokasi (GH1-B1, GH1-B2, dst.)
         data: dataValues,            // Data persentase
@@ -906,17 +942,17 @@
         spanGaps: true               // Sambungkan garis jika ada tanggal kosong
       };
     });
-
+ 
     // 5. Render grafik dengan multi-dataset
     renderChart(sortedDates, datasets, pestConfig[selectedPest]);
   }
-
+ 
   function renderChart(dates, datasets, cfg) {
     const ctx = document.getElementById('trendChart').getContext('2d');
     if (trendChartInstance) trendChartInstance.destroy();
-
+ 
     const labels = dates.map(d => d.slice(5));
-
+ 
     trendChartInstance = new Chart(ctx, {
       type: 'line',
       data: {
@@ -946,7 +982,7 @@
       }
     });
   }
-
+ 
   function renderHistoryTable() {
     const tbody = document.getElementById('historyTableBody');
     let rowsHtml = '';
@@ -964,7 +1000,7 @@
     });
     tbody.innerHTML = rowsHtml || '<tr><td colspan="3" style="text-align:center;">Tidak ada riwayat</td></tr>';
   }
-
+ 
   async function deleteRecord(tgl, lok) {
     if (!confirm(`Hapus data ${tgl} (${lok})?`)) return;
     await fetch(scriptUrl, {
@@ -974,14 +1010,14 @@
     showToast('deleteMsg', 'Data dihapus!');
     setTimeout(fetchDashboardData, 800);
   }
-
+ 
   async function editRecord(tanggal, lokasi) {
     if (!scriptUrl) return showToast('warningMsg', 'Belum connect ke Sheets');
     try {
       const res = await fetch(scriptUrl + '?action=get&tanggal=' + encodeURIComponent(tanggal) + '&lokasi=' + encodeURIComponent(lokasi));
       const data = await res.json();
       if (data.status === 'error') return showToast('warningMsg', data.message);
-
+ 
       switchTab('form');
       setFormData(data);
       document.getElementById('tanggal').value = tanggal;
@@ -992,6 +1028,5 @@
     }
   }
 </script>
-
-</body>
+ </body>
 </html>
