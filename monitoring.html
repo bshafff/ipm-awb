@@ -445,6 +445,25 @@
 
   <!-- TAB 3: RIWAYAT -->
   <div id="tab-history" class="tab-content" style="display:none;">
+    
+    <!-- FILTER BARU UNTUK RIWAYAT -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>Dari Tanggal</label>
+        <input type="date" id="historyFromDate" onchange="renderHistoryTable()">
+      </div>
+      <div class="filter-group">
+        <label>Sampai Tanggal</label>
+        <input type="date" id="historyToDate" onchange="renderHistoryTable()">
+      </div>
+      <div class="filter-group">
+        <label>Lokasi</label>
+        <select id="historyLocationFilter" onchange="renderHistoryTable()">
+          <option value="">Semua Lokasi</option>
+        </select>
+      </div>
+    </div>
+
     <div style="margin-bottom:12px; display:flex; justify-content:flex-end;">
       <button class="btn-bar btn-secondary" onclick="fetchDashboardData()">🔄 Sync / Refresh Data</button>
     </div>
@@ -497,7 +516,13 @@
     initForm();
     document.getElementById('fromDate').value = '2026-09-01';
     document.getElementById('toDate').value = TODAY;
+    // Default filter riwayat: dari awal bulan ini sampai hari ini
+    const firstDayOfMonth = TODAY.substring(0, 8) + '01';
+    document.getElementById('historyFromDate').value = firstDayOfMonth;
+    document.getElementById('historyToDate').value = TODAY;
+    
     updateLocationListUI();
+    updateHistoryLocationOptions();
     fetchDashboardData();
   };
 
@@ -566,6 +591,23 @@
       txtElem.textContent = selectedLocations[0];
     } else {
       txtElem.textContent = `${selectedLocations.length} Lokasi Terpilih`;
+    }
+  }
+
+  // Update dropdown lokasi di tab Riwayat
+  function updateHistoryLocationOptions() {
+    const select = document.getElementById('historyLocationFilter');
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">Semua Lokasi</option>';
+    availableLocations.forEach(loc => {
+      const opt = document.createElement('option');
+      opt.value = loc;
+      opt.textContent = loc;
+      select.appendChild(opt);
+    });
+    // Kembalikan nilai yang tadi dipilih jika masih ada
+    if (availableLocations.includes(currentVal)) {
+      select.value = currentVal;
     }
   }
 
@@ -818,6 +860,7 @@
       }
 
       updateLocationListUI();
+      updateHistoryLocationOptions(); // Update dropdown di riwayat
       renderDashboard();
       renderHistoryTable();
     } catch (e) {
@@ -947,22 +990,52 @@
     });
   }
 
+  // ====== RIWAYAT DENGAN FILTER DAN SORTING TERBARU ======
   function renderHistoryTable() {
     const tbody = document.getElementById('historyTableBody');
-    let rowsHtml = '';
+    
+    // Ambil nilai filter
+    const fromDate = document.getElementById('historyFromDate').value;
+    const toDate = document.getElementById('historyToDate').value;
+    const locFilter = document.getElementById('historyLocationFilter').value;
+
+    // 1. Ratakan semua data dari berbagai lokasi menjadi satu array
+    let flatData = [];
     Object.keys(hptData).forEach(loc => {
       hptData[loc].forEach(item => {
-        rowsHtml += `<tr>
-          <td><b>${item.date}</b></td>
-          <td>${loc}</td>
-          <td>
-            <button style="padding:4px 8px;border-radius:6px;background:#e0f2fe;border:none;color:#0369a1;font-weight:bold;cursor:pointer;margin-right:4px;" onclick="editRecord('${item.date}','${loc}')">✏️ Edit</button>
-            <button style="padding:4px 8px;border-radius:6px;background:#fee2e2;border:none;color:#dc2626;font-weight:bold;cursor:pointer;" onclick="deleteRecord('${item.date}','${loc}')">🗑️ Hapus</button>
-          </td>
-        </tr>`;
+        flatData.push({ ...item, lokasi: loc });
       });
     });
-    tbody.innerHTML = rowsHtml || '<tr><td colspan="3" style="text-align:center;">Tidak ada riwayat</td></tr>';
+
+    // 2. Filter data berdasarkan input pengguna
+    let filteredData = flatData.filter(item => {
+      const matchDate = (!fromDate || item.date >= fromDate) && (!toDate || item.date <= toDate);
+      const matchLoc = !locFilter || item.lokasi === locFilter;
+      return matchDate && matchLoc;
+    });
+
+    // 3. Urutkan berdasarkan Tanggal Terbaru (Descending), lalu berdasarkan Lokasi
+    filteredData.sort((a, b) => {
+      // b.date dibandingkan dengan a.date untuk Descending (terbaru di atas)
+      if (a.date !== b.date) return b.date.localeCompare(a.date);
+      // Jika tanggal sama, urutkan berdasarkan lokasi
+      return a.lokasi.localeCompare(b.lokasi);
+    });
+
+    // 4. Render ke tabel
+    let rowsHtml = '';
+    filteredData.forEach(item => {
+      rowsHtml += `<tr>
+        <td><b>${item.date}</b></td>
+        <td>${item.lokasi}</td>
+        <td>
+          <button style="padding:4px 8px;border-radius:6px;background:#e0f2fe;border:none;color:#0369a1;font-weight:bold;cursor:pointer;margin-right:4px;" onclick="editRecord('${item.date}','${item.lokasi}')">✏️ Edit</button>
+          <button style="padding:4px 8px;border-radius:6px;background:#fee2e2;border:none;color:#dc2626;font-weight:bold;cursor:pointer;" onclick="deleteRecord('${item.date}','${item.lokasi}')">🗑️ Hapus</button>
+        </td>
+      </tr>`;
+    });
+
+    tbody.innerHTML = rowsHtml || '<tr><td colspan="3" style="text-align:center;">Tidak ada riwayat yang cocok dengan filter</td></tr>';
   }
 
   async function deleteRecord(tgl, lok) {
