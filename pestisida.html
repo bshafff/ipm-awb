@@ -534,6 +534,7 @@ function addInventory() {
   document.getElementById('invKeterangan').value='';
   document.getElementById('invTanggal').valueAsDate=new Date();
   renderInventory();
+  renderPestisidaList();
 }
 
 function addUsage() {
@@ -546,10 +547,11 @@ function addUsage() {
 
   const tgl = document.getElementById('usageTanggal').value || new Date().toISOString().split('T')[0];
   const gh = document.getElementById('usageGH').value;
+  const usageId = Date.now();
 
-  // Catat data penggunaan harian
+  // 1. Catat data penggunaan harian
   dailyUsage.push({
-    id: Date.now(),
+    id: usageId,
     tanggal: tgl,
     gh: gh,
     jenisPenyemprotan: jenis,
@@ -563,10 +565,11 @@ function addUsage() {
   });
   localStorage.setItem('pestisida_usage', JSON.stringify(dailyUsage));
 
-  // OTOMATIS: Catat Mutasi Keluar ke Stok jika Buka Baru > 0
+  // 2. OTOMATIS: Catat Mutasi Keluar ke Stok jika Buka Baru > 0
   if (bukaVal > 0) {
     inventory.push({
-      id: Date.now() + 1,
+      id: usageId + 1,
+      refUsageId: usageId, // Menghubungkan mutasi ini dengan data penggunaan
       tanggal: tgl,
       nama: obat,
       jenis: 'Keluar',
@@ -581,23 +584,34 @@ function addUsage() {
     markDirty('usage');
   }
 
+  // Reset form input
   ['usageObat','usageJenis','usageKonsentrasi','usageAir','usageVolObat','usageSasaran','usageBuka','usageKeterangan'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('usageTanggal').valueAsDate=new Date();
 
   updateKategoriObat(); 
   renderUsage();
-  renderInventory(); // Refresh tabel stok jika ada mutasi keluar
+  renderInventory();
+  renderPestisidaList(); // Langsung perbarui angka di tab Daftar Pestisida!
+  showToast('✓ Penggunaan berhasil dicatat', 'ok');
 }
 
-function deleteItem(type,id) {
-  if(type==='inventory'){
-    inventory=inventory.filter(i=>i.id!==id);
-    localStorage.setItem('pestisida_inventory',JSON.stringify(inventory));
-    markDirty('inventory'); renderInventory();
+function deleteItem(type, id) {
+  if (type === 'inventory') {
+    inventory = inventory.filter(i => i.id !== id);
+    localStorage.setItem('pestisida_inventory', JSON.stringify(inventory));
+    markDirty('inventory');
+    renderInventory();
+    renderPestisidaList();
   } else {
-    dailyUsage=dailyUsage.filter(i=>i.id!==id);
-    localStorage.setItem('pestisida_usage',JSON.stringify(dailyUsage));
-    markDirty('usage'); renderUsage();
+    // Jika menghapus usage, hapus juga mutasi stok otomatis yang terhubung dengannya
+    dailyUsage = dailyUsage.filter(i => i.id !== id);
+    inventory = inventory.filter(i => i.refUsageId !== id);
+    localStorage.setItem('pestisida_usage', JSON.stringify(dailyUsage));
+    localStorage.setItem('pestisida_inventory', JSON.stringify(inventory));
+    markDirty('usage', 'inventory');
+    renderUsage();
+    renderInventory();
+    renderPestisidaList();
   }
 }
 
