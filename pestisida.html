@@ -549,7 +549,7 @@ function addUsage() {
   const gh = document.getElementById('usageGH').value;
   const usageId = Date.now();
 
-  // 1. Catat data penggunaan harian
+  // 1. Catat Penggunaan Harian
   dailyUsage.push({
     id: usageId,
     tanggal: tgl,
@@ -565,7 +565,7 @@ function addUsage() {
   });
   localStorage.setItem('pestisida_usage', JSON.stringify(dailyUsage));
 
-  // 2. OTOMATIS: Catat Mutasi Keluar ke Stok jika Buka Baru > 0
+  // 2. OTOMATIS: Catat Mutasi Keluar jika Buka Baru > 0
   if (bukaVal > 0) {
     inventory.push({
       id: usageId + 1,
@@ -575,7 +575,7 @@ function addUsage() {
       jenis: 'Keluar',
       jumlah: bukaVal,
       delta: -Math.abs(bukaVal),
-      keterangan: 'Auto', // Menggunakan teks "Auto"
+      keterangan: 'Auto',
       satuan: (getMaster(obat) || {}).satuan || ''
     });
     localStorage.setItem('pestisida_inventory', JSON.stringify(inventory));
@@ -584,7 +584,7 @@ function addUsage() {
     markDirty('usage');
   }
 
-  // Reset form input
+  // Reset form
   ['usageObat','usageJenis','usageKonsentrasi','usageAir','usageVolObat','usageSasaran','usageBuka','usageKeterangan'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('usageTanggal').valueAsDate=new Date();
 
@@ -603,8 +603,25 @@ function deleteItem(type, id) {
     renderInventory();
     renderPestisidaList();
   } else {
+    // Ambil data penggunaan yang akan dihapus untuk pencocokan cadangan (fallback)
+    const uItem = dailyUsage.find(i => i.id === id);
     dailyUsage = dailyUsage.filter(i => i.id !== id);
-    inventory = inventory.filter(i => i.refUsageId !== id);
+
+    if (uItem) {
+      // Hapus mutasi stok terkait: cocokkan via refUsageId ATAU kriteria (Nama + Tanggal + Jumlah + Auto)
+      inventory = inventory.filter(i => {
+        if (i.refUsageId && String(i.refUsageId) === String(id)) return false;
+        if (uItem.bukaObatBaru > 0 && 
+            i.nama === uItem.namaObat && 
+            i.tanggal === uItem.tanggal && 
+            Number(i.jumlah) === Number(uItem.bukaObatBaru) && 
+            (i.keterangan === 'Auto' || i.keterangan.indexOf('Auto') !== -1)) {
+          return false;
+        }
+        return true;
+      });
+    }
+
     localStorage.setItem('pestisida_usage', JSON.stringify(dailyUsage));
     localStorage.setItem('pestisida_inventory', JSON.stringify(inventory));
     markDirty('usage', 'inventory');
