@@ -569,13 +569,13 @@ function addUsage() {
   if (bukaVal > 0) {
     inventory.push({
       id: usageId + 1,
-      refUsageId: usageId, // Menghubungkan mutasi ini dengan data penggunaan
+      refUsageId: usageId,
       tanggal: tgl,
       nama: obat,
       jenis: 'Keluar',
       jumlah: bukaVal,
       delta: -Math.abs(bukaVal),
-      keterangan: 'Auto dari Penggunaan Harian (' + gh + ' - Buka Baru: ' + bukaVal + ')',
+      keterangan: 'Auto', // Menggunakan teks "Auto"
       satuan: (getMaster(obat) || {}).satuan || ''
     });
     localStorage.setItem('pestisida_inventory', JSON.stringify(inventory));
@@ -591,7 +591,7 @@ function addUsage() {
   updateKategoriObat(); 
   renderUsage();
   renderInventory();
-  renderPestisidaList(); // Langsung perbarui angka di tab Daftar Pestisida!
+  renderPestisidaList();
   showToast('✓ Penggunaan berhasil dicatat', 'ok');
 }
 
@@ -603,7 +603,6 @@ function deleteItem(type, id) {
     renderInventory();
     renderPestisidaList();
   } else {
-    // Jika menghapus usage, hapus juga mutasi stok otomatis yang terhubung dengannya
     dailyUsage = dailyUsage.filter(i => i.id !== id);
     inventory = inventory.filter(i => i.refUsageId !== id);
     localStorage.setItem('pestisida_usage', JSON.stringify(dailyUsage));
