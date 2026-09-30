@@ -312,18 +312,33 @@ function showToast(msg, type) {
 }
 
 function getMaster(n) { return pestisidaList.find(p => p.nama === n); }
-function getMutasiSorted() {
-  return inventory.slice().sort((a,b) => a.tanggal!==b.tanggal ? (a.tanggal<b.tanggal?-1:1) : a.id-b.id);
+
+function parseDateVal(dStr) {
+  if (!dStr) return 0;
+  const d = new Date(dStr);
+  return isNaN(d.getTime()) ? 0 : d.getTime();
 }
+
+function getMutasiSorted() {
+  return inventory.slice().sort((a,b) => {
+    const tA = parseDateVal(a.tanggal);
+    const tB = parseDateVal(b.tanggal);
+    if (tA !== tB) return tA - tB;
+    return a.id - b.id;
+  });
+}
+
 function getStokSekarang(n) {
   let s = parseFloat((getMaster(n)||{}).stokAwal)||0;
   getMutasiSorted().filter(t=>t.nama===n).forEach(t => { s += t.delta; });
   return s;
 }
+
 function markDirty() {
   for (let i=0;i<arguments.length;i++) if (dirty[arguments[i]]!==undefined) dirty[arguments[i]]=true;
   scheduleAutoSync();
 }
+
 function scheduleAutoSync() {
   if (!isAuthenticated || !scriptUrl) return;
   clearTimeout(autoSyncTimer);
@@ -352,6 +367,7 @@ function addPestisida() {
   document.getElementById('listStokAwal').value='';
   renderPestisidaList();
 }
+
 function deletePestisida(id) {
   const item = pestisidaList.find(p=>p.id===id); if (!item) return;
   const n = inventory.filter(t=>t.nama===item.nama).length;
@@ -363,6 +379,7 @@ function deletePestisida(id) {
   markDirty('list','inventory');
   renderPestisidaList();
 }
+
 function formatIsi(p) { return (p.isi===''||p.isi==null) ? '-' : (p.isi+' '+(p.satuan||'')); }
 
 function renderPestisidaList() {
@@ -398,6 +415,7 @@ function switchTab(tab, el) {
   else if (tab==='inventory') renderInventory();
   else renderUsage();
 }
+
 function updateKategoriObat() {
   const jenis=document.getElementById('usageJenis').value;
   const sel=document.getElementById('usageObat');
@@ -421,6 +439,7 @@ function updateAuthStatus() {
     p.style.display=l.style.display='none';
   }
 }
+
 function handleAuthClick() {
   if (isAuthenticated) {
     isAuthenticated=false; localStorage.setItem('pestisida_auth','false');
@@ -465,6 +484,7 @@ async function syncToSheets(force) {
     if(pendingSync){ pendingSync=false; setTimeout(()=>syncToSheets(false),600); }
   }
 }
+
 async function pullFromSheets(silent) {
   silent=!!silent;
   if(!scriptUrl){ if(!silent) alert('Belum connect'); return; }
@@ -515,29 +535,60 @@ function addInventory() {
   document.getElementById('invTanggal').valueAsDate=new Date();
   renderInventory();
 }
+
 function addUsage() {
-  const jenis=document.getElementById('usageJenis').value.trim();
-  const obat=document.getElementById('usageObat').value.trim();
+  const jenis = document.getElementById('usageJenis').value.trim();
+  const obat = document.getElementById('usageObat').value.trim();
+  const bukaVal = parseFloat(document.getElementById('usageBuka').value) || 0;
+
   if(!jenis) return alert('Pilih jenis');
   if(!obat) return alert('Pilih obat');
+
+  const tgl = document.getElementById('usageTanggal').value || new Date().toISOString().split('T')[0];
+  const gh = document.getElementById('usageGH').value;
+
+  // Catat data penggunaan harian
   dailyUsage.push({
-    id:Date.now(),
-    tanggal:document.getElementById('usageTanggal').value,
-    gh:document.getElementById('usageGH').value,
-    jenisPenyemprotan:jenis, namaObat:obat,
-    konsentrasi:parseFloat(document.getElementById('usageKonsentrasi').value)||0,
-    volAirBaku:parseFloat(document.getElementById('usageAir').value)||0,
-    volObat:parseFloat(document.getElementById('usageVolObat').value)||0,
-    sasaran:document.getElementById('usageSasaran').value,
-    bukaObatBaru:document.getElementById('usageBuka').value||0,
-    keterangan:document.getElementById('usageKeterangan').value||'-'
+    id: Date.now(),
+    tanggal: tgl,
+    gh: gh,
+    jenisPenyemprotan: jenis,
+    namaObat: obat,
+    konsentrasi: parseFloat(document.getElementById('usageKonsentrasi').value)||0,
+    volAirBaku: parseFloat(document.getElementById('usageAir').value)||0,
+    volObat: parseFloat(document.getElementById('usageVolObat').value)||0,
+    sasaran: document.getElementById('usageSasaran').value,
+    bukaObatBaru: bukaVal,
+    keterangan: document.getElementById('usageKeterangan').value || '-'
   });
-  localStorage.setItem('pestisida_usage',JSON.stringify(dailyUsage));
-  markDirty('usage');
+  localStorage.setItem('pestisida_usage', JSON.stringify(dailyUsage));
+
+  // OTOMATIS: Catat Mutasi Keluar ke Stok jika Buka Baru > 0
+  if (bukaVal > 0) {
+    inventory.push({
+      id: Date.now() + 1,
+      tanggal: tgl,
+      nama: obat,
+      jenis: 'Keluar',
+      jumlah: bukaVal,
+      delta: -Math.abs(bukaVal),
+      keterangan: 'Auto dari Penggunaan Harian (' + gh + ' - Buka Baru: ' + bukaVal + ')',
+      satuan: (getMaster(obat) || {}).satuan || ''
+    });
+    localStorage.setItem('pestisida_inventory', JSON.stringify(inventory));
+    markDirty('usage', 'inventory');
+  } else {
+    markDirty('usage');
+  }
+
   ['usageObat','usageJenis','usageKonsentrasi','usageAir','usageVolObat','usageSasaran','usageBuka','usageKeterangan'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('usageTanggal').valueAsDate=new Date();
-  updateKategoriObat(); renderUsage();
+
+  updateKategoriObat(); 
+  renderUsage();
+  renderInventory(); // Refresh tabel stok jika ada mutasi keluar
 }
+
 function deleteItem(type,id) {
   if(type==='inventory'){
     inventory=inventory.filter(i=>i.id!==id);
@@ -567,6 +618,7 @@ function renderInventory() {
     '<th>Tgl</th><th>Nama</th><th class="tc">Jenis</th><th class="tc">Jml</th><th class="tc">Sat</th><th class="tc">Setelah</th><th>Ket</th><th class="tc">Aksi</th>'+
     '</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>';
 }
+
 function renderUsage() {
   if(!dailyUsage.length){ document.getElementById('usageContent').innerHTML='<div class="empty">Belum ada penggunaan.</div>'; return; }
   document.getElementById('usageContent').innerHTML='<div class="table-wrap"><table style="font-size:12px"><thead><tr>'+
