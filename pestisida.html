@@ -113,6 +113,7 @@
     .stok { display: inline-block; padding: 3px 10px; border-radius: 10px; font-weight: 700; font-size: 0.8125rem; background: #d1fae5; color: #065f46; }
     .stok.minus { background: #fee2e2; color: #b91c1c; }
     .stok.nol { background: #f3f4f6; color: #6b7280; }
+    .total { display: inline-block; padding: 3px 10px; border-radius: 10px; font-weight: 600; font-size: 0.8125rem; background: #eef2ff; color: #3730a3; }
     .empty { padding: 2rem; text-align: center; color: #999; font-size: 0.875rem; background: #fafafa; border-radius: 12px; }
     .alert {
       padding: 0.75rem; border-radius: 10px; font-size: 0.75rem;
@@ -175,13 +176,13 @@
           <option>ML</option><option>Liter</option><option>Gr</option>
           <option>Kg</option><option>Botol</option><option>Galon</option><option>Bungkus</option>
         </select>
-        <input type="number" id="listStokAwal" placeholder="Stok Awal" min="0" step="0.1">
+        <input type="number" id="listStokAwal" placeholder="Stok Awal (jika ada)" min="0" step="0.1">
         <button class="btn btn-success span2" onclick="addPestisida()">➕ Tambah</button>
       </div>
     </div>
     <button class="btn btn-export" onclick="exportCSV('list')" style="margin-bottom:0.75rem">⬇️ Export CSV</button>
     <div id="listContent"></div>
-    <div class="alert">Stok Saat Ini = Stok Awal + mutasi. Isi = kemasan (contoh 250 ML). Auto-sync setelah Connect.</div>
+    <div class="alert">Total Masuk = Stok Awal + semua mutasi "Masuk". Stok Saat Ini = Total Masuk − Keluar + Penyesuaian. Auto-sync setelah Connect.</div>
   </div>
 
   <div id="inventory" class="tab-content">
@@ -311,10 +312,20 @@ function getMutasiSorted() {
   });
 }
 
+// Stok saat ini = stokAwal + semua delta (Masuk positif, Keluar negatif, Penyesuaian ±)
 function getStokSekarang(n) {
   let s = parseFloat((getMaster(n)||{}).stokAwal)||0;
   getMutasiSorted().filter(t=>t.nama===n).forEach(t => { s += t.delta; });
   return s;
+}
+
+// Total Masuk = stokAwal + Σ mutasi bertipe "Masuk"
+function getTotalMasuk(n) {
+  let total = parseFloat((getMaster(n)||{}).stokAwal)||0;
+  inventory.forEach(t => {
+    if (t.nama === n && t.jenis === 'Masuk') total += Math.abs(t.delta);
+  });
+  return total;
 }
 
 function markDirty() {
@@ -370,13 +381,15 @@ function renderPestisidaList() {
     document.getElementById('listContent').innerHTML = '<div class="empty">Belum ada pestisida.</div>';
   } else {
     document.getElementById('listContent').innerHTML = '<div class="table-wrap"><table><thead><tr>'+
-      '<th class="tc">#</th><th>Nama</th><th class="tc">Isi</th><th class="tc">Satuan</th><th class="tc">Awal</th><th class="tc">Saat Ini</th><th class="tc">Aksi</th></tr></thead><tbody>'+
+      '<th class="tc">#</th><th>Nama</th><th class="tc">Isi</th><th class="tc">Satuan</th><th class="tc">Total Masuk</th><th class="tc">Stok Saat Ini</th><th class="tc">Aksi</th></tr></thead><tbody>'+
       pestisidaList.map((p,i)=>{
         const stok=getStokSekarang(p.nama);
+        const total=getTotalMasuk(p.nama);
         const cls=stok<0?'stok minus':(stok===0?'stok nol':'stok');
         return '<tr><td class="tc muted">'+(i+1)+'</td><td style="font-weight:600">'+p.nama+'</td>'+
           '<td class="tc"><span class="badge">'+formatIsi(p)+'</span></td>'+
-          '<td class="tc muted">'+(p.satuan||'-')+'</td><td class="tc muted">'+p.stokAwal+'</td>'+
+          '<td class="tc muted">'+(p.satuan||'-')+'</td>'+
+          '<td class="tc"><span class="total">'+total+'</span></td>'+
           '<td class="tc"><span class="'+cls+'">'+stok+'</span></td>'+
           '<td class="tc"><button class="btn btn-danger" onclick="deletePestisida('+p.id+')">Hapus</button></td></tr>';
       }).join('')+'</tbody></table></div>';
@@ -497,7 +510,6 @@ function ensureAutoMutasi() {
   const usageMap = {};
   dailyUsage.forEach(u => { usageMap[String(u.id)] = u; });
 
-  // buang mutasi Auto yatim
   const before = inventory.length;
   inventory = inventory.filter(i => {
     if (!i.refUsageId) return true;
@@ -506,7 +518,6 @@ function ensureAutoMutasi() {
   });
   if (inventory.length !== before) changed = true;
 
-  // tambah / update
   dailyUsage.forEach(u => {
     const buka = Number(u.bukaObatBaru) || 0;
     if (buka <= 0 || !u.namaObat) return;
@@ -586,7 +597,6 @@ function addUsage() {
   const gh = document.getElementById('usageGH').value;
   const usageId = Date.now();
 
-  // 1. Catat Penggunaan Harian
   dailyUsage.push({
     id: usageId,
     tanggal: tgl,
@@ -602,7 +612,6 @@ function addUsage() {
   });
   localStorage.setItem('pestisida_usage', JSON.stringify(dailyUsage));
 
-  // 2. OTOMATIS: mutasi "Keluar - Auto" bila Buka Baru > 0
   if (bukaVal > 0) {
     inventory.push({
       id: usageId + 1,
@@ -621,7 +630,6 @@ function addUsage() {
     markDirty('usage');
   }
 
-  // Reset form
   ['usageObat','usageJenis','usageKonsentrasi','usageAir','usageVolObat','usageSasaran','usageBuka','usageKeterangan'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('usageTanggal').valueAsDate=new Date();
 
@@ -698,7 +706,7 @@ function renderUsage() {
 function exportCSV(type) {
   let data, fn;
   if(type==='list'){
-    data=pestisidaList.map(p=>({nama:p.nama,isi:p.isi,satuan:p.satuan,stokAwal:p.stokAwal,stokSaatIni:getStokSekarang(p.nama)}));
+    data=pestisidaList.map(p=>({nama:p.nama,isi:p.isi,satuan:p.satuan,totalMasuk:getTotalMasuk(p.nama),stokSaatIni:getStokSekarang(p.nama)}));
     fn='daftar-pestisida.csv';
   } else if(type==='inventory'){
     const saldo={}; pestisidaList.forEach(p=>saldo[p.nama]=parseFloat(p.stokAwal)||0);
