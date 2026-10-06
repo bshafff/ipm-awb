@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#3b82f6">
-  <meta name="description" content="Manajemen Pestisida AWB — Stok Opname & Daily Usage">
+  <meta name="description" content="Manajemen Pestisida AWB">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,30 +13,23 @@
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
   <link rel="apple-touch-icon" href="./icon-192.png">
   <title>Manajemen Pestisida AWB</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
-      --primary: #3b82f6;
-      --primary-dark: #2563eb;
-      --bg: #f0f0ee;
-      --card: #fff;
-      --border: #e5e5e5;
-      --text: #1a1a18;
-      --muted: #666;
+      --primary: #3b82f6; --primary-dark: #2563eb; --bg: #f0f0ee; --card: #fff;
+      --border: #e5e5e5; --text: #1a1a18; --muted: #666;
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
     html { font-size: 16px; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg); color: var(--text);
-      line-height: 1.45; -webkit-font-smoothing: antialiased;
-      overscroll-behavior-y: none;
+      background: var(--bg); color: var(--text); line-height: 1.45;
+      -webkit-font-smoothing: antialiased; overscroll-behavior-y: none;
       padding-bottom: calc(16px + env(safe-area-inset-bottom));
     }
     .app-header {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      color: #fff;
-      padding: 1.25rem 1rem 1.1rem;
-      padding-top: calc(1.25rem + env(safe-area-inset-top));
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff;
+      padding: 1.25rem 1rem 1.1rem; padding-top: calc(1.25rem + env(safe-area-inset-top));
       text-align: center;
     }
     .app-header h1 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.25rem; letter-spacing: -0.3px; }
@@ -45,41 +38,31 @@
     .auth-status.ok { color: #bbf7d0; }
     .auth-status.syncing { color: #e0f2fe; }
     .auth-status.error { color: #fecaca; }
-    .header-actions {
-      display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;
-      margin-top: 0.75rem;
-    }
+    .header-actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 0.75rem; }
     .container { max-width: 720px; margin: 0 auto; padding: 0.75rem; }
     .btn {
       padding: 0.65rem 0.9rem; border: none; border-radius: 10px; cursor: pointer;
       font-size: 0.8125rem; font-weight: 700; display: inline-flex; align-items: center;
-      gap: 4px; min-height: 44px; touch-action: manipulation;
+      gap: 4px; min-height: 44px; touch-action: manipulation; font-family: inherit;
     }
     .btn:active { transform: scale(0.97); opacity: 0.92; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-primary { background: #fff; color: var(--primary); }
     .btn-sync { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.35); }
     .btn-logout { background: #fee2e2; color: #dc2626; }
     .btn-success { background: #10b981; color: #fff; }
     .btn-danger { background: #fee2e2; color: #dc2626; }
     .btn-export { background: #8b5cf6; color: #fff; }
+    .btn-import { background: #0ea5e9; color: #fff; }
     .btn-muted { background: #f5f5f3; color: var(--text); border: 1.5px solid var(--border); }
-    .tabs {
-      display: flex; gap: 6px; margin-bottom: 0.75rem; flex-wrap: wrap;
-      background: var(--card); padding: 0.5rem; border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-    .tab-btn {
-      flex: 1; min-width: 100px; padding: 0.7rem 0.5rem; background: transparent;
-      color: var(--muted); border: none; border-radius: 8px; cursor: pointer;
-      font-weight: 600; font-size: 0.8rem; min-height: 44px;
-    }
+    .btn-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+    .btn-row .btn { flex: 1; min-width: 130px; justify-content: center; }
+    .tabs { display: flex; gap: 6px; margin-bottom: 0.75rem; flex-wrap: wrap; background: var(--card); padding: 0.5rem; border-radius: 12px; border: 1px solid var(--border); }
+    .tab-btn { flex: 1; min-width: 100px; padding: 0.7rem 0.5rem; background: transparent; color: var(--muted); border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.8rem; min-height: 44px; font-family: inherit; }
     .tab-btn.active { background: var(--primary); color: #fff; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    .card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 1rem; margin-bottom: 0.75rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-    }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-bottom: 0.75rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
     .card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
     .form-grid input, .form-grid select {
@@ -87,54 +70,83 @@
       font-size: 0.9375rem; width: 100%; min-height: 48px; background: #fff;
       -webkit-appearance: none; appearance: none; font-family: inherit;
     }
-    .form-grid input:focus, .form-grid select:focus {
-      outline: none; border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
-    }
+    .form-grid input:focus, .form-grid select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
     .form-grid .span2 { grid-column: span 2; }
-    .table-wrap {
-      overflow-x: auto; border-radius: 12px; border: 1px solid var(--border);
-      background: #fff; -webkit-overflow-scrolling: touch; margin-bottom: 0.75rem;
-    }
+    .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); background: #fff; -webkit-overflow-scrolling: touch; margin-bottom: 0.75rem; }
     table { width: 100%; border-collapse: collapse; }
-    th {
-      padding: 0.7rem 0.6rem; text-align: left; font-size: 0.75rem; font-weight: 700;
-      background: #f7f7f5; color: #444; border-bottom: 1px solid var(--border); white-space: nowrap;
-    }
+    th { padding: 0.7rem 0.6rem; text-align: left; font-size: 0.75rem; font-weight: 700; background: #f7f7f5; color: #444; border-bottom: 1px solid var(--border); white-space: nowrap; }
     td { padding: 0.7rem 0.6rem; font-size: 0.8125rem; border-bottom: 1px solid #eee; }
     .tc { text-align: center; }
-    .ok { color: #10b981; }
-    .bad { color: #ef4444; }
-    .muted { color: #999; }
-    .badge {
-      display: inline-block; padding: 2px 8px; border-radius: 10px;
-      font-size: 0.75rem; font-weight: 600; background: #e0e7ff; color: #4338ca;
-    }
+    .ok { color: #10b981; } .bad { color: #ef4444; } .muted { color: #999; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; background: #e0e7ff; color: #4338ca; }
     .stok { display: inline-block; padding: 3px 10px; border-radius: 10px; font-weight: 700; font-size: 0.8125rem; background: #d1fae5; color: #065f46; }
     .stok.minus { background: #fee2e2; color: #b91c1c; }
     .stok.nol { background: #f3f4f6; color: #6b7280; }
     .total { display: inline-block; padding: 3px 10px; border-radius: 10px; font-weight: 600; font-size: 0.8125rem; background: #eef2ff; color: #3730a3; }
     .empty { padding: 2rem; text-align: center; color: #999; font-size: 0.875rem; background: #fafafa; border-radius: 12px; }
-    .alert {
-      padding: 0.75rem; border-radius: 10px; font-size: 0.75rem;
-      border-left: 4px solid var(--primary); background: #eff6ff; color: #1e40af; margin-top: 0.5rem;
-    }
-    .install-banner {
-      display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;
-      padding: 0.75rem; margin-bottom: 0.75rem; align-items: center; gap: 0.75rem; flex-wrap: wrap;
-    }
+    .alert { padding: 0.75rem; border-radius: 10px; font-size: 0.75rem; border-left: 4px solid var(--primary); background: #eff6ff; color: #1e40af; margin-top: 0.5rem; }
+    .install-banner { display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 0.75rem; margin-bottom: 0.75rem; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
     .install-banner.show { display: flex; }
     .install-banner p { flex: 1; font-size: 0.8125rem; color: #1e40af; margin: 0; }
     .toast {
       position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 16px; right: 16px;
       max-width: 400px; margin: 0 auto; background: #1f2937; color: #fff;
-      padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.8125rem; z-index: 999;
+      padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.8125rem; z-index: 9999;
       display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
     }
     .toast.show { display: block; }
     .toast.ok { border-left: 4px solid #10b981; }
     .toast.err { border-left: 4px solid #ef4444; }
     .toast.info { border-left: 4px solid #0ea5e9; }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.55); z-index: 9998;
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.show { display: flex !important; }
+    .modal-box {
+      background: #fff; border-radius: 16px; max-width: 620px; width: 100%;
+      max-height: 92vh; display: flex; flex-direction: column;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+    }
+    .modal-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { font-size: 1rem; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #999; line-height: 1; padding: 0 0.5rem; font-family: inherit; }
+    .modal-body { padding: 1rem 1.25rem; overflow-y: auto; flex: 1; }
+    .modal-footer { padding: 0.875rem 1.25rem; border-top: 1px solid var(--border); display: flex; gap: 0.5rem; justify-content: flex-end; }
+    .import-step { display: flex; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px dashed var(--border); }
+    .import-step:last-of-type { border-bottom: none; }
+    .step-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    .step-body { flex: 1; min-width: 0; }
+    .step-body h4 { font-size: 0.875rem; margin-bottom: 3px; }
+    .step-body p { font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; }
+    label.upload-zone {
+      display: block; border: 2px dashed var(--primary); border-radius: 10px;
+      padding: 18px 12px; text-align: center; cursor: pointer;
+      background: #f8fbff; transition: background .15s;
+    }
+    label.upload-zone:hover, label.upload-zone.dragover { background: #e0f2fe; }
+    label.upload-zone .icon { font-size: 1.75rem; margin-bottom: 4px; }
+    label.upload-zone .title { font-weight: 700; font-size: 0.8125rem; color: var(--primary-dark); }
+    label.upload-zone .sub { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+    .hidden-file { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+    .import-preview-box { display: none; margin-top: 0.75rem; }
+    .import-preview-box.show { display: block; }
+    .preview-summary { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .chip { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .chip-info { background: #dbeafe; color: #1e40af; }
+    .chip-ok { background: #dcfce7; color: #166534; }
+    .chip-bad { background: #fee2e2; color: #991b1b; }
+    .preview-table-wrap { overflow: auto; border-radius: 8px; border: 1px solid var(--border); max-height: 250px; }
+    .preview-table-wrap table { font-size: 11px; }
+    .preview-table-wrap th, .preview-table-wrap td { padding: 5px 7px; border-bottom: 1px solid #eee; white-space: nowrap; }
+    .preview-table-wrap th { background: #f7f7f5; position: sticky; top: 0; }
+    .preview-table-wrap tr.invalid td { background: #fff5f5; color: #991b1b; }
+    .progress-bar { display: none; height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+    .progress-bar.show { display: block; }
+    .progress-bar > div { height: 100%; background: var(--primary); width: 0%; transition: width 0.2s; border-radius: 999px; }
     @media (min-width: 640px) {
       .form-grid { grid-template-columns: repeat(3, 1fr); }
       .form-grid .span2 { grid-column: span 1; }
@@ -148,22 +160,22 @@
   <p>Master Data · Stok Opname · Penggunaan Harian</p>
   <div class="auth-status" id="authStatus"></div>
   <div class="header-actions">
-    <button class="btn btn-sync" id="pushBtn" onclick="syncToSheets(true)" style="display:none">⬆️ Sync</button>
-    <button class="btn btn-sync" id="pullBtn" onclick="pullFromSheets()" style="display:none">⬇️ Muat</button>
-    <button class="btn btn-primary" id="authBtn" onclick="handleAuthClick()">☁️ Connect Sheets</button>
+    <button type="button" class="btn btn-sync" id="pushBtn" style="display:none">⬆️ Sync</button>
+    <button type="button" class="btn btn-sync" id="pullBtn" style="display:none">⬇️ Muat</button>
+    <button type="button" class="btn btn-primary" id="authBtn">☁️ Connect Sheets</button>
   </div>
 </div>
 
 <div class="container">
   <div class="install-banner" id="installBanner">
-    <p>📲 Install ke layar utama agar tampil seperti aplikasi (tanpa bar Chrome).</p>
-    <button class="btn btn-primary" style="background:var(--primary);color:#fff" onclick="installPWA()">Install</button>
+    <p>📲 Install ke layar utama agar tampil seperti aplikasi.</p>
+    <button type="button" class="btn" id="installBtn" style="background:var(--primary);color:#fff">Install</button>
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('pestisidaList', this)">🧪 Daftar</button>
-    <button class="tab-btn" onclick="switchTab('inventory', this)">📦 Stok</button>
-    <button class="tab-btn" onclick="switchTab('usage', this)">💊 Penggunaan</button>
+    <button type="button" class="tab-btn active" data-tab="pestisidaList">🧪 Daftar</button>
+    <button type="button" class="tab-btn" data-tab="inventory">📦 Stok</button>
+    <button type="button" class="tab-btn" data-tab="usage">💊 Penggunaan</button>
   </div>
 
   <div id="pestisidaList" class="tab-content active">
@@ -177,12 +189,15 @@
           <option>Kg</option><option>Botol</option><option>Galon</option><option>Bungkus</option>
         </select>
         <input type="number" id="listStokAwal" placeholder="Stok Awal (jika ada)" min="0" step="0.1">
-        <button class="btn btn-success span2" onclick="addPestisida()">➕ Tambah</button>
+        <button type="button" class="btn btn-success span2" id="addPestisidaBtn">➕ Tambah</button>
       </div>
     </div>
-    <button class="btn btn-export" onclick="exportCSV('list')" style="margin-bottom:0.75rem">⬇️ Export CSV</button>
+    <div class="btn-row">
+      <button type="button" class="btn btn-export" data-export="list">⬇️ Export CSV</button>
+      <button type="button" class="btn btn-import" data-import="list">📥 Import Excel</button>
+    </div>
     <div id="listContent"></div>
-    <div class="alert">Total Masuk = Stok Awal + semua mutasi "Masuk". Stok Saat Ini = Total Masuk − Keluar + Penyesuaian. Auto-sync setelah Connect.</div>
+    <div class="alert">Total Masuk = Stok Awal + semua mutasi "Masuk". Stok Saat Ini = Total Masuk − Keluar + Penyesuaian.</div>
   </div>
 
   <div id="inventory" class="tab-content">
@@ -198,10 +213,13 @@
         </select>
         <input type="number" id="invJumlah" placeholder="Jumlah" min="0" step="0.1">
         <input type="text" id="invKeterangan" placeholder="Keterangan" class="span2">
-        <button class="btn btn-success span2" onclick="addInventory()">➕ Catat</button>
+        <button type="button" class="btn btn-success span2" id="addInventoryBtn">➕ Catat</button>
       </div>
     </div>
-    <button class="btn btn-export" onclick="exportCSV('inventory')" style="margin-bottom:0.75rem">⬇️ Export CSV</button>
+    <div class="btn-row">
+      <button type="button" class="btn btn-export" data-export="inventory">⬇️ Export CSV</button>
+      <button type="button" class="btn btn-import" data-import="inventory">📥 Import Excel</button>
+    </div>
     <div id="inventoryContent"></div>
   </div>
 
@@ -211,7 +229,7 @@
       <div class="form-grid">
         <input type="date" id="usageTanggal">
         <select id="usageGH"><option>GH 1</option><option>GH 2</option></select>
-        <select id="usageJenis" onchange="updateKategoriObat()">
+        <select id="usageJenis">
           <option value="">- Jenis -</option>
           <option value="Preventif - Insektisida">Preventif - Insektisida</option>
           <option value="Preventif - Akarisida">Preventif - Akarisida</option>
@@ -227,505 +245,1086 @@
         <input type="text" id="usageSasaran" placeholder="Sasaran HPT">
         <input type="number" id="usageBuka" placeholder="Buka baru" min="0">
         <input type="text" id="usageKeterangan" placeholder="Keterangan" class="span2">
-        <button class="btn btn-success span2" onclick="addUsage()">➕ Catat</button>
+        <button type="button" class="btn btn-success span2" id="addUsageBtn">➕ Catat</button>
       </div>
     </div>
-    <button class="btn btn-export" onclick="exportCSV('usage')" style="margin-bottom:0.75rem">⬇️ Export CSV</button>
+    <div class="btn-row">
+      <button type="button" class="btn btn-export" data-export="usage">⬇️ Export CSV</button>
+      <button type="button" class="btn btn-import" data-import="usage">📥 Import Excel</button>
+    </div>
     <div id="usageContent"></div>
+  </div>
+</div>
+
+<!-- MODAL IMPORT -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="importModalTitle">📥 Import Excel</h3>
+      <button type="button" class="modal-close" data-action="close-modal">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="import-step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Download Template</h4>
+          <p id="importTemplateHint"></p>
+          <button type="button" class="btn btn-export" id="downloadTemplateBtn">⬇️ Download Template</button>
+        </div>
+      </div>
+      <div class="import-step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Upload File Excel</h4>
+          <p>Format: .xlsx / .xls. Kolom harus sesuai template. Bisa dari tab manapun, aplikasi auto-deteksi.</p>
+          <label for="importFile" class="upload-zone" id="importUploadZone">
+            <div class="icon">📄</div>
+            <div class="title">Klik atau drag & drop file di sini</div>
+            <div class="sub">Bisa ratusan baris sekaligus</div>
+          </label>
+          <input type="file" id="importFile" accept=".xlsx,.xls,.csv" class="hidden-file">
+        </div>
+      </div>
+      <div class="import-step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Preview & Import</h4>
+          <p>Periksa data, baris merah = error (di-skip otomatis).</p>
+          <div class="progress-bar" id="importProgress"><div id="importProgressFill"></div></div>
+        </div>
+      </div>
+      <div class="import-preview-box" id="importPreviewBox"></div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-muted" data-action="close-modal">Batal</button>
+      <button type="button" class="btn btn-success" id="importDoBtn" disabled>🚀 Import</button>
+    </div>
   </div>
 </div>
 
 <div id="syncToast" class="toast"></div>
 
 <script>
-const obatDatabase = {
-  'Preventif - Insektisida': ['Matador','Decis','Prevathon','Curacron'],
-  'Preventif - Akarisida': ['Vertimec','Sulfur 95'],
-  'Preventif - Fungisida': ['Baycor','Benlate','Antracol'],
-  'Kuratif - Insektisida': ['Matador','Decis','Curacron','Neem Oil'],
-  'Kuratif - Akarisida': ['Vertimec','Sulfur 95'],
-  'Kuratif - Fungisida': ['Baycor','Thiram','Mancozeb','Karbendazim','Propineb']
-};
+(function() {
+  'use strict';
 
-let pestisidaList = JSON.parse(localStorage.getItem('pestisida_list') || '[]').map(p => ({ stokAwal:0, isi:'', ...p }));
-let inventory = JSON.parse(localStorage.getItem('pestisida_inventory') || '[]');
-let dailyUsage = JSON.parse(localStorage.getItem('pestisida_usage') || '[]');
-let isAuthenticated = JSON.parse(localStorage.getItem('pestisida_auth') || 'false');
-let scriptUrl = localStorage.getItem('pestisida_script_url') || '';
-
-const dirty = { list:false, inventory:false, usage:false };
-let isSyncing=false, pendingSync=false, autoSyncTimer=null, lastSyncAt=0;
-const DEBOUNCE_MS=2500, MIN_SYNC_INTERVAL=4000;
-
-// ===== PWA install =====
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('installBanner').classList.add('show');
-});
-window.addEventListener('appinstalled', () => {
-  deferredPrompt = null;
-  document.getElementById('installBanner').classList.remove('show');
-  showToast('✓ App terinstall!', 'ok');
-});
-async function installPWA() {
-  if (!deferredPrompt) {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (isIOS) {
-      alert('Di iPhone/iPad:\n1. Tap tombol Share (kotak panah)\n2. Pilih "Add to Home Screen"\n3. Tap Add');
-    } else {
-      alert('Install belum tersedia.\n\nCoba:\n• Chrome menu ⋮ → Install app / Add to Home screen\n• Pastikan dibuka lewat HTTPS\n• Belum pernah di-install sebelumnya');
-    }
-    return;
+  // ================= STORAGE WRAPPER =================
+  function lsGet(key, fallback) {
+    try { const v = localStorage.getItem(key); return v === null ? fallback : v; }
+    catch (e) { console.warn('localStorage get blocked:', e); return fallback; }
   }
-  deferredPrompt.prompt();
-  await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  document.getElementById('installBanner').classList.remove('show');
-}
+  function lsSet(key, val) {
+    try { localStorage.setItem(key, val); } catch (e) { console.warn('ls set fail:', e); }
+  }
+  function lsDel(key) {
+    try { localStorage.removeItem(key); } catch (e) { console.warn('ls del fail:', e); }
+  }
 
-document.getElementById('usageTanggal').valueAsDate = new Date();
-document.getElementById('invTanggal').valueAsDate = new Date();
-updateAuthStatus();
+  // ================= DATA INIT =================
+  const obatDatabase = {
+    'Preventif - Insektisida': ['Matador','Decis','Prevathon','Curacron'],
+    'Preventif - Akarisida': ['Vertimec','Sulfur 95'],
+    'Preventif - Fungisida': ['Baycor','Benlate','Antracol'],
+    'Kuratif - Insektisida': ['Matador','Decis','Curacron','Neem Oil'],
+    'Kuratif - Akarisida': ['Vertimec','Sulfur 95'],
+    'Kuratif - Fungisida': ['Baycor','Thiram','Mancozeb','Karbendazim','Propineb']
+  };
 
-function showToast(msg, type) {
-  const el = document.getElementById('syncToast');
-  el.textContent = msg; el.className = 'toast show ' + (type||'info');
-  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 3000);
-}
+  let pestisidaList = JSON.parse(lsGet('pestisida_list', '[]')).map(p => Object.assign({ stokAwal:0, isi:'' }, p));
+  let inventory     = JSON.parse(lsGet('pestisida_inventory', '[]'));
+  let dailyUsage    = JSON.parse(lsGet('pestisida_usage', '[]'));
+  let isAuthenticated = JSON.parse(lsGet('pestisida_auth', 'false'));
+  let scriptUrl     = lsGet('pestisida_script_url', '');
 
-function getMaster(n) { return pestisidaList.find(p => p.nama === n); }
+  const dirty = { list:false, inventory:false, usage:false };
+  let isSyncing=false, pendingSync=false, autoSyncTimer=null, lastSyncAt=0;
+  const DEBOUNCE_MS=2500, MIN_SYNC_INTERVAL=4000;
 
-function parseDateVal(dStr) {
-  if (!dStr) return 0;
-  const d = new Date(dStr);
-  return isNaN(d.getTime()) ? 0 : d.getTime();
-}
+  let deferredPrompt = null;
+  let currentImportType = null;
+  let parsedImportRows = [];
 
-function getMutasiSorted() {
-  return inventory.slice().sort((a,b) => {
-    const tA = parseDateVal(a.tanggal);
-    const tB = parseDateVal(b.tanggal);
-    if (tA !== tB) return tA - tB;
-    return a.id - b.id;
+  // ================= TOAST =================
+  function showToast(msg, type) {
+    const el = document.getElementById('syncToast');
+    if (!el) return;
+    el.textContent = msg;
+    el.className = 'toast show ' + (type||'info');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 3500);
+  }
+
+  // ================= GLOBAL ERROR =================
+  window.addEventListener('error', function(ev) {
+    console.error('JS Error:', ev.message, ev.filename, ev.lineno);
+    showToast('⚠️ ' + ev.message, 'err');
   });
-}
-
-// Stok saat ini = stokAwal + semua delta (Masuk positif, Keluar negatif, Penyesuaian ±)
-function getStokSekarang(n) {
-  let s = parseFloat((getMaster(n)||{}).stokAwal)||0;
-  getMutasiSorted().filter(t=>t.nama===n).forEach(t => { s += t.delta; });
-  return s;
-}
-
-// Total Masuk = stokAwal + Σ mutasi bertipe "Masuk"
-function getTotalMasuk(n) {
-  let total = parseFloat((getMaster(n)||{}).stokAwal)||0;
-  inventory.forEach(t => {
-    if (t.nama === n && t.jenis === 'Masuk') total += Math.abs(t.delta);
-  });
-  return total;
-}
-
-function markDirty() {
-  for (let i=0;i<arguments.length;i++) if (dirty[arguments[i]]!==undefined) dirty[arguments[i]]=true;
-  scheduleAutoSync();
-}
-
-function scheduleAutoSync() {
-  if (!isAuthenticated || !scriptUrl) return;
-  clearTimeout(autoSyncTimer);
-  autoSyncTimer = setTimeout(() => {
-    const w = Math.max(0, MIN_SYNC_INTERVAL - (Date.now()-lastSyncAt));
-    if (w>0) autoSyncTimer = setTimeout(()=>syncToSheets(false), w);
-    else syncToSheets(false);
-  }, DEBOUNCE_MS);
-}
-
-function addPestisida() {
-  const nama = document.getElementById('listNama').value.trim();
-  if (!nama) return alert('Isi nama');
-  if (pestisidaList.some(p => p.nama.toLowerCase()===nama.toLowerCase())) return alert('Sudah ada');
-  const isi = document.getElementById('listIsi').value;
-  pestisidaList.push({
-    id: Date.now(), nama,
-    isi: isi!=='' ? parseFloat(isi) : '',
-    satuan: document.getElementById('listSatuan').value,
-    stokAwal: parseFloat(document.getElementById('listStokAwal').value)||0
-  });
-  localStorage.setItem('pestisida_list', JSON.stringify(pestisidaList));
-  markDirty('list');
-  document.getElementById('listNama').value='';
-  document.getElementById('listIsi').value='';
-  document.getElementById('listStokAwal').value='';
-  renderPestisidaList();
-}
-
-function deletePestisida(id) {
-  const item = pestisidaList.find(p=>p.id===id); if (!item) return;
-  const n = inventory.filter(t=>t.nama===item.nama).length;
-  if (!confirm('Hapus "'+item.nama+'"?'+(n?'\n'+n+' mutasi ikut terhapus!':''))) return;
-  pestisidaList = pestisidaList.filter(p=>p.id!==id);
-  inventory = inventory.filter(t=>t.nama!==item.nama);
-  localStorage.setItem('pestisida_list', JSON.stringify(pestisidaList));
-  localStorage.setItem('pestisida_inventory', JSON.stringify(inventory));
-  markDirty('list','inventory');
-  renderPestisidaList();
-}
-
-function formatIsi(p) { return (p.isi===''||p.isi==null) ? '-' : (p.isi+' '+(p.satuan||'')); }
-
-function renderPestisidaList() {
-  if (!pestisidaList.length) {
-    document.getElementById('listContent').innerHTML = '<div class="empty">Belum ada pestisida.</div>';
-  } else {
-    document.getElementById('listContent').innerHTML = '<div class="table-wrap"><table><thead><tr>'+
-      '<th class="tc">#</th><th>Nama</th><th class="tc">Isi</th><th class="tc">Satuan</th><th class="tc">Total Masuk</th><th class="tc">Stok Saat Ini</th><th class="tc">Aksi</th></tr></thead><tbody>'+
-      pestisidaList.map((p,i)=>{
-        const stok=getStokSekarang(p.nama);
-        const total=getTotalMasuk(p.nama);
-        const cls=stok<0?'stok minus':(stok===0?'stok nol':'stok');
-        return '<tr><td class="tc muted">'+(i+1)+'</td><td style="font-weight:600">'+p.nama+'</td>'+
-          '<td class="tc"><span class="badge">'+formatIsi(p)+'</span></td>'+
-          '<td class="tc muted">'+(p.satuan||'-')+'</td>'+
-          '<td class="tc"><span class="total">'+total+'</span></td>'+
-          '<td class="tc"><span class="'+cls+'">'+stok+'</span></td>'+
-          '<td class="tc"><button class="btn btn-danger" onclick="deletePestisida('+p.id+')">Hapus</button></td></tr>';
-      }).join('')+'</tbody></table></div>';
-  }
-  document.getElementById('invNama').innerHTML = '<option value="">- Pestisida -</option>'+
-    pestisidaList.map(p=>{
-      const l=p.isi?p.nama+' ('+p.isi+' '+p.satuan+')':p.nama;
-      return '<option value="'+p.nama+'">'+l+'</option>';
-    }).join('');
-  updateKategoriObat();
-}
-
-function switchTab(tab, el) {
-  document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active'));
-  document.getElementById(tab).classList.add('active');
-  el.classList.add('active');
-  if (tab==='pestisidaList') renderPestisidaList();
-  else if (tab==='inventory') renderInventory();
-  else renderUsage();
-}
-
-function updateKategoriObat() {
-  const jenis=document.getElementById('usageJenis').value;
-  const sel=document.getElementById('usageObat');
-  const prev=sel.value;
-  sel.innerHTML='<option value="">- Bahan Aktif -</option>';
-  let opts=(jenis&&obatDatabase[jenis])?obatDatabase[jenis].slice():[];
-  pestisidaList.forEach(p=>{ if(!opts.some(o=>o.toLowerCase()===p.nama.toLowerCase())) opts.push(p.nama); });
-  opts.forEach(o=>{ const op=document.createElement('option'); op.value=o; op.textContent=o; if(o===prev)op.selected=true; sel.appendChild(op); });
-}
-
-function updateAuthStatus() {
-  const s=document.getElementById('authStatus'), a=document.getElementById('authBtn');
-  const p=document.getElementById('pushBtn'), l=document.getElementById('pullBtn');
-  if (isAuthenticated && scriptUrl) {
-    s.innerHTML='✓ Terhubung — auto-sync'; s.className='auth-status ok';
-    a.textContent='Putuskan'; a.className='btn btn-logout';
-    p.style.display=l.style.display='inline-flex';
-  } else {
-    s.innerHTML=''; s.className='auth-status';
-    a.textContent='☁️ Connect Sheets'; a.className='btn btn-primary';
-    p.style.display=l.style.display='none';
-  }
-}
-
-function handleAuthClick() {
-  if (isAuthenticated) {
-    isAuthenticated=false; localStorage.setItem('pestisida_auth','false');
-    updateAuthStatus(); showToast('Koneksi diputus','info'); return;
-  }
-  const url=prompt('URL Web App Apps Script (/exec):\nWho has access = Anyone', scriptUrl||'');
-  if(!url||!url.trim()) return;
-  scriptUrl=url.trim().replace(/\/$/,'');
-  if(scriptUrl.indexOf('/exec')<0) return alert('URL harus mengandung /exec');
-  localStorage.setItem('pestisida_script_url',scriptUrl);
-  localStorage.setItem('pestisida_auth','true');
-  isAuthenticated=true; dirty.list=dirty.inventory=dirty.usage=true;
-  updateAuthStatus(); showToast('✓ Tersambung','info');
-  setTimeout(()=>{ pullFromSheets(true).finally(()=>{ dirty.list=dirty.inventory=dirty.usage=true; syncToSheets(false); }); },300);
-}
-
-async function syncToSheets(force) {
-  force=!!force;
-  if(!scriptUrl){ if(force) alert('Belum connect'); return; }
-  if(isSyncing){ pendingSync=true; return; }
-  const payload={}; let has=false;
-  if(force||dirty.list){ payload.list=pestisidaList; has=true; }
-  if(force||dirty.inventory){ payload.inventory=inventory; has=true; }
-  if(force||dirty.usage){ payload.usage=dailyUsage; has=true; }
-  if(!has) return;
-  isSyncing=true; pendingSync=false; lastSyncAt=Date.now();
-  const st=document.getElementById('authStatus');
-  if(st){ st.innerHTML='⟳ Sync...'; st.className='auth-status syncing'; }
-  if(force) showToast('☁️ Sync...','info');
-  try {
-    await fetch(scriptUrl,{ method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload) });
-    if(payload.list) dirty.list=false;
-    if(payload.inventory) dirty.inventory=false;
-    if(payload.usage) dirty.usage=false;
-    if(st){ st.innerHTML='✓ Terhubung — auto-sync'; st.className='auth-status ok'; }
-    if(force) showToast('✓ Terkirim','ok');
-  } catch(e) {
-    if(st){ st.innerHTML='✗ Gagal sync'; st.className='auth-status error'; }
-    showToast('Gagal: '+e.message,'err');
-  } finally {
-    isSyncing=false;
-    if(pendingSync){ pendingSync=false; setTimeout(()=>syncToSheets(false),600); }
-  }
-}
-
-async function pullFromSheets(silent) {
-  silent=!!silent;
-  if(!scriptUrl){ if(!silent) alert('Belum connect'); return; }
-  if(!silent && !confirm('Muat dari Sheets akan TIMPA data lokal. Lanjut?')) return;
-  if(!silent) showToast('⬇️ Memuat...','info');
-  try {
-    const res=await fetch(scriptUrl+'?action=getAll',{redirect:'follow'});
-    const data=JSON.parse(await res.text());
-    if(data.error) throw new Error(data.error);
-    if(data.list){ pestisidaList=data.list.map(p=>({stokAwal:0,isi:'',...p})); localStorage.setItem('pestisida_list',JSON.stringify(pestisidaList)); }
-    if(data.inventory){ inventory=data.inventory; localStorage.setItem('pestisida_inventory',JSON.stringify(inventory)); }
-    if(data.usage){ dailyUsage=data.usage; localStorage.setItem('pestisida_usage',JSON.stringify(dailyUsage)); }
-    dirty.list=dirty.inventory=dirty.usage=false;
-    ensureAutoMutasi();
-    renderPestisidaList(); renderInventory(); renderUsage();
-    if(!silent) showToast('✓ Dimuat','ok');
-  } catch(e) {
-    showToast('Gagal: '+e.message,'err');
-    if(!silent) alert(e.message);
-  }
-}
-
-// Rekonsiliasi lokal: pastikan tiap Penggunaan dgn Buka Obat Baru > 0
-// punya mutasi "Keluar - Auto" (tambah / update / hapus yatim)
-function ensureAutoMutasi() {
-  let changed = false;
-  const usageMap = {};
-  dailyUsage.forEach(u => { usageMap[String(u.id)] = u; });
-
-  const before = inventory.length;
-  inventory = inventory.filter(i => {
-    if (!i.refUsageId) return true;
-    const u = usageMap[String(i.refUsageId)];
-    return !!u && (Number(u.bukaObatBaru) || 0) > 0;
-  });
-  if (inventory.length !== before) changed = true;
-
-  dailyUsage.forEach(u => {
-    const buka = Number(u.bukaObatBaru) || 0;
-    if (buka <= 0 || !u.namaObat) return;
-    const ex = inventory.find(i => i.refUsageId && String(i.refUsageId) === String(u.id));
-    const sat = (getMaster(u.namaObat) || {}).satuan || '';
-    if (!ex) {
-      inventory.push({
-        id: Number(u.id) + 1,
-        refUsageId: u.id,
-        tanggal: u.tanggal,
-        nama: u.namaObat,
-        jenis: 'Keluar',
-        jumlah: buka,
-        delta: -buka,
-        keterangan: 'Auto',
-        satuan: sat
-      });
-      changed = true;
-    } else if (ex.tanggal !== u.tanggal || ex.nama !== u.namaObat || Number(ex.jumlah) !== buka) {
-      ex.tanggal = u.tanggal;
-      ex.nama = u.namaObat;
-      ex.jumlah = buka;
-      ex.delta = -buka;
-      ex.keterangan = 'Auto';
-      ex.satuan = sat;
-      changed = true;
-    }
+  window.addEventListener('unhandledrejection', function(ev) {
+    console.error('Promise Error:', ev.reason);
+    showToast('⚠️ ' + (ev.reason && ev.reason.message || ev.reason), 'err');
   });
 
-  if (changed) {
-    localStorage.setItem('pestisida_inventory', JSON.stringify(inventory));
-    markDirty('inventory');
-  }
-  return changed;
-}
-
-function addInventory() {
-  const nama=document.getElementById('invNama').value.trim();
-  const jenis=document.getElementById('invJenis').value;
-  const jumlah=parseFloat(document.getElementById('invJumlah').value);
-  if(!nama) return alert('Pilih pestisida');
-  if(isNaN(jumlah)||jumlah===0) return alert('Isi jumlah ≠ 0');
-  let delta;
-  if(jenis==='Masuk') delta=Math.abs(jumlah);
-  else if(jenis==='Keluar'){
-    delta=-Math.abs(jumlah);
-    if(Math.abs(jumlah)>getStokSekarang(nama)) return alert('Stok tidak cukup');
-  } else {
-    delta=jumlah;
-    if(getStokSekarang(nama)+delta<0) return alert('Stok jadi negatif');
-  }
-  inventory.push({
-    id:Date.now(),
-    tanggal:document.getElementById('invTanggal').value||new Date().toISOString().split('T')[0],
-    nama,jenis,jumlah:Math.abs(jumlah),delta,
-    keterangan:document.getElementById('invKeterangan').value.trim(),
-    satuan:(getMaster(nama)||{}).satuan||''
-  });
-  localStorage.setItem('pestisida_inventory',JSON.stringify(inventory));
-  markDirty('inventory');
-  document.getElementById('invJumlah').value='';
-  document.getElementById('invKeterangan').value='';
-  document.getElementById('invTanggal').valueAsDate=new Date();
-  renderInventory();
-  renderPestisidaList();
-}
-
-function addUsage() {
-  const jenis = document.getElementById('usageJenis').value.trim();
-  const obat = document.getElementById('usageObat').value.trim();
-  const bukaVal = parseFloat(document.getElementById('usageBuka').value) || 0;
-
-  if(!jenis) return alert('Pilih jenis');
-  if(!obat) return alert('Pilih obat');
-
-  const tgl = document.getElementById('usageTanggal').value || new Date().toISOString().split('T')[0];
-  const gh = document.getElementById('usageGH').value;
-  const usageId = Date.now();
-
-  dailyUsage.push({
-    id: usageId,
-    tanggal: tgl,
-    gh: gh,
-    jenisPenyemprotan: jenis,
-    namaObat: obat,
-    konsentrasi: parseFloat(document.getElementById('usageKonsentrasi').value)||0,
-    volAirBaku: parseFloat(document.getElementById('usageAir').value)||0,
-    volObat: parseFloat(document.getElementById('usageVolObat').value)||0,
-    sasaran: document.getElementById('usageSasaran').value,
-    bukaObatBaru: bukaVal,
-    keterangan: document.getElementById('usageKeterangan').value || '-'
-  });
-  localStorage.setItem('pestisida_usage', JSON.stringify(dailyUsage));
-
-  if (bukaVal > 0) {
-    inventory.push({
-      id: usageId + 1,
-      refUsageId: usageId,
-      tanggal: tgl,
-      nama: obat,
-      jenis: 'Keluar',
-      jumlah: bukaVal,
-      delta: -Math.abs(bukaVal),
-      keterangan: 'Auto',
-      satuan: (getMaster(obat) || {}).satuan || ''
+  // ================= HELPERS =================
+  function getMaster(n) { return pestisidaList.find(p => p.nama === n); }
+  function parseDateVal(dStr) { if (!dStr) return 0; const d = new Date(dStr); return isNaN(d.getTime()) ? 0 : d.getTime(); }
+  function getMutasiSorted() {
+    return inventory.slice().sort((a,b) => {
+      const tA = parseDateVal(a.tanggal), tB = parseDateVal(b.tanggal);
+      if (tA !== tB) return tA - tB;
+      return a.id - b.id;
     });
-    localStorage.setItem('pestisida_inventory', JSON.stringify(inventory));
-    markDirty('usage', 'inventory');
-  } else {
-    markDirty('usage');
+  }
+  function getStokSekarang(n) {
+    let s = parseFloat((getMaster(n)||{}).stokAwal)||0;
+    getMutasiSorted().filter(t=>t.nama===n).forEach(t => { s += t.delta; });
+    return s;
+  }
+  function getTotalMasuk(n) {
+    let total = parseFloat((getMaster(n)||{}).stokAwal)||0;
+    inventory.forEach(t => { if (t.nama === n && t.jenis === 'Masuk') total += Math.abs(t.delta); });
+    return total;
+  }
+  function markDirty() {
+    for (let i=0;i<arguments.length;i++) if (dirty[arguments[i]]!==undefined) dirty[arguments[i]]=true;
+    scheduleAutoSync();
+  }
+  function scheduleAutoSync() {
+    if (!isAuthenticated || !scriptUrl) return;
+    clearTimeout(autoSyncTimer);
+    autoSyncTimer = setTimeout(() => {
+      const w = Math.max(0, MIN_SYNC_INTERVAL - (Date.now()-lastSyncAt));
+      if (w>0) autoSyncTimer = setTimeout(()=>syncToSheets(false), w);
+      else syncToSheets(false);
+    }, DEBOUNCE_MS);
   }
 
-  ['usageObat','usageJenis','usageKonsentrasi','usageAir','usageVolObat','usageSasaran','usageBuka','usageKeterangan'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('usageTanggal').valueAsDate=new Date();
+  // ================= CRUD =================
+  function addPestisida() {
+    const nama = document.getElementById('listNama').value.trim();
+    if (!nama) return alert('Isi nama');
+    if (pestisidaList.some(p => p.nama.toLowerCase()===nama.toLowerCase())) return alert('Sudah ada');
+    const isi = document.getElementById('listIsi').value;
+    pestisidaList.push({
+      id: Date.now(), nama,
+      isi: isi!=='' ? parseFloat(isi) : '',
+      satuan: document.getElementById('listSatuan').value,
+      stokAwal: parseFloat(document.getElementById('listStokAwal').value)||0
+    });
+    lsSet('pestisida_list', JSON.stringify(pestisidaList));
+    markDirty('list');
+    document.getElementById('listNama').value='';
+    document.getElementById('listIsi').value='';
+    document.getElementById('listStokAwal').value='';
+    renderPestisidaList();
+    showToast('✓ Pestisida ditambahkan', 'ok');
+  }
 
-  updateKategoriObat();
-  renderUsage();
-  renderInventory();
-  renderPestisidaList();
-  showToast('✓ Penggunaan berhasil dicatat', 'ok');
-}
+  function deletePestisida(id) {
+    const item = pestisidaList.find(p=>p.id===id); if (!item) return;
+    const n = inventory.filter(t=>t.nama===item.nama).length;
+    if (!confirm('Hapus "'+item.nama+'"?'+(n?'\n'+n+' mutasi ikut terhapus!':''))) return;
+    pestisidaList = pestisidaList.filter(p=>p.id!==id);
+    inventory = inventory.filter(t=>t.nama!==item.nama);
+    lsSet('pestisida_list', JSON.stringify(pestisidaList));
+    lsSet('pestisida_inventory', JSON.stringify(inventory));
+    markDirty('list','inventory');
+    renderPestisidaList();
+    showToast('✓ Dihapus', 'ok');
+  }
 
-function deleteItem(type, id) {
-  if (type === 'inventory') {
-    inventory = inventory.filter(i => i.id !== id);
-    localStorage.setItem('pestisida_inventory', JSON.stringify(inventory));
+  function addInventory() {
+    const nama=document.getElementById('invNama').value.trim();
+    const jenis=document.getElementById('invJenis').value;
+    const jumlah=parseFloat(document.getElementById('invJumlah').value);
+    if(!nama) return alert('Pilih pestisida');
+    if(isNaN(jumlah)||jumlah===0) return alert('Isi jumlah ≠ 0');
+    let delta;
+    if(jenis==='Masuk') delta=Math.abs(jumlah);
+    else if(jenis==='Keluar'){
+      delta=-Math.abs(jumlah);
+      if(Math.abs(jumlah)>getStokSekarang(nama)) return alert('Stok tidak cukup');
+    } else {
+      delta=jumlah;
+      if(getStokSekarang(nama)+delta<0) return alert('Stok jadi negatif');
+    }
+    inventory.push({
+      id:Date.now(),
+      tanggal:document.getElementById('invTanggal').value||new Date().toISOString().split('T')[0],
+      nama, jenis, jumlah:Math.abs(jumlah), delta,
+      keterangan:document.getElementById('invKeterangan').value.trim(),
+      satuan:(getMaster(nama)||{}).satuan||''
+    });
+    lsSet('pestisida_inventory',JSON.stringify(inventory));
     markDirty('inventory');
+    document.getElementById('invJumlah').value='';
+    document.getElementById('invKeterangan').value='';
+    document.getElementById('invTanggal').valueAsDate=new Date();
     renderInventory();
     renderPestisidaList();
-  } else {
-    const uItem = dailyUsage.find(i => i.id === id);
-    dailyUsage = dailyUsage.filter(i => i.id !== id);
+    showToast('✓ Mutasi dicatat', 'ok');
+  }
 
-    if (uItem) {
-      inventory = inventory.filter(i => {
-        if (i.refUsageId && String(i.refUsageId) === String(id)) return false;
-        if (uItem.bukaObatBaru > 0 &&
-            i.nama === uItem.namaObat &&
-            i.tanggal === uItem.tanggal &&
-            Number(i.jumlah) === Number(uItem.bukaObatBaru) &&
-            (i.keterangan === 'Auto' || i.keterangan.indexOf('Auto') !== -1)) {
-          return false;
+  function addUsage() {
+    const jenis = document.getElementById('usageJenis').value.trim();
+    const obat = document.getElementById('usageObat').value.trim();
+    const bukaVal = parseFloat(document.getElementById('usageBuka').value) || 0;
+    if(!jenis) return alert('Pilih jenis');
+    if(!obat) return alert('Pilih obat');
+
+    const tgl = document.getElementById('usageTanggal').value || new Date().toISOString().split('T')[0];
+    const gh = document.getElementById('usageGH').value;
+    const usageId = Date.now();
+
+    dailyUsage.push({
+      id: usageId, tanggal: tgl, gh: gh,
+      jenisPenyemprotan: jenis, namaObat: obat,
+      konsentrasi: parseFloat(document.getElementById('usageKonsentrasi').value)||0,
+      volAirBaku: parseFloat(document.getElementById('usageAir').value)||0,
+      volObat: parseFloat(document.getElementById('usageVolObat').value)||0,
+      sasaran: document.getElementById('usageSasaran').value,
+      bukaObatBaru: bukaVal,
+      keterangan: document.getElementById('usageKeterangan').value || '-'
+    });
+    lsSet('pestisida_usage', JSON.stringify(dailyUsage));
+
+    if (bukaVal > 0) {
+      inventory.push({
+        id: usageId + 1, refUsageId: usageId, tanggal: tgl, nama: obat,
+        jenis: 'Keluar', jumlah: bukaVal, delta: -Math.abs(bukaVal),
+        keterangan: 'Auto', satuan: (getMaster(obat) || {}).satuan || ''
+      });
+      lsSet('pestisida_inventory', JSON.stringify(inventory));
+      markDirty('usage', 'inventory');
+    } else markDirty('usage');
+
+    ['usageObat','usageJenis','usageKonsentrasi','usageAir','usageVolObat','usageSasaran','usageBuka','usageKeterangan'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('usageTanggal').valueAsDate=new Date();
+    updateKategoriObat();
+    renderUsage(); renderInventory(); renderPestisidaList();
+    showToast('✓ Penggunaan dicatat', 'ok');
+  }
+
+  function deleteItem(type, id) {
+    if (type === 'inventory') {
+      inventory = inventory.filter(i => i.id !== id);
+      lsSet('pestisida_inventory', JSON.stringify(inventory));
+      markDirty('inventory');
+      renderInventory(); renderPestisidaList();
+    } else {
+      const uItem = dailyUsage.find(i => i.id === id);
+      dailyUsage = dailyUsage.filter(i => i.id !== id);
+      if (uItem) {
+        inventory = inventory.filter(i => {
+          if (i.refUsageId && String(i.refUsageId) === String(id)) return false;
+          if (uItem.bukaObatBaru > 0 && i.nama === uItem.namaObat && i.tanggal === uItem.tanggal &&
+              Number(i.jumlah) === Number(uItem.bukaObatBaru) && (i.keterangan === 'Auto' || i.keterangan.indexOf('Auto') !== -1)) return false;
+          return true;
+        });
+      }
+      lsSet('pestisida_usage', JSON.stringify(dailyUsage));
+      lsSet('pestisida_inventory', JSON.stringify(inventory));
+      markDirty('usage', 'inventory');
+      renderUsage(); renderInventory(); renderPestisidaList();
+    }
+    showToast('✓ Dihapus', 'ok');
+  }
+
+  function ensureAutoMutasi() {
+    let changed = false;
+    const usageMap = {};
+    dailyUsage.forEach(u => { usageMap[String(u.id)] = u; });
+    const before = inventory.length;
+    inventory = inventory.filter(i => {
+      if (!i.refUsageId) return true;
+      const u = usageMap[String(i.refUsageId)];
+      return !!u && (Number(u.bukaObatBaru) || 0) > 0;
+    });
+    if (inventory.length !== before) changed = true;
+    dailyUsage.forEach(u => {
+      const buka = Number(u.bukaObatBaru) || 0;
+      if (buka <= 0 || !u.namaObat) return;
+      const ex = inventory.find(i => i.refUsageId && String(i.refUsageId) === String(u.id));
+      const sat = (getMaster(u.namaObat) || {}).satuan || '';
+      if (!ex) {
+        inventory.push({ id: Number(u.id) + 1, refUsageId: u.id, tanggal: u.tanggal, nama: u.namaObat, jenis: 'Keluar', jumlah: buka, delta: -buka, keterangan: 'Auto', satuan: sat });
+        changed = true;
+      } else if (ex.tanggal !== u.tanggal || ex.nama !== u.namaObat || Number(ex.jumlah) !== buka) {
+        ex.tanggal = u.tanggal; ex.nama = u.namaObat; ex.jumlah = buka; ex.delta = -buka; ex.keterangan = 'Auto'; ex.satuan = sat;
+        changed = true;
+      }
+    });
+    if (changed) { lsSet('pestisida_inventory', JSON.stringify(inventory)); markDirty('inventory'); }
+    return changed;
+  }
+
+  // ================= RENDER =================
+  function formatIsi(p) { return (p.isi===''||p.isi==null) ? '-' : (p.isi+' '+(p.satuan||'')); }
+
+  function renderPestisidaList() {
+    const el = document.getElementById('listContent');
+    if (!pestisidaList.length) {
+      el.innerHTML = '<div class="empty">Belum ada pestisida.</div>';
+    } else {
+      el.innerHTML = '<div class="table-wrap"><table><thead><tr>'+
+        '<th class="tc">#</th><th>Nama</th><th class="tc">Isi</th><th class="tc">Satuan</th><th class="tc">Total Masuk</th><th class="tc">Stok Saat Ini</th><th class="tc">Aksi</th></tr></thead><tbody>'+
+        pestisidaList.map((p,i)=>{
+          const stok=getStokSekarang(p.nama), total=getTotalMasuk(p.nama);
+          const cls=stok<0?'stok minus':(stok===0?'stok nol':'stok');
+          return '<tr><td class="tc muted">'+(i+1)+'</td><td style="font-weight:600">'+p.nama+'</td>'+
+            '<td class="tc"><span class="badge">'+formatIsi(p)+'</span></td>'+
+            '<td class="tc muted">'+(p.satuan||'-')+'</td>'+
+            '<td class="tc"><span class="total">'+total+'</span></td>'+
+            '<td class="tc"><span class="'+cls+'">'+stok+'</span></td>'+
+            '<td class="tc"><button type="button" class="btn btn-danger" data-del-pest="'+p.id+'">Hapus</button></td></tr>';
+        }).join('')+'</tbody></table></div>';
+    }
+    const invSel = document.getElementById('invNama');
+    invSel.innerHTML = '<option value="">- Pestisida -</option>'+
+      pestisidaList.map(p=>{
+        const l=p.isi?p.nama+' ('+p.isi+' '+p.satuan+')':p.nama;
+        return '<option value="'+p.nama+'">'+l+'</option>';
+      }).join('');
+    updateKategoriObat();
+  }
+
+  function renderInventory() {
+    const el = document.getElementById('inventoryContent');
+    if(!inventory.length){ el.innerHTML='<div class="empty">Belum ada mutasi.</div>'; return; }
+    const saldo={}; pestisidaList.forEach(p=>saldo[p.nama]=parseFloat(p.stokAwal)||0);
+    const rows=getMutasiSorted().map(t=>{
+      saldo[t.nama]=(saldo[t.nama]||0)+t.delta;
+      const badge=t.jenis==='Masuk'?'<span class="ok">Masuk</span>':(t.jenis==='Keluar'?'<span class="bad">Keluar</span>':'<span style="color:#d97706">Sesuai</span>');
+      const j=t.delta>0?'<td class="tc ok">+'+t.jumlah+'</td>':'<td class="tc bad">-'+t.jumlah+'</td>';
+      const s=saldo[t.nama];
+      return '<tr><td>'+t.tanggal+'</td><td style="font-weight:600">'+t.nama+'</td><td class="tc">'+badge+'</td>'+j+
+        '<td class="tc muted">'+(t.satuan||'')+'</td><td class="tc '+(s<0?'bad':'')+'" style="font-weight:700">'+s+'</td>'+
+        '<td class="muted">'+((t.keterangan||''))+'</td>'+
+        '<td class="tc"><button type="button" class="btn btn-danger" data-del-inv="'+t.id+'">Hapus</button></td></tr>';
+    });
+    el.innerHTML='<div class="table-wrap"><table><thead><tr>'+
+      '<th>Tgl</th><th>Nama</th><th class="tc">Jenis</th><th class="tc">Jml</th><th class="tc">Sat</th><th class="tc">Setelah</th><th>Ket</th><th class="tc">Aksi</th>'+
+      '</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>';
+  }
+
+  function renderUsage() {
+    const el = document.getElementById('usageContent');
+    if(!dailyUsage.length){ el.innerHTML='<div class="empty">Belum ada penggunaan.</div>'; return; }
+    el.innerHTML='<div class="table-wrap"><table style="font-size:12px"><thead><tr>'+
+      '<th>Tgl</th><th class="tc">GH</th><th>Jenis</th><th>Obat</th><th class="tc">Kons</th><th class="tc">Air</th><th class="tc">Vol</th><th>Sasaran</th><th class="tc">Buka</th><th class="tc">Aksi</th>'+
+      '</tr></thead><tbody>'+dailyUsage.map(i=>
+        '<tr><td>'+i.tanggal+'</td><td class="tc">'+i.gh+'</td><td>'+i.jenisPenyemprotan+'</td><td style="font-weight:600">'+i.namaObat+'</td>'+
+        '<td class="tc">'+i.konsentrasi+'</td><td class="tc">'+i.volAirBaku+'</td><td class="tc">'+i.volObat+'</td><td>'+i.sasaran+'</td><td class="tc">'+(i.bukaObatBaru||0)+'</td>'+
+        '<td class="tc"><button type="button" class="btn btn-danger" data-del-use="'+i.id+'">Hapus</button></td></tr>'
+      ).join('')+'</tbody></table></div>';
+  }
+
+  function updateKategoriObat() {
+    const jenis=document.getElementById('usageJenis').value;
+    const sel=document.getElementById('usageObat');
+    const prev=sel.value;
+    sel.innerHTML='<option value="">- Bahan Aktif -</option>';
+    let opts=(jenis&&obatDatabase[jenis])?obatDatabase[jenis].slice():[];
+    pestisidaList.forEach(p=>{ if(!opts.some(o=>o.toLowerCase()===p.nama.toLowerCase())) opts.push(p.nama); });
+    opts.forEach(o=>{ const op=document.createElement('option'); op.value=o; op.textContent=o; if(o===prev)op.selected=true; sel.appendChild(op); });
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(e=>e.classList.remove('active'));
+    const t = document.getElementById(tab);
+    if (t) t.classList.add('active');
+    const btn = document.querySelector('.tab-btn[data-tab="'+tab+'"]');
+    if (btn) btn.classList.add('active');
+    if (tab==='pestisidaList') renderPestisidaList();
+    else if (tab==='inventory') renderInventory();
+    else renderUsage();
+  }
+
+  // ================= AUTH & SYNC =================
+  function updateAuthStatus() {
+    const s=document.getElementById('authStatus'), a=document.getElementById('authBtn');
+    const p=document.getElementById('pushBtn'), l=document.getElementById('pullBtn');
+    if (isAuthenticated && scriptUrl) {
+      s.innerHTML='✓ Terhubung — auto-sync'; s.className='auth-status ok';
+      a.textContent='Putuskan'; a.className='btn btn-logout';
+      p.style.display=l.style.display='inline-flex';
+    } else {
+      s.innerHTML=''; s.className='auth-status';
+      a.textContent='☁️ Connect Sheets'; a.className='btn btn-primary';
+      p.style.display=l.style.display='none';
+    }
+  }
+
+  function handleAuthClick() {
+    if (isAuthenticated) {
+      isAuthenticated=false; lsSet('pestisida_auth','false');
+      updateAuthStatus(); showToast('Koneksi diputus','info'); return;
+    }
+    const url=prompt('URL Web App Apps Script (/exec):\nWho has access = Anyone', scriptUrl||'');
+    if(!url||!url.trim()) return;
+    scriptUrl=url.trim().replace(/\/$/,'');
+    if(scriptUrl.indexOf('/exec')<0) return alert('URL harus mengandung /exec');
+    lsSet('pestisida_script_url',scriptUrl);
+    lsSet('pestisida_auth','true');
+    isAuthenticated=true; dirty.list=dirty.inventory=dirty.usage=true;
+    updateAuthStatus(); showToast('✓ Tersambung','ok');
+    setTimeout(()=>{ pullFromSheets(true).finally(()=>{ dirty.list=dirty.inventory=dirty.usage=true; syncToSheets(false); }); },300);
+  }
+
+  async function syncToSheets(force) {
+    force=!!force;
+    if(!scriptUrl){ if(force) alert('Belum connect'); return; }
+    if(isSyncing){ pendingSync=true; return; }
+    const payload={}; let has=false;
+    if(force||dirty.list){ payload.list=pestisidaList; has=true; }
+    if(force||dirty.inventory){ payload.inventory=inventory; has=true; }
+    if(force||dirty.usage){ payload.usage=dailyUsage; has=true; }
+    if(!has) return;
+    isSyncing=true; pendingSync=false; lastSyncAt=Date.now();
+    const st=document.getElementById('authStatus');
+    if(st){ st.innerHTML='⟳ Sync...'; st.className='auth-status syncing'; }
+    if(force) showToast('☁️ Sync...','info');
+    try {
+      await fetch(scriptUrl,{ method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload) });
+      if(payload.list) dirty.list=false;
+      if(payload.inventory) dirty.inventory=false;
+      if(payload.usage) dirty.usage=false;
+      if(st){ st.innerHTML='✓ Terhubung — auto-sync'; st.className='auth-status ok'; }
+      if(force) showToast('✓ Terkirim','ok');
+    } catch(e) {
+      if(st){ st.innerHTML='✗ Gagal sync'; st.className='auth-status error'; }
+      showToast('Gagal: '+e.message,'err');
+    } finally {
+      isSyncing=false;
+      if(pendingSync){ pendingSync=false; setTimeout(()=>syncToSheets(false),600); }
+    }
+  }
+
+  async function pullFromSheets(silent) {
+    silent=!!silent;
+    if(!scriptUrl){ if(!silent) alert('Belum connect'); return; }
+    if(!silent && !confirm('Muat dari Sheets akan TIMPA data lokal. Lanjut?')) return;
+    if(!silent) showToast('⬇️ Memuat...','info');
+    try {
+      const res=await fetch(scriptUrl+'?action=getAll',{redirect:'follow'});
+      const data=JSON.parse(await res.text());
+      if(data.error) throw new Error(data.error);
+      if(data.list){ pestisidaList=data.list.map(p=>Object.assign({stokAwal:0,isi:''},p)); lsSet('pestisida_list',JSON.stringify(pestisidaList)); }
+      if(data.inventory){ inventory=data.inventory; lsSet('pestisida_inventory',JSON.stringify(inventory)); }
+      if(data.usage){ dailyUsage=data.usage; lsSet('pestisida_usage',JSON.stringify(dailyUsage)); }
+      dirty.list=dirty.inventory=dirty.usage=false;
+      ensureAutoMutasi();
+      renderPestisidaList(); renderInventory(); renderUsage();
+      if(!silent) showToast('✓ Dimuat','ok');
+    } catch(e) {
+      showToast('Gagal: '+e.message,'err');
+      if(!silent) alert(e.message);
+    }
+  }
+
+  // ================= EXPORT CSV =================
+  function exportCSV(type) {
+    let data, fn;
+    if(type==='list'){
+      data=pestisidaList.map(p=>({nama:p.nama,isi:p.isi,satuan:p.satuan,totalMasuk:getTotalMasuk(p.nama),stokSaatIni:getStokSekarang(p.nama)}));
+      fn='daftar-pestisida.csv';
+    } else if(type==='inventory'){
+      const saldo={}; pestisidaList.forEach(p=>saldo[p.nama]=parseFloat(p.stokAwal)||0);
+      data=getMutasiSorted().map(t=>{ saldo[t.nama]=(saldo[t.nama]||0)+t.delta; return {tanggal:t.tanggal,nama:t.nama,jenis:t.jenis,jumlah:t.jumlah,satuan:t.satuan,stokSetelah:saldo[t.nama],keterangan:t.keterangan}; });
+      fn='stok-opname.csv';
+    } else { data=dailyUsage; fn='penggunaan.csv'; }
+    if(!data||!data.length) return alert('Tidak ada data');
+    const h=Object.keys(data[0]);
+    const csv=[h.join(',')].concat(data.map(r=>h.map(k=>typeof r[k]==='string'?'"'+r[k]+'"':r[k]).join(','))).join('\n');
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=fn; a.click();
+    showToast('✓ CSV didownload','ok');
+  }
+
+  // ================= IMPORT EXCEL =================
+  const IMPORT_CONFIGS = {
+    list: {
+      title: '📥 Import Daftar Pestisida',
+      hint: 'Kolom: Nama, Isi, Satuan, Stok Awal',
+      columns: [
+        { key: 'nama',     label: 'Nama',      required: true },
+        { key: 'isi',      label: 'Isi',       type: 'number' },
+        { key: 'satuan',   label: 'Satuan',    default: 'ML' },
+        { key: 'stokAwal', label: 'Stok Awal', type: 'number', default: 0 }
+      ],
+      contoh: { nama: 'Matador', isi: 250, satuan: 'ML', stokAwal: 10 }
+    },
+    inventory: {
+      title: '📥 Import Mutasi Stok',
+      hint: 'Kolom: Tanggal, Nama Pestisida, Jenis (Masuk/Keluar/Penyesuaian), Jumlah, Keterangan',
+      columns: [
+        { key: 'tanggal',    label: 'Tanggal',        required: true },
+        { key: 'nama',       label: 'Nama Pestisida', required: true },
+        { key: 'jenis',      label: 'Jenis',          required: true },
+        { key: 'jumlah',     label: 'Jumlah',         type: 'number', required: true },
+        { key: 'keterangan', label: 'Keterangan' }
+      ],
+      contoh: { tanggal: '2026-10-06', nama: 'Matador', jenis: 'Masuk', jumlah: 5, keterangan: 'Pembelian' }
+    },
+    usage: {
+      title: '📥 Import Penggunaan Harian',
+      hint: 'Kolom: Tanggal, GH, Jenis Penyemprotan, Nama Obat, Konsentrasi, Vol Air, Vol Obat, Sasaran, Buka Obat Baru, Keterangan',
+      columns: [
+        { key: 'tanggal',           label: 'Tanggal',            required: true },
+        { key: 'gh',                label: 'GH',                 required: true },
+        { key: 'jenisPenyemprotan', label: 'Jenis Penyemprotan', required: true },
+        { key: 'namaObat',          label: 'Nama Obat',          required: true },
+        { key: 'konsentrasi',       label: 'Konsentrasi',        type: 'number' },
+        { key: 'volAirBaku',        label: 'Vol Air',            type: 'number' },
+        { key: 'volObat',           label: 'Vol Obat',           type: 'number' },
+        { key: 'sasaran',           label: 'Sasaran' },
+        { key: 'bukaObatBaru',      label: 'Buka Obat Baru',     type: 'number', default: 0 },
+        { key: 'keterangan',        label: 'Keterangan' }
+      ],
+      contoh: { tanggal: '2026-10-06', gh: 'GH 1', jenisPenyemprotan: 'Preventif - Insektisida', namaObat: 'Matador', konsentrasi: 1, volAirBaku: 200, volObat: 200, sasaran: 'Thrips', bukaObatBaru: 1, keterangan: 'Rutin' }
+    }
+  };
+
+  function openImportModal(type) {
+    try {
+      if (!IMPORT_CONFIGS[type]) { showToast('Tipe import tidak valid', 'err'); return; }
+      currentImportType = type;
+      parsedImportRows = [];
+      const cfg = IMPORT_CONFIGS[type];
+      document.getElementById('importModalTitle').textContent = cfg.title;
+      document.getElementById('importTemplateHint').textContent = cfg.hint;
+      document.getElementById('importPreviewBox').classList.remove('show');
+      document.getElementById('importPreviewBox').innerHTML = '';
+      document.getElementById('importDoBtn').disabled = true;
+      document.getElementById('importDoBtn').textContent = '🚀 Import';
+      document.getElementById('importProgress').classList.remove('show');
+      document.getElementById('importProgressFill').style.width = '0%';
+      const modal = document.getElementById('importModal');
+      modal.classList.add('show');
+      modal.style.display = 'flex';
+    } catch (err) {
+      console.error(err);
+      showToast('Error buka modal: ' + err.message, 'err');
+    }
+  }
+
+  function closeImportModal() {
+    const modal = document.getElementById('importModal');
+    modal.classList.remove('show');
+    modal.style.display = '';
+    parsedImportRows = [];
+    currentImportType = null;
+  }
+
+  function downloadImportTemplate() {
+    if (!currentImportType) return;
+    if (typeof XLSX === 'undefined') { showToast('Library Excel belum termuat. Cek koneksi internet.', 'err'); return; }
+    const cfg = IMPORT_CONFIGS[currentImportType];
+    const headers = cfg.columns.map(c => c.label);
+    const contohRow = cfg.columns.map(c => cfg.contoh[c.key] ?? '');
+    const ws = XLSX.utils.aoa_to_sheet([headers, contohRow]);
+    ws['!cols'] = headers.map(() => ({ wch: 20 }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Template');
+
+    const petunjuk = [['PETUNJUK PENGISIAN'],['']];
+    petunjuk.push(['1. Baris ke-1 adalah header — JANGAN diubah.']);
+    petunjuk.push(['2. Baris ke-2 adalah CONTOH — silakan hapus/timpa.']);
+    petunjuk.push(['3. Tanggal format: YYYY-MM-DD (contoh: 2026-10-06)']);
+    if (currentImportType === 'list') {
+      petunjuk.push(['4. Satuan: ML / Liter / Gr / Kg / Botol / Galon / Bungkus']);
+      petunjuk.push(['5. Stok Awal opsional, default 0']);
+    } else if (currentImportType === 'inventory') {
+      petunjuk.push(['4. Nama Pestisida HARUS sudah ada di Daftar']);
+      petunjuk.push(['5. Jenis: Masuk / Keluar / Penyesuaian']);
+    } else {
+      petunjuk.push(['4. GH: "GH 1" atau "GH 2"']);
+      petunjuk.push(['5. Jenis Penyemprotan: Preventif/Kuratif - Insektisida/Akarisida/Fungisida']);
+      petunjuk.push(['6. Buka Obat Baru = jumlah yang dibuka (stok otomatis berkurang)']);
+    }
+    petunjuk.push(['7. Simpan sebagai .xlsx lalu upload di aplikasi.']);
+    const ws2 = XLSX.utils.aoa_to_sheet(petunjuk);
+    ws2['!cols'] = [{ wch: 70 }];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Petunjuk');
+
+    XLSX.writeFile(wb, 'Template_' + currentImportType + '_' + new Date().toISOString().split('T')[0] + '.xlsx');
+    showToast('✓ Template didownload', 'ok');
+  }
+
+  function parseExcelDate(v) {
+    if (v === null || v === undefined || v === '') return '';
+    if (typeof v === 'number') {
+      const d = XLSX.SSF.parse_date_code(v);
+      if (d) return d.y + '-' + String(d.m).padStart(2,'0') + '-' + String(d.d).padStart(2,'0');
+    }
+    const s = String(v).trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+    const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+    if (m) {
+      let [, d, mo, y] = m;
+      if (y.length === 2) y = '20' + y;
+      return y + '-' + mo.padStart(2,'0') + '-' + d.padStart(2,'0');
+    }
+    const dt = new Date(s);
+    if (!isNaN(dt.getTime())) return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+    return s;
+  }
+
+  // ============ HELPER: NORMALIZE HEADER ============
+  function normalizeHeader(s) {
+    return String(s || '').toLowerCase()
+      .replace(/[\(\)\[\]\{\}_\-\.\,\:\;\/\\]/g, ' ')
+      .replace(/\s+/g, ' ').trim();
+  }
+
+  // ============ HELPER: DETEKSI TIPE DARI HEADER ============
+  function detectTypeFromHeaders(headers) {
+    const norm = headers.map(normalizeHeader).join(' | ');
+    const has = (kw) => norm.indexOf(kw) !== -1;
+    if (has('penyemprotan') || has('nama obat') || has('namaobat') || has('vol air') || has('volair') || has('buka obat') || has('bukaobat')) return 'usage';
+    if (has('stok awal') || has('stokawal')) return 'list';
+    if (has('jenis') && !has('penyemprotan')) return 'inventory';
+    if (has('obat')) return 'usage';
+    if (has('jumlah') && has('nama')) return 'inventory';
+    if (has('satuan')) return 'list';
+    return null;
+  }
+
+  // ============ HELPER: FLEXIBLE COLUMN MATCH ============
+  function findColumnKeyFlexible(headerText, columns) {
+    const norm = normalizeHeader(headerText);
+    if (!norm) return null;
+    for (const c of columns) {
+      if (normalizeHeader(c.label) === norm) return c.key;
+      if (normalizeHeader(c.key) === norm) return c.key;
+    }
+    const candidates = [];
+    for (const c of columns) {
+      const cl = normalizeHeader(c.label);
+      const ck = normalizeHeader(c.key);
+      if (cl && (cl.includes(norm) || norm.includes(cl))) candidates.push({ key: c.key, len: cl.length });
+      if (ck && (ck.includes(norm) || norm.includes(ck))) candidates.push({ key: c.key, len: ck.length });
+    }
+    if (candidates.length) {
+      candidates.sort((a, b) => b.len - a.len);
+      return candidates[0].key;
+    }
+    return null;
+  }
+
+  // ============ PROCESS IMPORT FILE (v2 - AUTO DETECT) ============
+  function processImportFile(file) {
+    if (typeof XLSX === 'undefined') {
+      showToast('❌ Library Excel belum termuat. Cek koneksi internet / refresh.', 'err');
+      console.error('XLSX undefined. CDN gagal load?');
+      return;
+    }
+    if (!currentImportType) {
+      showToast('❌ Pilih tab dulu sebelum upload', 'err');
+      return;
+    }
+
+    console.log('════════════════════════════════');
+    console.log('📄 FILE:', file.name, '|', (file.size/1024).toFixed(1) + ' KB');
+    console.log('📄 Tab aktif saat upload:', currentImportType);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: 'array' });
+        if (!wb.SheetNames.length) { showToast('File tidak punya sheet', 'err'); return; }
+        const ws = wb.Sheets[wb.SheetNames[0]];
+
+        const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
+        if (!aoa.length) { showToast('File kosong', 'err'); return; }
+
+        let headerRowIdx = 0;
+        for (let i = 0; i < Math.min(5, aoa.length); i++) {
+          const filled = (aoa[i] || []).filter(v => v !== '' && v !== null && v !== undefined).length;
+          if (filled >= 2) { headerRowIdx = i; break; }
         }
-        return true;
+        const rawHeaders = (aoa[headerRowIdx] || []).map(h => String(h || '').trim());
+        const nonEmptyHeaders = rawHeaders.filter(h => h);
+        console.log('📄 Header row index:', headerRowIdx);
+        console.log('📄 Headers ditemukan:', nonEmptyHeaders);
+
+        if (nonEmptyHeaders.length === 0) {
+          showToast('❌ Tidak ada header terdeteksi di baris awal file', 'err');
+          return;
+        }
+
+        const detectedType = detectTypeFromHeaders(nonEmptyHeaders);
+        console.log('📄 Tipe auto-detect:', detectedType, '| Tab aktif:', currentImportType);
+
+        let workType = currentImportType;
+        if (detectedType && detectedType !== currentImportType) {
+          workType = detectedType;
+          currentImportType = detectedType;
+          document.getElementById('importModalTitle').textContent = IMPORT_CONFIGS[detectedType].title;
+          document.getElementById('importTemplateHint').textContent = IMPORT_CONFIGS[detectedType].hint;
+          showToast('ℹ️ File terdeteksi sebagai: ' + IMPORT_CONFIGS[detectedType].title.replace('📥 ',''), 'info');
+        }
+        const cfg = IMPORT_CONFIGS[workType];
+
+        const headerMap = {};
+        rawHeaders.forEach((h, idx) => {
+          if (!h) return;
+          const key = findColumnKeyFlexible(h, cfg.columns);
+          if (key) headerMap[idx] = key;
+        });
+        console.log('📄 Mapping kolom:', headerMap);
+        console.log('📄 Total kolom ter-map:', Object.keys(headerMap).length, 'dari', rawHeaders.length);
+
+        if (Object.keys(headerMap).length === 0) {
+          showToast('❌ Header tidak dikenali: ' + nonEmptyHeaders.slice(0,5).join(', '), 'err');
+          return;
+        }
+
+        const parsed = [];
+        for (let i = headerRowIdx + 1; i < aoa.length; i++) {
+          const row = aoa[i] || [];
+          const filled = row.filter(v => v !== '' && v !== null && v !== undefined).length;
+          if (filled === 0) continue;
+
+          const obj = { __row: i + 1 };
+          Object.keys(headerMap).forEach(colIdx => {
+            const key = headerMap[colIdx];
+            let val = row[colIdx];
+            const colDef = cfg.columns.find(c => c.key === key);
+            if (!colDef) return;
+
+            if (colDef.type === 'number') {
+              val = (val === '' || val === null || val === undefined) ? (colDef.default ?? '') : (Number(val) || 0);
+            } else if (key === 'tanggal') {
+              val = parseExcelDate(val);
+            } else {
+              val = String(val == null ? '' : val).trim();
+              if (!val && colDef.default !== undefined) val = colDef.default;
+            }
+            obj[key] = val;
+          });
+          parsed.push(obj);
+        }
+
+        console.log('📄 Baris data terbaca:', parsed.length);
+        if (parsed.length > 0) console.log('📄 Contoh baris ke-1:', parsed[0]);
+
+        if (!parsed.length) {
+          showToast('❌ Tidak ada baris data (hanya header). Cek file Anda.', 'err');
+          return;
+        }
+
+        parsed.forEach(r => {
+          r.__errors = [];
+          if (workType === 'list') {
+            if (!r.nama) r.__errors.push('nama kosong');
+            else if (pestisidaList.some(p => p.nama.toLowerCase() === String(r.nama).toLowerCase())) r.__errors.push('nama sudah ada');
+          } else if (workType === 'inventory') {
+            if (!r.tanggal) r.__errors.push('tanggal kosong');
+            else if (!/^\d{4}-\d{2}-\d{2}$/.test(r.tanggal)) r.__errors.push('format tanggal');
+            if (!r.nama) r.__errors.push('nama kosong');
+            else if (!pestisidaList.some(p => p.nama === r.nama)) r.__errors.push('nama belum ada di Daftar');
+            if (!r.jenis) r.__errors.push('jenis kosong');
+            else if (['Masuk','Keluar','Penyesuaian'].indexOf(r.jenis) < 0) r.__errors.push('jenis salah');
+            if (r.jumlah === '' || isNaN(r.jumlah) || r.jumlah === 0) r.__errors.push('jumlah invalid');
+          } else if (workType === 'usage') {
+            if (!r.tanggal) r.__errors.push('tanggal kosong');
+            else if (!/^\d{4}-\d{2}-\d{2}$/.test(r.tanggal)) r.__errors.push('format tanggal');
+            if (!r.gh) r.__errors.push('GH kosong');
+            else if (['GH 1','GH 2'].indexOf(r.gh) < 0) r.__errors.push('GH harus "GH 1"/"GH 2"');
+            if (!r.jenisPenyemprotan) r.__errors.push('jenis kosong');
+            if (!r.namaObat) r.__errors.push('nama obat kosong');
+          }
+        });
+
+        const valid = parsed.filter(r => r.__errors.length === 0).length;
+        console.log('📄 Valid:', valid, '| Error:', parsed.length - valid);
+
+        parsedImportRows = parsed;
+        renderImportPreview(parsed);
+
+      } catch (err) {
+        console.error('❌ Error parse file:', err);
+        showToast('Gagal baca file: ' + err.message, 'err');
+      }
+    };
+    reader.onerror = () => showToast('Gagal baca file', 'err');
+    reader.readAsArrayBuffer(file);
+  }
+
+  function renderImportPreview(rows) {
+    const box = document.getElementById('importPreviewBox');
+    const btn = document.getElementById('importDoBtn');
+    const cfg = IMPORT_CONFIGS[currentImportType];
+    const validRows = rows.filter(r => r.__errors.length === 0);
+    const invalidRows = rows.filter(r => r.__errors.length > 0);
+
+    const previewCols = ['__row'].concat(cfg.columns.slice(0, 6).map(c => c.key));
+    const headerLabels = { __row: '#' };
+    cfg.columns.forEach(c => { headerLabels[c.key] = c.label; });
+
+    let html = '<div class="preview-summary">' +
+      '<span class="chip chip-info">📋 ' + cfg.title.replace('📥 ','') + '</span>' +
+      '<span class="chip chip-info">Total: ' + rows.length + '</span>' +
+      '<span class="chip chip-ok">✓ Valid: ' + validRows.length + '</span>' +
+      (invalidRows.length ? '<span class="chip chip-bad">✗ Error: ' + invalidRows.length + '</span>' : '') +
+      '</div>';
+
+    if (invalidRows.length > 0 && validRows.length === 0) {
+      const contohErr = invalidRows[0].__errors.join(', ');
+      html += '<div class="alert" style="background:#fef2f2;border-left-color:#ef4444;color:#991b1b;margin-bottom:8px">' +
+              '⚠️ Semua baris error! Contoh penyebab: <b>' + contohErr + '</b><br>' +
+              'Cek kembali file Excel Anda.' +
+              '</div>';
+    }
+
+    html += '<div style="font-size:12px;color:#666;margin-bottom:6px;">Preview ' + Math.min(15, rows.length) + ' baris pertama:</div>';
+    html += '<div class="preview-table-wrap"><table><thead><tr>';
+    previewCols.forEach(c => { html += '<th>' + (headerLabels[c] || c) + '</th>'; });
+    if (invalidRows.length) html += '<th>Error</th>';
+    html += '</tr></thead><tbody>';
+
+    rows.slice(0, 15).forEach(r => {
+      html += '<tr class="' + (r.__errors.length ? 'invalid' : '') + '">';
+      previewCols.forEach(c => {
+        const v = r[c];
+        html += '<td>' + (v != null && v !== '' ? String(v) : '<span style="color:#ccc">—</span>') + '</td>';
+      });
+      if (invalidRows.length) html += '<td>' + (r.__errors.join(', ') || '') + '</td>';
+      html += '</tr>';
+    });
+    if (rows.length > 15) {
+      const span = previewCols.length + (invalidRows.length ? 1 : 0);
+      html += '<tr><td colspan="' + span + '" style="text-align:center;color:#999;">... dan ' + (rows.length - 15) + ' baris lainnya</td></tr>';
+    }
+    html += '</tbody></table></div>';
+
+    box.innerHTML = html;
+    box.classList.add('show');
+
+    if (validRows.length > 0) {
+      btn.disabled = false;
+      btn.textContent = '🚀 Import ' + validRows.length + ' Baris';
+    } else {
+      btn.disabled = true;
+      btn.textContent = '🚀 Tidak ada baris valid';
+    }
+  }
+
+  async function doImport() {
+    const validRows = parsedImportRows.filter(r => r.__errors.length === 0);
+    if (!validRows.length) return;
+    const bar = document.getElementById('importProgress');
+    const fill = document.getElementById('importProgressFill');
+    const btn = document.getElementById('importDoBtn');
+    btn.disabled = true;
+    bar.classList.add('show');
+    fill.style.width = '30%';
+
+    const now = Date.now();
+    let imported = 0;
+
+    if (currentImportType === 'list') {
+      validRows.forEach((r, i) => {
+        pestisidaList.push({
+          id: now + i, nama: r.nama,
+          isi: (r.isi === '' || r.isi === undefined) ? '' : (parseFloat(r.isi) || 0),
+          satuan: r.satuan || 'ML',
+          stokAwal: parseFloat(r.stokAwal) || 0
+        });
+        imported++;
+      });
+      lsSet('pestisida_list', JSON.stringify(pestisidaList));
+      markDirty('list');
+    } else if (currentImportType === 'inventory') {
+      validRows.forEach((r, i) => {
+        const jumlah = Math.abs(parseFloat(r.jumlah) || 0);
+        let delta;
+        if (r.jenis === 'Masuk') delta = jumlah;
+        else if (r.jenis === 'Keluar') delta = -jumlah;
+        else delta = parseFloat(r.jumlah) || 0;
+        inventory.push({
+          id: now + i, tanggal: r.tanggal, nama: r.nama, jenis: r.jenis,
+          jumlah: Math.abs(delta), delta: delta,
+          keterangan: r.keterangan || 'Import',
+          satuan: (getMaster(r.nama) || {}).satuan || ''
+        });
+        imported++;
+      });
+      lsSet('pestisida_inventory', JSON.stringify(inventory));
+      markDirty('inventory');
+    } else if (currentImportType === 'usage') {
+      validRows.forEach((r, i) => {
+        const usageId = now + i * 2;
+        dailyUsage.push({
+          id: usageId, tanggal: r.tanggal, gh: r.gh,
+          jenisPenyemprotan: r.jenisPenyemprotan, namaObat: r.namaObat,
+          konsentrasi: parseFloat(r.konsentrasi) || 0,
+          volAirBaku: parseFloat(r.volAirBaku) || 0,
+          volObat: parseFloat(r.volObat) || 0,
+          sasaran: r.sasaran || '',
+          bukaObatBaru: parseFloat(r.bukaObatBaru) || 0,
+          keterangan: r.keterangan || '-'
+        });
+        imported++;
+      });
+      lsSet('pestisida_usage', JSON.stringify(dailyUsage));
+      ensureAutoMutasi();
+      markDirty('usage', 'inventory');
+    }
+
+    fill.style.width = '70%';
+    if (isAuthenticated && scriptUrl) {
+      try { await syncToSheets(false); } catch(e) {}
+    }
+    fill.style.width = '100%';
+    setTimeout(() => {
+      showToast('✓ Import selesai! ' + imported + ' baris berhasil', 'ok');
+      closeImportModal();
+      renderPestisidaList(); renderInventory(); renderUsage();
+    }, 400);
+  }
+
+  // ================= EVENT BINDING =================
+  function bind() {
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+    });
+
+    // Header auth
+    document.getElementById('authBtn').addEventListener('click', handleAuthClick);
+    document.getElementById('pushBtn').addEventListener('click', () => syncToSheets(true));
+    document.getElementById('pullBtn').addEventListener('click', () => pullFromSheets(false));
+    document.getElementById('installBtn').addEventListener('click', installPWA);
+
+    // Add buttons
+    document.getElementById('addPestisidaBtn').addEventListener('click', addPestisida);
+    document.getElementById('addInventoryBtn').addEventListener('click', addInventory);
+    document.getElementById('addUsageBtn').addEventListener('click', addUsage);
+
+    // Kategori obat
+    document.getElementById('usageJenis').addEventListener('change', updateKategoriObat);
+
+    // Delegasi klik body
+    document.body.addEventListener('click', function(e) {
+      const t = e.target.closest ? e.target.closest('button') : null;
+      if (!t) return;
+
+      const exp = t.getAttribute('data-export');
+      if (exp) { e.preventDefault(); exportCSV(exp); return; }
+
+      const imp = t.getAttribute('data-import');
+      if (imp) { e.preventDefault(); openImportModal(imp); return; }
+
+      if (t.getAttribute('data-action') === 'close-modal') {
+        e.preventDefault(); closeImportModal(); return;
+      }
+
+      const delPest = t.getAttribute('data-del-pest');
+      if (delPest) { e.preventDefault(); deletePestisida(Number(delPest)); return; }
+
+      const delInv = t.getAttribute('data-del-inv');
+      if (delInv) { e.preventDefault(); deleteItem('inventory', Number(delInv)); return; }
+
+      const delUse = t.getAttribute('data-del-use');
+      if (delUse) { e.preventDefault(); deleteItem('usage', Number(delUse)); return; }
+    });
+
+    // Modal-specific
+    document.getElementById('downloadTemplateBtn').addEventListener('click', downloadImportTemplate);
+    document.getElementById('importDoBtn').addEventListener('click', doImport);
+
+    // File input
+    document.getElementById('importFile').addEventListener('change', function(ev) {
+      const file = ev.target.files[0];
+      if (!file) return;
+      processImportFile(file);
+      ev.target.value = '';
+    });
+
+    // Drag & drop
+    const zone = document.getElementById('importUploadZone');
+    if (zone) {
+      ['dragenter','dragover'].forEach(ev => {
+        zone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); zone.classList.add('dragover'); });
+      });
+      ['dragleave','drop'].forEach(ev => {
+        zone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); zone.classList.remove('dragover'); });
+      });
+      zone.addEventListener('drop', e => {
+        const files = e.dataTransfer.files;
+        if (files.length) processImportFile(files[0]);
       });
     }
 
-    localStorage.setItem('pestisida_usage', JSON.stringify(dailyUsage));
-    localStorage.setItem('pestisida_inventory', JSON.stringify(inventory));
-    markDirty('usage', 'inventory');
-    renderUsage();
-    renderInventory();
-    renderPestisidaList();
+    // Overlay close
+    const modal = document.getElementById('importModal');
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) closeImportModal();
+    });
+
+    // ESC close
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.classList.contains('show')) closeImportModal();
+    });
   }
-}
 
-function renderInventory() {
-  if(!inventory.length){ document.getElementById('inventoryContent').innerHTML='<div class="empty">Belum ada mutasi.</div>'; return; }
-  const saldo={}; pestisidaList.forEach(p=>saldo[p.nama]=parseFloat(p.stokAwal)||0);
-  const rows=getMutasiSorted().map(t=>{
-    saldo[t.nama]=(saldo[t.nama]||0)+t.delta;
-    const badge=t.jenis==='Masuk'?'<span class="ok">Masuk</span>':(t.jenis==='Keluar'?'<span class="bad">Keluar</span>':'<span style="color:#d97706">Sesuai</span>');
-    const j=t.delta>0?'<td class="tc ok">+'+t.jumlah+'</td>':'<td class="tc bad">-'+t.jumlah+'</td>';
-    const s=saldo[t.nama];
-    return '<tr><td>'+t.tanggal+'</td><td style="font-weight:600">'+t.nama+'</td><td class="tc">'+badge+'</td>'+j+
-      '<td class="tc muted">'+(t.satuan||'')+'</td><td class="tc '+(s<0?'bad':'')+'" style="font-weight:700">'+s+'</td>'+
-      '<td class="muted">'+((t.keterangan||''))+'</td>'+
-      '<td class="tc"><button class="btn btn-danger" onclick="deleteItem(\'inventory\','+t.id+')">Hapus</button></td></tr>';
+  // ================= PWA =================
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBanner').classList.add('show');
   });
-  document.getElementById('inventoryContent').innerHTML='<div class="table-wrap"><table><thead><tr>'+
-    '<th>Tgl</th><th>Nama</th><th class="tc">Jenis</th><th class="tc">Jml</th><th class="tc">Sat</th><th class="tc">Setelah</th><th>Ket</th><th class="tc">Aksi</th>'+
-    '</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>';
-}
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    document.getElementById('installBanner').classList.remove('show');
+    showToast('✓ App terinstall!', 'ok');
+  });
+  async function installPWA() {
+    if (!deferredPrompt) {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (isIOS) alert('Di iPhone/iPad:\n1. Tap tombol Share (kotak panah)\n2. Pilih "Add to Home Screen"\n3. Tap Add');
+      else alert('Install belum tersedia.\n\nCoba:\n• Chrome menu ⋮ → Install app / Add to Home screen\n• Pastikan dibuka lewat HTTPS');
+      return;
+    }
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById('installBanner').classList.remove('show');
+  }
 
-function renderUsage() {
-  if(!dailyUsage.length){ document.getElementById('usageContent').innerHTML='<div class="empty">Belum ada penggunaan.</div>'; return; }
-  document.getElementById('usageContent').innerHTML='<div class="table-wrap"><table style="font-size:12px"><thead><tr>'+
-    '<th>Tgl</th><th class="tc">GH</th><th>Jenis</th><th>Obat</th><th class="tc">Kons</th><th class="tc">Air</th><th class="tc">Vol</th><th>Sasaran</th><th class="tc">Buka</th><th class="tc">Aksi</th>'+
-    '</tr></thead><tbody>'+dailyUsage.map(i=>
-      '<tr><td>'+i.tanggal+'</td><td class="tc">'+i.gh+'</td><td>'+i.jenisPenyemprotan+'</td><td style="font-weight:600">'+i.namaObat+'</td>'+
-      '<td class="tc">'+i.konsentrasi+'</td><td class="tc">'+i.volAirBaku+'</td><td class="tc">'+i.volObat+'</td><td>'+i.sasaran+'</td><td class="tc">'+(i.bukaObatBaru||0)+'</td>'+
-      '<td class="tc"><button class="btn btn-danger" onclick="deleteItem(\'usage\','+i.id+')">Hapus</button></td></tr>'
-    ).join('')+'</tbody></table></div>';
-}
+  // ================= INIT =================
+  function init() {
+    try {
+      document.getElementById('usageTanggal').valueAsDate = new Date();
+      document.getElementById('invTanggal').valueAsDate = new Date();
+    } catch(e) { console.warn('set date fail', e); }
 
-function exportCSV(type) {
-  let data, fn;
-  if(type==='list'){
-    data=pestisidaList.map(p=>({nama:p.nama,isi:p.isi,satuan:p.satuan,totalMasuk:getTotalMasuk(p.nama),stokSaatIni:getStokSekarang(p.nama)}));
-    fn='daftar-pestisida.csv';
-  } else if(type==='inventory'){
-    const saldo={}; pestisidaList.forEach(p=>saldo[p.nama]=parseFloat(p.stokAwal)||0);
-    data=getMutasiSorted().map(t=>{ saldo[t.nama]=(saldo[t.nama]||0)+t.delta; return {tanggal:t.tanggal,nama:t.nama,jenis:t.jenis,jumlah:t.jumlah,satuan:t.satuan,stokSetelah:saldo[t.nama],keterangan:t.keterangan}; });
-    fn='stok-opname.csv';
-  } else { data=dailyUsage; fn='penggunaan.csv'; }
-  if(!data||!data.length) return alert('Tidak ada data');
-  const h=Object.keys(data[0]);
-  const csv=[h.join(',')].concat(data.map(r=>h.map(k=>typeof r[k]==='string'?'"'+r[k]+'"':r[k]).join(','))).join('\n');
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=fn; a.click();
-}
+    bind();
+    updateAuthStatus();
+    ensureAutoMutasi();
+    renderPestisidaList();
+    renderInventory();
+    renderUsage();
 
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./service-worker.js').then(()=>console.log('SW ok')).catch(e=>console.log('SW fail',e));
-}
+    console.log('✓ AWB Pestisida App v2.2 loaded');
+    console.log('  - pestisidaList:', pestisidaList.length);
+    console.log('  - inventory:', inventory.length);
+    console.log('  - dailyUsage:', dailyUsage.length);
+    console.log('  - scriptUrl set:', !!scriptUrl);
+    console.log('  - XLSX available:', typeof XLSX !== 'undefined');
+  }
 
-// ===== INIT =====
-ensureAutoMutasi();
-renderPestisidaList(); renderInventory(); renderUsage();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(() => console.log('SW ok'))
+      .catch(e => console.log('SW skip:', e.message));
+  }
+})();
 </script>
 </body>
 </html>
