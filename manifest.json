@@ -1,7 +1,7 @@
 {
   "name": "IPM - PT. Agri Wangi Berry",
   "short_name": "IPM AWB",
-  "description": "Aplikasi monitoring HPT dan manajemen pestisida",
+  "description": "Aplikasi monitoring HPT, manajemen pestisida, serta suhu dan kelembapan greenhouse",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
