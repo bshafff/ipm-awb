@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ea580c">
+<title>Suhu & Kelembapan - PT. Agri Wangi Berry</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--p:#ea580c;--pd:#c2410c;--bg:#f0f0ee;--card:#fff;--bd:#d8d8d0;--tx:#1a1a18;--mu:#666}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--tx);line-height:1.5}
+.hdr{background:linear-gradient(135deg,#fb923c,#ea580c);color:#fff;text-align:center;padding:1rem;padding-top:calc(1rem + env(safe-area-inset-top))}
+.hdr img{width:70px;background:#fff;border-radius:14px;padding:5px}
+.hdr h1{font-size:1.15rem}.hdr p{font-size:.8rem;opacity:.92}
+.hbtn{margin-top:.5rem;display:inline-flex;gap:.4rem;flex-wrap:wrap;justify-content:center}
+.hbtn button,.hbtn a{padding:.4rem .75rem;border-radius:8px;border:none;font-size:.75rem;font-weight:700;background:rgba(255,255,255,.22);color:#fff;text-decoration:none;cursor:pointer}
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:40;overflow-x:auto}
+.tabs button{flex:1;min-width:85px;padding:12px 4px;border:none;background:none;font-weight:700;font-size:.78rem;color:var(--mu);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.tabs button.on{color:var(--p);border-bottom-color:var(--p)}
+.wrap{max-width:900px;margin:0 auto;padding:12px 12px 80px}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+.row>div{flex:1;min-width:130px}
+label{display:block;font-size:.72rem;font-weight:700;color:var(--mu);text-transform:uppercase;margin-bottom:3px}
+input,select{width:100%;padding:.65rem;border:1.5px solid var(--bd);border-radius:10px;font-size:.95rem;background:#fff;min-height:44px}
+input:focus,select:focus{outline:none;border-color:var(--p)}
+.seg{display:flex;gap:6px}.seg button{flex:1;padding:.65rem;border:1.5px solid var(--bd);border-radius:10px;background:#fff;font-weight:700;cursor:pointer;min-height:44px}
+.seg button.on{background:var(--p);color:#fff;border-color:var(--p)}
+.grid{display:grid;grid-template-columns:70px 1fr 1fr;gap:8px;align-items:center}
+.grid b{font-size:.9rem}.grid input{text-align:center;font-weight:700}
+.avg{display:flex;gap:8px;margin-top:10px}.avg div{flex:1;background:#fff7ed;border-radius:10px;padding:8px;text-align:center;font-size:.75rem;color:var(--mu)}
+.avg strong{display:block;font-size:1.3rem;color:var(--p)}
+.btn{padding:.8rem 1rem;border:none;border-radius:10px;font-weight:700;font-size:.9rem;cursor:pointer;background:var(--p);color:#fff;min-height:44px}
+.btn.s{background:#e5e5e0;color:var(--tx)}.btn.d{background:#fee2e2;color:#c62828}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:8px;margin-bottom:10px}
+.sc{background:#fff;border:1px solid var(--bd);border-left:4px solid var(--p);border-radius:10px;padding:8px}
+.sc small{font-size:.66rem;color:var(--mu);font-weight:700;text-transform:uppercase;display:block}
+.sc b{font-size:1.15rem;color:var(--p)}.sc i{font-size:.66rem;color:var(--mu);display:block;font-style:normal}
+.gh{font-weight:800;font-size:.85rem;border-left:4px solid var(--p);padding-left:8px;margin:12px 0 8px}
+.ch{position:relative;height:260px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.8rem;text-align:center}
+th{background:#1f4e79;color:#fff;padding:6px 4px;position:sticky;top:0}td{padding:5px 4px;border-bottom:1px solid #eee}
+td.a{background:#eee;color:#1a56a0}tr.cl{cursor:pointer}tr.cl:hover{background:#fff7ed}td.hi{color:#c62828;font-weight:700}
+#msg{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));max-width:420px;margin:auto;background:#1f2937;color:#fff;padding:.7rem 1rem;border-radius:10px;font-size:.85rem;display:none;z-index:99}
+.mu{font-size:.78rem;color:var(--mu)}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <img src="LOGO_AWB.png" alt="" onerror="this.style.display='none'">
+  <h1>🌡️ SUHU & KELEMBAPAN</h1>
+  <p>PT. Agri Wangi Berry · GH 1 & GH 2</p>
+  <div class="hbtn">
+    <a href="./index.html">🏠 Menu</a>
+    <button onclick="connect()" id="cbtn">☁️ Connect Sheets</button>
+    <button onclick="load()">⬇️ Muat</button>
+  </div>
+</div>
+<div class="tabs">
+  <button class="on" onclick="tab('in',this)">📝 Input</button>
+  <button onclick="tab('db',this)">📊 Dashboard</button>
+  <button onclick="tab('dt',this)">📜 Data</button>
+  <button onclick="tab('im',this)">📥 Import</button>
+</div>
+<div class="wrap">
+
+<!-- INPUT -->
+<div class="tab on" id="in">
+  <div class="card">
+    <div class="row">
+      <div><label>Greenhouse</label><div class="seg" id="inGH"><button class="on" onclick="setGH('GH1')">GH 1</button><button onclick="setGH('GH2')">GH 2</button></div></div>
+      <div><label>Tanggal</label><input type="date" id="inDate" onchange="loadForm()"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="grid"><span></span><label style="text-align:center;margin:0">Suhu (°C)</label><label style="text-align:center;margin:0">RH (%)</label></div>
+    <div class="grid" id="inGrid" style="margin-top:6px"></div>
+    <div class="avg"><div>Rata-rata Suhu<strong id="aT">-</strong></div><div>Rata-rata RH<strong id="aR">-</strong></div><div>Hari<strong id="aH" style="font-size:1.05rem">-</strong></div></div>
+    <div class="row" style="margin-top:12px"><div><button class="btn" style="width:100%" onclick="save()">💾 Simpan</button></div><div><button class="btn d" style="width:100%" onclick="del()">🗑️ Hapus</button></div></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="tab" id="db">
+  <div class="card">
+    <div class="row">
+      <div><label>Greenhouse</label><select id="dbGH" onchange="renderDB()"><option value="GH1">GH 1</option><option value="GH2">GH 2</option><option value="ALL">Bandingkan GH 1 & GH 2</option></select></div>
+      <div><label>Bulan</label><input type="month" id="dbMonth" onchange="fillWeeks(true)"></div>
+      <div><label>Minggu ke</label><select id="dbWeek" onchange="renderDB()"></select></div>
+    </div>
+    <p class="mu" style="margin-top:6px">Minggu dihitung Senin–Minggu; minggu 1 = minggu yang memuat tanggal 1.</p>
+  </div>
+  <div id="dbCards"></div>
+  <div class="card"><label>Suhu harian (°C)</label><div class="ch"><canvas id="c1"></canvas></div></div>
+  <div class="card"><label>Kelembapan harian (RH %)</label><div class="ch"><canvas id="c2"></canvas></div></div>
+  <div class="card"><label>Pola rata-rata per jam — Suhu (°C)</label><div class="ch"><canvas id="c3"></canvas></div></div>
+  <div class="card"><label>Pola rata-rata per jam — RH (%)</label><div class="ch"><canvas id="c4"></canvas></div></div>
+</div>
+
+<!-- DATA -->
+<div class="tab" id="dt">
+  <div class="card"><div class="row">
+    <div><label>Greenhouse</label><select id="dtGH" onchange="renderTable()"><option value="GH1">GH 1</option><option value="GH2">GH 2</option></select></div>
+    <div><label>Bulan</label><input type="month" id="dtMonth" onchange="renderTable()"></div>
+  </div><p class="mu" style="margin-top:6px">Tap baris untuk mengedit. Merah = RH ≥ 85% atau suhu ≥ 30°C.</p></div>
+  <div class="card tw" id="dtTable"></div>
+</div>
+
+<!-- IMPORT -->
+<div class="tab" id="im">
+  <div class="card">
+    <p class="mu" style="margin-bottom:8px">Upload Excel/CSV dengan kolom seperti Google Sheet (No, Tanggal, Hari, Jam 06:00 °C/RH, 09:00, 12:00, 15:00). Format tanggal "1 Jul 2026", "16/07/2026", atau 2026-07-16 sama-sama terbaca. Tab bernama GH1 / GH2 di dalam file otomatis dikenali.</p>
+    <div class="row"><div><label>Untuk greenhouse (jika tab tidak bernama GH1/GH2)</label><select id="imGH"><option>GH1</option><option>GH2</option></select></div>
+    <div><label>File</label><input type="file" id="imFile" accept=".xlsx,.xls,.csv" onchange="readFile(this.files[0])"></div></div>
+    <div class="row" style="margin-top:10px"><div><button class="btn s" style="width:100%" onclick="tpl(false)">📄 Template Excel (GH1 + GH2)</button></div><div><button class="btn s" style="width:100%" onclick="tpl(true)">📄 Template CSV</button></div></div>
+    <div id="imPrev" style="margin-top:10px"></div>
+    <button class="btn" id="imBtn" style="display:none;width:100%;margin-top:8px" onclick="runImport()">🚀 Import</button>
+  </div>
+</div>
+</div>
+<div id="msg"></div>
+
+<script>
+const HOURS=['06','09','12','15'], KEYS=[], HARI=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const BLN=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const BLNMAP={jan:1,feb:2,mar:3,apr:4,mei:5,may:5,jun:6,jul:7,agu:8,ags:8,agt:8,aug:8,sep:9,okt:10,oct:10,nov:11,des:12,dec:12};
+const RH_HI=85, T_HI=30, COL={GH1:'#378add',GH2:'#16a34a'};
+HOURS.forEach(h=>KEYS.push('t'+h,'rh'+h));
+let url=localStorage.getItem('suhu_url')||'';   // atau isi URL Apps Script di sini
+let DATA=JSON.parse(localStorage.getItem('suhu_cache')||'{"GH1":{},"GH2":{}'+'}');
+let gh='GH1', charts={}, parsed=[];
+const $=id=>document.getElementById(id);
+
+/* ---------- util ---------- */
+const U=s=>{const[p,q,r]=s.split('-').map(Number);return Date.UTC(p,q-1,r)};
+const iso=ms=>new Date(ms).toISOString().slice(0,10);
+const dLbl=ms=>{const d=new Date(ms);return d.getUTCDate()+' '+BLN[d.getUTCMonth()]};
+const dFull=s=>{const d=new Date(U(s));return d.getUTCDate()+' '+BLN[d.getUTCMonth()]+' '+d.getUTCFullYear()};
+const hari=s=>HARI[new Date(U(s)).getUTCDay()];
+const nv=v=>(v===''||v==null||isNaN(v))?null:+v;
+const mean=a=>{a=a.filter(x=>x!=null);return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
+const f1=v=>v==null?'-':v.toFixed(1).replace('.',',');
+const rAvg=(r,p)=>mean(HOURS.map(h=>nv(r[p+h])));
+function toast(t){const m=$('msg');m.textContent=t;m.style.display='block';clearTimeout(m._t);m._t=setTimeout(()=>m.style.display='none',2600)}
+function tab(id,b){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));$(id).classList.add('on');document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');if(id=='db')renderDB();if(id=='dt')renderTable()}
+function cache(){localStorage.setItem('suhu_cache',JSON.stringify(DATA))}
+
+/* ---------- koneksi ---------- */
+function connect(){const u=prompt('URL Apps Script Web App (/exec) untuk sheet SUHU:',url);if(u===null)return;url=u.trim();localStorage.setItem('suhu_url',url);upd();load()}
+function upd(){$('cbtn').textContent=url?'✓ Terhubung':'☁️ Connect Sheets'}
+async function load(){
+  if(!url)return toast('Belum connect ke Sheets (data lokal)');
+  try{const j=await (await fetch(url)).json();
+    ['GH1','GH2'].forEach(g=>{DATA[g]={};(j[g]||[]).forEach(r=>DATA[g][r.tanggal]=r)});
+    cache();refresh();toast('✓ Data dimuat')}catch(e){toast('Gagal memuat (offline?) — pakai data lokal')}
+}
+async function post(o){if(!url)return false;try{await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(o)});return true}catch(e){return false}}
+function refresh(){loadForm();if($('db').classList.contains('on'))renderDB();if($('dt').classList.contains('on'))renderTable()}
+
+/* ---------- input ---------- */
+function setGH(g){gh=g;document.querySelectorAll('#inGH button').forEach((b,i)=>b.classList.toggle('on',['GH1','GH2'][i]==g));loadForm()}
+function initForm(){
+  $('inGrid').innerHTML=HOURS.map(h=>`<b>${h}:00</b><input type="number" step="0.1" inputmode="decimal" id="t${h}" oninput="prev()"><input type="number" step="0.1" inputmode="decimal" id="rh${h}" oninput="prev()">`).join('');
+}
+function loadForm(){
+  const d=$('inDate').value, r=DATA[gh][d]||{};
+  KEYS.forEach(k=>$(k).value=r[k]==null?'':r[k]);prev();
+}
+function formRec(){const r={gh,tanggal:$('inDate').value};KEYS.forEach(k=>r[k]=$(k).value===''?'':+$(k).value);return r}
+function prev(){const r=formRec();$('aT').textContent=f1(rAvg(r,'t'));$('aR').textContent=f1(rAvg(r,'rh'));$('aH').textContent=r.tanggal?hari(r.tanggal):'-'}
+async function save(){
+  const r=formRec();if(!r.tanggal)return toast('Pilih tanggal dulu');
+  if(KEYS.every(k=>r[k]===''))return toast('Isi minimal satu pembacaan');
+  DATA[gh][r.tanggal]=r;cache();
+  if(url){const ok=await post({action:'submit',...r});toast(ok?'✓ Tersimpan & dikirim ke Sheets':'Tersimpan lokal, gagal kirim');setTimeout(load,1200)}
+  else toast('✓ Tersimpan di browser (lokal)');
+}
+async function del(){
+  const d=$('inDate').value;if(!d||!confirm('Hapus data '+gh+' '+dFull(d)+'?'))return;
+  delete DATA[gh][d];cache();loadForm();
+  if(url){await post({action:'delete',gh,tanggal:d});setTimeout(load,1200)}toast('✓ Dihapus');
+}
+
+/* ---------- periode & minggu ---------- */
+function weeksOf(ym){
+  const[y,m]=ym.split('-').map(Number), first=Date.UTC(y,m-1,1), last=Date.UTC(y,m,0);
+  let s=first-((new Date(first).getUTCDay()+6)%7)*864e5;const w=[];
+  while(s<=last){w.push([s,s+6*864e5]);s+=7*864e5}return w;
+}
+function fillWeeks(reset){
+  const ym=$('dbMonth').value, w=weeksOf(ym), cur=$('dbWeek').value;
+  $('dbWeek').innerHTML='<option value="all">Semua (1 bulan penuh)</option>'+w.map((x,i)=>`<option value="${i}">Minggu ${i+1}: ${dLbl(x[0])} – ${dLbl(x[1])} ${new Date(x[1]).getUTCFullYear()}</option>`).join('');
+  const t=U(iso(Date.now()+7*36e5));let pick='all';
+  if(!reset&&cur)pick=cur;else w.forEach((x,i)=>{if(t>=x[0]&&t<=x[1]&&iso(t).slice(0,7)==ym)pick=String(i)});
+  $('dbWeek').value=pick;renderDB();
+}
+function period(){
+  const ym=$('dbMonth').value,wk=$('dbWeek').value,w=weeksOf(ym);let a,b;
+  if(wk==='all'){const[y,m]=ym.split('-').map(Number);a=Date.UTC(y,m-1,1);b=Date.UTC(y,m,0)}else[a,b]=w[+wk];
+  const out=[];for(let t=a;t<=b;t+=864e5)out.push(iso(t));return out;
+}
+
+/* ---------- dashboard ---------- */
+function stats(g,days){
+  const recs=days.map(d=>DATA[g][d]).filter(Boolean);
+  const T=[],R=[];recs.forEach(r=>HOURS.forEach(h=>{const t=nv(r['t'+h]),rh=nv(r['rh'+h]);if(t!=null)T.push({v:t,d:r.tanggal,h});if(rh!=null)R.push({v:rh,d:r.tanggal,h})}));
+  const ex=(a,f)=>a.length?a.reduce((x,y)=>f(y.v,x.v)?y:x):null;
+  return{n:recs.length,aT:mean(recs.map(r=>rAvg(r,'t'))),aR:mean(recs.map(r=>rAvg(r,'rh'))),maxT:ex(T,(a,b)=>a>b),minT:ex(T,(a,b)=>a<b),maxR:ex(R,(a,b)=>a>b),minR:ex(R,(a,b)=>a<b),hiR:R.filter(x=>x.v>=RH_HI).length,hiT:T.filter(x=>x.v>=T_HI).length};
+}
+function renderDB(){
+  if(!$('dbMonth').value)return;
+  const days=period(), sel=$('dbGH').value, ghs=sel=='ALL'?['GH1','GH2']:[sel];
+  const ref=x=>x?`<i>${dLbl(U(x.d))} · ${x.h}:00</i>`:'';
+  $('dbCards').innerHTML=ghs.map(g=>{const s=stats(g,days);
+    return `<div class="gh" style="border-color:${COL[g]}">${g.replace('GH','GH ')} · ${s.n}/${days.length} hari terisi</div><div class="cards">
+    <div class="sc"><small>Rata² Suhu</small><b>${f1(s.aT)}°C</b></div>
+    <div class="sc"><small>Suhu Maks</small><b>${f1(s.maxT&&s.maxT.v)}°C</b>${ref(s.maxT)}</div>
+    <div class="sc"><small>Suhu Min</small><b>${f1(s.minT&&s.minT.v)}°C</b>${ref(s.minT)}</div>
+    <div class="sc"><small>Rata² RH</small><b>${f1(s.aR)}%</b></div>
+    <div class="sc"><small>RH Maks</small><b>${f1(s.maxR&&s.maxR.v)}%</b>${ref(s.maxR)}</div>
+    <div class="sc"><small>RH Min</small><b>${f1(s.minR&&s.minR.v)}%</b>${ref(s.minR)}</div>
+    <div class="sc"><small>RH ≥ ${RH_HI}%</small><b>${s.hiR}×</b><i>pembacaan</i></div>
+    <div class="sc"><small>Suhu ≥ ${T_HI}°C</small><b>${s.hiT}×</b><i>pembacaan</i></div></div>`}).join('');
+  const labels=days.map(d=>dLbl(U(d)));
+  const daily=p=>{
+    if(ghs.length>1)return ghs.map(g=>({label:g,data:days.map(d=>DATA[g][d]?rAvg(DATA[g][d],p):null),borderColor:COL[g],backgroundColor:COL[g],tension:.25,borderWidth:2.5}));
+    const g=ghs[0],cs=['#6366f1','#f59e0b','#ef4444','#0ea5e9'];
+    return HOURS.map((h,i)=>({label:h+':00',data:days.map(d=>DATA[g][d]?nv(DATA[g][d][p+h]):null),borderColor:cs[i],backgroundColor:cs[i],borderWidth:1.2,pointRadius:2,tension:.25}))
+      .concat([{label:'Rata-rata',data:days.map(d=>DATA[g][d]?rAvg(DATA[g][d],p):null),borderColor:'#111',backgroundColor:'#111',borderWidth:3,tension:.25}]);
+  };
+  const hourly=p=>ghs.map(g=>({label:g,backgroundColor:COL[g],data:HOURS.map(h=>mean(days.map(d=>DATA[g][d]?nv(DATA[g][d][p+h]):null)))}));
+  mk('c1','line',labels,daily('t'));mk('c2','line',labels,daily('rh'));
+  mk('c3','bar',HOURS.map(h=>h+':00'),hourly('t'));mk('c4','bar',HOURS.map(h=>h+':00'),hourly('rh'));
+}
+function mk(id,type,labels,datasets){
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart($(id),{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,spanGaps:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}}},scales:{x:{ticks:{maxRotation:60,font:{size:10}}}}}});
+}
+
+/* ---------- tabel data ---------- */
+function renderTable(){
+  const g=$('dtGH').value,ym=$('dtMonth').value;
+  const rows=Object.keys(DATA[g]).filter(d=>d.startsWith(ym)).sort();
+  let h='<table><tr><th>No</th><th>Tanggal</th><th>Hari</th>'+HOURS.map(x=>`<th>${x}:00<br>°C</th><th>${x}:00<br>RH%</th>`).join('')+'<th>Rata² °C</th><th>Rata² RH</th></tr>';
+  rows.forEach((d,i)=>{const r=DATA[g][d];
+    h+=`<tr class="cl" onclick="edit('${g}','${d}')"><td>${i+1}</td><td>${dFull(d)}</td><td>${hari(d)}</td>`+HOURS.map(x=>{const t=nv(r['t'+x]),rh=nv(r['rh'+x]);return `<td class="${t>=T_HI?'hi':''}">${f1(t)}</td><td class="${rh>=RH_HI?'hi':''}">${f1(rh)}</td>`}).join('')+`<td class="a">${f1(rAvg(r,'t'))}</td><td class="a">${f1(rAvg(r,'rh'))}</td></tr>`});
+  $('dtTable').innerHTML=rows.length?h+'</table>':'<p class="mu">Belum ada data di bulan ini.</p>';
+}
+function edit(g,d){setGH(g);$('inDate').value=d;loadForm();tab('in',document.querySelector('.tabs button'))}
+
+/* ---------- import ---------- */
+function pDate(v){
+  if(v instanceof Date)return iso(Date.UTC(v.getFullYear(),v.getMonth(),v.getDate()));
+  if(typeof v=='number'){const d=XLSX.SSF.parse_date_code(v);return d?`${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`:''}
+  const s=String(v).trim();let m;
+  if(m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  if(m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/))return `${m[3].length==2?'20'+m[3]:m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  if((m=s.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{2,4})$/))&&BLNMAP[m[2].slice(0,3).toLowerCase()])return `${m[3].length==2?'20'+m[3]:m[3]}-${String(BLNMAP[m[2].slice(0,3).toLowerCase()]).padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  return '';
+}
+function readFile(f){
+  if(!f)return;const rd=new FileReader();
+  rd.onload=e=>{
+    const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});parsed=[];let skip=0;
+    wb.SheetNames.forEach(n=>{
+      const m=n.replace(/\s/g,'').toUpperCase().match(/GH([12])/),g=m?'GH'+m[1]:(wb.SheetNames.length==1||!/GH/i.test(wb.SheetNames.join()))?$('imGH').value:null;
+      if(!g)return;
+      const a=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:'',raw:true});
+      const hi=a.findIndex(r=>r.some(c=>/tanggal/i.test(c)));if(hi<0)return;
+      const col={};a[hi].forEach((c,i)=>{const s=String(c);if(/tanggal/i.test(s))col.tanggal=i;const h=s.match(/(\d{2}):?(\d{2})/);if(h&&/(rata|avg)/i.test(s)==false)col[(/rh/i.test(s)?'rh':'t')+h[1]]=i});
+      a.slice(hi+1).forEach(r=>{
+        const d=pDate(r[col.tanggal]);if(!d){if(r.some(x=>x!==''))skip++;return}
+        const o={gh:g,tanggal:d};KEYS.forEach(k=>{const v=col[k]==null?'':String(r[col[k]]).replace(',','.');o[k]=v===''||isNaN(v)?'':+v});
+        if(KEYS.some(k=>o[k]!==''))parsed.push(o);
+      });
+    });
+    const c={GH1:0,GH2:0};parsed.forEach(r=>c[r.gh]++);
+    $('imPrev').innerHTML=`<p><b>${parsed.length}</b> baris valid (GH1: ${c.GH1}, GH2: ${c.GH2})${skip?`, ${skip} baris dilewati (tanggal tidak terbaca)`:''}.</p>`;
+    $('imBtn').style.display=parsed.length?'block':'none';
+  };rd.readAsArrayBuffer(f);
+}
+async function runImport(){
+  parsed.forEach(r=>DATA[r.gh][r.tanggal]=r);cache();
+  if(url)for(const g of ['GH1','GH2']){const rows=parsed.filter(r=>r.gh==g);for(let i=0;i<rows.length;i+=100){toast(`☁️ Kirim ${g}: ${Math.min(i+100,rows.length)}/${rows.length}`);await post({action:'bulk',gh:g,rows:rows.slice(i,i+100)});await new Promise(r=>setTimeout(r,1500))}}
+  toast('✓ Import selesai');parsed=[];$('imPrev').innerHTML='';$('imBtn').style.display='none';$('imFile').value='';if(url)setTimeout(load,1500);else refresh();
+}
+
+/* ---------- template ---------- */
+function tpl(csv){
+  const H=['No','Tanggal','Hari'];HOURS.forEach(h=>H.push(`Jam ${h}:00 (°C)`,`Jam ${h}:00 (RH%)`));
+  const ex=(g,n)=>[[1,'2026-10-01','Kamis',9.5,75,28.4,52,30.1,45,22.3,60],[2,'2026-10-02','Jumat',10.2,78,27.9,55,29.5,48,21.8,63]].slice(0,n);
+  if(csv){
+    const g=$('imGH').value,rows=[H].concat(ex(g,2).map(r=>r.slice(0,3).concat(r.slice(3))));
+    const t=rows.map(r=>r.join(',')).join('\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download='template_suhu_'+g+'.csv';a.click();return;
+  }
+  const wb=XLSX.utils.book_new();
+  ['GH1','GH2'].forEach(g=>{const ws=XLSX.utils.aoa_to_sheet([H].concat(ex(g,2)));ws['!cols']=H.map((x,i)=>({wch:i==1?12:14}));XLSX.utils.book_append_sheet(wb,ws,g)});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
+    ['PETUNJUK TEMPLATE SUHU & KELEMBAPAN'],[''],
+    ['1. Isi data di tab GH1 dan GH2 (jangan ganti nama tab).'],
+    ['2. Mulai dari baris 2; baris contoh boleh dihapus. Header jangan diubah.'],
+    ['3. Kolom Tanggal: 2026-10-01, 1 Okt 2026, atau 01/10/2026 (hari/bulan/tahun).'],
+    ['4. Kolom No dan Hari boleh dikosongkan; Hari terisi otomatis.'],
+    ['5. Suhu dan RH berupa angka (desimal pakai titik atau koma). Kosongkan sel jika tidak ada pembacaan.'],
+    ['6. Rata-rata dihitung otomatis, tidak perlu diisi.'],
+    ['7. Tanggal yang sudah ada akan ditimpa.']]),'Petunjuk');
+  XLSX.writeFile(wb,'template_suhu_kelembapan.xlsx');
+}
+
+/* ---------- init ---------- */
+const today=iso(Date.now()+7*36e5);
+$('inDate').value=today;$('dbMonth').value=today.slice(0,7);$('dtMonth').value=today.slice(0,7);
+initForm();loadForm();fillWeeks(true);upd();if(url)load();
+</script>
+</body>
+</html>
