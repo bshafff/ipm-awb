@@ -1,16 +1,17 @@
-/* AWB Apps — Service Worker v4
+/* AWB Apps — Service Worker v5
  * Strategi:
  *  - HTML/CSS/JS  → network-first (selalu coba ambil terbaru)
  *  - Gambar/icon  → cache-first (jarang berubah, biar cepat)
  *  - Apps Script  → bypass total (jangan di-cache)
  */
-const CACHE_NAME = 'awb-apps-v4'; // naikkan angka ini tiap kali mau paksa update
+const CACHE_NAME = 'awb-apps-v5'; // naikkan angka ini tiap kali mau paksa update
 
 const PRECACHE = [
   './',
   './index.html',
   './monitoring.html',
   './pestisida.html',
+  './suhu.html',
   './manifest.json',
   './LOGO_AWB.png',
   './icon-192.png',
