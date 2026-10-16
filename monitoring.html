@@ -405,13 +405,13 @@
 <div class="button-bar" id="formActionBar">
   <button class="btn-bar btn-secondary" onclick="clearForm()">🗑️ Bersihkan</button>
   <button class="btn-bar btn-danger" onclick="deleteFromSheets()">❌ Hapus</button>
-  <button class="btn-bar btn-primary" onclick="submitForm()">✓ Simpan</button>
+  <button class="btn-bar btn-primary" id="saveBtn" onclick="submitForm()">✓ Simpan</button>
 </div>
 
 <script>
   const TODAY = new Date().toISOString().split('T')[0];
   const CONFIG = {
-    APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw6INkIU6CuITJnHOAxC72VaKoqwLqqrea1bd5kbiPOHcR-lthbDw_L465XqS2uFBGvbQ/exec'
+    APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyY2_2eqEiabNCRV2y1eCZ7DLHQIEKQNjZB7TvCR1IN0Qz737ltAsHvo4OImtXIU5WBFA/exec'
   };
   let scriptUrl = localStorage.getItem('hpt_script_url') || CONFIG.APPS_SCRIPT_URL || '';
   let isAuthenticated = JSON.parse(localStorage.getItem('hpt_auth') || 'false');
@@ -638,6 +638,7 @@
 
   function clearForm(confirmUser = true) {
     if (confirmUser && !confirm('Kosongkan form input?')) return;
+    editKey = null;
     document.querySelectorAll('.pest-card input[type="number"]').forEach(i => i.value = '');
     calculateAll();
   }
@@ -678,24 +679,56 @@
     fetchDashboardData();
   }
 
+  let isSaving = false;
+  let editKey = null; // 'tanggal|lokasi' saat mode edit
+
+  async function postJSON(body) {
+    const res = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(body)
+    });
+    return res.json();
+  }
+
+  function setSaveBtn(busy) {
+    const b = document.getElementById('saveBtn');
+    if (!b) return;
+    b.disabled = busy;
+    b.textContent = busy ? '⏳ Menyimpan...' : '✓ Simpan';
+  }
+
   async function submitForm() {
+    if (isSaving) return;
     const data = getFormData();
     if (!data.tanggal || !data.lokasi) return alert('Pilih tanggal dan lokasi dulu!');
     localStorage.setItem('hpt_' + data.tanggal + '_' + data.lokasi, JSON.stringify(data));
-    if (scriptUrl) {
+    if (!scriptUrl) return showToast('successMsg', '✓ Tersimpan di browser (Lokal)');
+
+    isSaving = true; setSaveBtn(true);
+    try {
       showToast('infoMsg', '☁️ Mengirim data...');
-      try {
-        await fetch(scriptUrl, {
-          method: 'POST', mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ ...data, action: 'submit' })
-        });
-        showToast('successMsg', '✓ Tersimpan & Tersinkronisasi!');
-        setTimeout(fetchDashboardData, 800);
-      } catch (e) {
-        showToast('warningMsg', 'Gagal kirim: ' + e.message);
+      const key = data.tanggal + '|' + data.lokasi;
+      let r = await postJSON({ ...data, action: 'submit', overwrite: editKey === key });
+      if (r.status === 'exists') {
+        if (!confirm(r.message)) return showToast('infoMsg', 'Dibatalkan');
+        r = await postJSON({ ...data, action: 'submit', overwrite: true });
       }
-    } else showToast('successMsg', '✓ Tersimpan di browser (Lokal)');
+      if (r.status !== 'success') throw new Error(r.message || 'Respons tidak dikenal');
+
+      // Edit yang mengganti tanggal/lokasi: hapus data lama
+      if (editKey && editKey !== key) {
+        const [t, l] = editKey.split('|');
+        await postJSON({ action: 'delete', tanggal: t, lokasi: l });
+      }
+      editKey = null;
+      showToast('successMsg', '✓ Tersimpan & Tersinkronisasi!');
+      setTimeout(fetchDashboardData, 800);
+    } catch (e) {
+      showToast('warningMsg', 'Gagal kirim: ' + e.message);
+    } finally {
+      isSaving = false; setSaveBtn(false);
+    }
   }
 
   async function syncToSheets(silent) { return submitForm(); }
@@ -848,11 +881,12 @@
     try {
       const res = await fetch(scriptUrl + '?action=get&tanggal=' + encodeURIComponent(tanggal) + '&lokasi=' + encodeURIComponent(lokasi));
       const data = await res.json();
-      if (data.status === 'error') return showToast('warningMsg', data.message);
+      if (data.error || data.status === 'error') return showToast('warningMsg', data.error || data.message);
       switchTab('form');
       setFormData(data);
       document.getElementById('tanggal').value = tanggal;
       document.getElementById('lokasi').value = lokasi;
+      editKey = tanggal + '|' + lokasi;
       showToast('infoMsg', '✏️ Mode edit: ' + tanggal + ' / ' + lokasi);
     } catch (e) { showToast('warningMsg', 'Gagal memuat data: ' + e.message); }
   }
@@ -1030,36 +1064,24 @@
     btn.disabled = true;
     bar.classList.add('show');
 
-    // Coba BULK dulu
-    try {
-      const payload = { action: 'bulkSubmit', rows: validRows.map(r => {
-        const clean = { ...r };
-        delete clean.__row; delete clean.__errors;
-        return clean;
-      })};
-      await fetch(scriptUrl, {
-        method: 'POST', mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-      });
-    } catch (e) { /* lanjut fallback */ }
-
-    // Fallback per-baris
     let successCount = 0, failCount = 0;
-    for (let i = 0; i < validRows.length; i++) {
-      const r = { ...validRows[i] };
-      delete r.__row; delete r.__errors;
-      try {
-        await fetch(scriptUrl, {
-          method: 'POST', mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ ...r, action: 'submit' })
-        });
-        successCount++;
-      } catch (e) { failCount++; }
-      const pct = Math.round(((i + 1) / validRows.length) * 100);
-      fill.style.width = pct + '%';
-      btn.textContent = `⏳ Mengirim... ${i + 1}/${validRows.length}`;
+    btn.textContent = '⏳ Mengirim...';
+    fill.style.width = '50%';
+    try {
+      const rows = validRows.map(r => {
+        const c = { ...r };
+        delete c.__row; delete c.__errors;
+        return c;
+      });
+      const res = await postJSON({ action: 'bulkSubmit', rows });
+      if (res.status !== 'success') throw new Error(res.message || 'gagal');
+      successCount = res.imported; failCount = res.failed;
+    } catch (e) {
+      showToast('warningMsg', 'Import gagal: ' + e.message);
+      bar.classList.remove('show'); fill.style.width = '0%';
+      btn.textContent = '🚀 Import ke Google Sheets';
+      btn.disabled = false;
+      return;
     }
     fill.style.width = '100%';
     btn.textContent = '🚀 Selesai!';
@@ -1069,6 +1091,7 @@
       parsedImportRows = [];
       document.getElementById('importPreview').classList.remove('show');
       btn.classList.remove('show'); btn.disabled = false;
+      btn.textContent = '🚀 Import ke Google Sheets';
       fetchDashboardData();
     }, 800);
   }
