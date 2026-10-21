@@ -1,10 +1,10 @@
-/* AWB Apps — Service Worker v7
+/* AWB Apps — Service Worker v8
  * Strategi:
  *  - HTML/CSS/JS  → network-first (selalu coba ambil terbaru)
  *  - Gambar/icon  → cache-first (jarang berubah, biar cepat)
  *  - Apps Script  → bypass total (jangan di-cache)
  */
-const CACHE_NAME = 'awb-apps-v7'; // naikkan angka ini tiap kali mau paksa update
+const CACHE_NAME = 'awb-apps-v8'; // naikkan angka ini tiap kali mau paksa update
 
 const PRECACHE = [
   './',
@@ -13,6 +13,9 @@ const PRECACHE = [
   './pestisida.html',
   './suhu.html',
   './analisis.html',
+  './outbox.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
   './manifest.json',
   './LOGO_AWB.png',
   './icon-192.png',

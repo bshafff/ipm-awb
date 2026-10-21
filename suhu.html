@@ -7,6 +7,7 @@
 <title>Suhu & Kelembapan - PT. Agri Wangi Berry</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="./outbox.js"></script>
 <style>
 :root{--p:#ea580c;--pd:#c2410c;--bg:#f0f0ee;--card:#fff;--bd:#d8d8d0;--tx:#1a1a18;--mu:#666}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -155,9 +156,9 @@ async function load(){
   if(!url)return toast('Belum connect ke Sheets (data lokal)');
   try{const j=await (await fetch(url)).json();
     ['GH1','GH2'].forEach(g=>{DATA[g]={};(j[g]||[]).forEach(r=>DATA[g][r.tanggal]=r)});
-    cache();refresh();toast('✓ Data dimuat')}catch(e){toast('Gagal memuat (offline?) — pakai data lokal')}
+    Outbox.pending().forEach(it=>{if(!DATA[it.gh])return;if(it.action==='delete')delete DATA[it.gh][it.tanggal];else DATA[it.gh][it.tanggal]=it});cache();refresh();toast('✓ Data dimuat')}catch(e){toast('Gagal memuat (offline?) — pakai data lokal')}
 }
-async function post(o){if(!url)return false;try{await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(o)});return true}catch(e){return false}}
+async function post(o){if(!url)return false;try{const c=new AbortController();setTimeout(()=>c.abort(),20000);await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(o),signal:c.signal});return true}catch(e){return false}}
 function refresh(){loadForm();if($('db').classList.contains('on'))renderDB();if($('dt').classList.contains('on'))renderTable()}
 
 /* ---------- input ---------- */
@@ -175,13 +176,13 @@ async function save(){
   const r=formRec();if(!r.tanggal)return toast('Pilih tanggal dulu');
   if(KEYS.every(k=>r[k]===''))return toast('Isi minimal satu pembacaan');
   DATA[gh][r.tanggal]=r;cache();
-  if(url){const ok=await post({action:'submit',...r});toast(ok?'✓ Tersimpan & dikirim ke Sheets':'Tersimpan lokal, gagal kirim');setTimeout(load,1200)}
+  if(url){const it={action:'submit',...r};const ok=await post(it);if(!ok)Outbox.add(it);toast(ok?'✓ Tersimpan & dikirim ke Sheets':'📴 Belum ada sinyal — tersimpan di HP, otomatis terkirim nanti');setTimeout(load,1200)}
   else toast('✓ Tersimpan di browser (lokal)');
 }
 async function del(){
   const d=$('inDate').value;if(!d||!confirm('Hapus data '+gh+' '+dFull(d)+'?'))return;
   delete DATA[gh][d];cache();loadForm();
-  if(url){await post({action:'delete',gh,tanggal:d});setTimeout(load,1200)}toast('✓ Dihapus');
+  if(url){const it={action:'delete',gh,tanggal:d};if(!await post(it))Outbox.add(it);setTimeout(load,1200)}toast('✓ Dihapus');
 }
 
 /* ---------- periode & minggu ---------- */
@@ -315,6 +316,7 @@ function tpl(csv){
 const today=iso(Date.now()+7*36e5);
 $('inDate').value=today;$('dbMonth').value=today.slice(0,7);$('dtMonth').value=today.slice(0,7);
 initForm();loadForm();fillWeeks(true);upd();if(url)load();
+Outbox.init(async it=>post(it),(n,left)=>{toast('✓ '+n+' data offline terkirim'+(left?', sisa '+left:''));load()});
 </script>
 </body>
 </html>

@@ -112,7 +112,7 @@ const f=(v,d=1)=>v==null?'–':v.toFixed(d).replace('.',',');
 const sg=(v,d=1)=>v==null?'–':(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(d).replace('.',',');
 let SB={},MAN={},SC={},SP=[],WX={},SPE=[],ST={},charts={};
 
-async function jget(u){const r=await fetch(u,{redirect:'follow'});const j=JSON.parse(await r.text());if(j&&j.error)throw new Error(j.error);return j}
+async function jget(u){const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);try{const r=await fetch(u,{redirect:'follow',signal:c.signal});const j=JSON.parse(await r.text());if(j&&j.error)throw new Error(j.error);return j}finally{clearTimeout(t)}}
 function targets(u){
   const s=String(u.sasaran||'').toLowerCase(),t=PK.filter(k=>PEST[k].re.test(s));
   if(t.length)return t;
@@ -123,12 +123,12 @@ function targets(u){
 }
 async function load(){
   ST={};
-  try{const j=await jget((LS('hpt_script_url')||HPT_DEF)+'?action=list'),agg={};
+  try{let j;try{j=await jget((LS('hpt_script_url')||HPT_DEF)+'?action=list');try{localStorage.setItem('ana_hpt_cache',JSON.stringify(j))}catch(x){}}catch(x){j=JSON.parse(LS('ana_hpt_cache')||'null');if(!j)throw x;ST.off=1}const agg={};
     Object.keys(j).forEach(loc=>{const g=loc.split('-')[0].replace(/\s/g,'').toUpperCase();agg[g]=agg[g]||{};
       (j[loc]||[]).forEach(it=>{const d=nd(it.date);if(!d)return;const o=agg[g][d]=agg[g][d]||{n:0,s:{}};o.n++;PK.forEach(k=>o.s[k]=(o.s[k]||0)+(+it[k]||0))})});
     SC={};Object.keys(agg).forEach(g=>SC[g]=Object.keys(agg[g]).sort().map(d=>{const o=agg[g][d],v={};PK.forEach(k=>v[k]=o.s[k]/o.n*100);return{d,ms:U(d),v}}));
     SB={};Object.keys(j).forEach(loc=>{SB[loc]=(j[loc]||[]).map(it=>{const d=nd(it.date),v={};PK.forEach(k=>v[k]=(+it[k]||0)*100);return{d,ms:d?U(d):0,v}}).filter(x=>x.d).sort((a,b)=>a.ms-b.ms)});
-    ST.s=Object.values(SC).reduce((a,b)=>a+b.length,0)+' hari scouting';
+    ST.s=Object.values(SC).reduce((a,b)=>a+b.length,0)+' hari scouting'+(ST.off?' (data terakhir)':'');
   }catch(e){SC={};ST.s=''}
   try{const u=LS('pestisida_script_url');if(!u)throw 0;SP=(await jget(u+'?action=getAll')).usage||[];ST.p=SP.length+' catatan semprot'}
   catch(e){SP=[];try{SP=JSON.parse(LS('pestisida_usage')||'[]')}catch(x){}ST.p=SP.length?SP.length+' catatan semprot (lokal)':''}
@@ -249,6 +249,7 @@ function drawSC(P,IV){
 }
 ['fGH','fFrom','fTo','fN','fEx','fP'].forEach(id=>$(id).addEventListener('change',run));
 $('fX').addEventListener('change',run);
+addEventListener('online',load);
 load();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
 </script>

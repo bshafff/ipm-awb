@@ -336,7 +336,7 @@
   let isAuthenticated = JSON.parse(lsGet('pestisida_auth', 'false'));
   let scriptUrl     = lsGet('pestisida_script_url', '');
 
-  const dirty = { list:false, inventory:false, usage:false };
+  const dirty = Object.assign({ list:false, inventory:false, usage:false }, (()=>{ try { return JSON.parse(lsGet('pestisida_dirty','{}')); } catch(e){ return {}; } })());
   let isSyncing=false, pendingSync=false, autoSyncTimer=null, lastSyncAt=0;
   const DEBOUNCE_MS=2500, MIN_SYNC_INTERVAL=4000;
 
@@ -384,7 +384,9 @@
     inventory.forEach(t => { if (t.nama === n && t.jenis === 'Masuk') total += Math.abs(t.delta); });
     return total;
   }
+  function saveDirty(){ lsSet('pestisida_dirty', JSON.stringify(dirty)); }
   function markDirty() {
+    setTimeout(saveDirty,0);
     for (let i=0;i<arguments.length;i++) if (dirty[arguments[i]]!==undefined) dirty[arguments[i]]=true;
     scheduleAutoSync();
   }
@@ -685,15 +687,15 @@
     if(st){ st.innerHTML='⟳ Sync...'; st.className='auth-status syncing'; }
     if(force) showToast('☁️ Sync...','info');
     try {
-      await fetch(scriptUrl,{ method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload) });
+      await fetch(scriptUrl,{ method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload), signal:(()=>{ const c=new AbortController(); setTimeout(()=>c.abort(),25000); return c.signal; })() });
       if(payload.list) dirty.list=false;
       if(payload.inventory) dirty.inventory=false;
-      if(payload.usage) dirty.usage=false;
+      if(payload.usage) dirty.usage=false; saveDirty();
       if(st){ st.innerHTML='✓ Terhubung — auto-sync'; st.className='auth-status ok'; }
       if(force) showToast('✓ Terkirim','ok');
     } catch(e) {
       if(st){ st.innerHTML='✗ Gagal sync'; st.className='auth-status error'; }
-      showToast('Gagal: '+e.message,'err');
+      if(force) showToast('Gagal: '+e.message,'err'); else if(st){ st.innerHTML='📴 Offline — akan sync otomatis saat ada sinyal'; }
     } finally {
       isSyncing=false;
       if(pendingSync){ pendingSync=false; setTimeout(()=>syncToSheets(false),600); }
@@ -712,7 +714,7 @@
       if(data.list){ pestisidaList=data.list.map(p=>Object.assign({stokAwal:0,isi:''},p)); lsSet('pestisida_list',JSON.stringify(pestisidaList)); }
       if(data.inventory){ inventory=data.inventory; lsSet('pestisida_inventory',JSON.stringify(inventory)); }
       if(data.usage){ dailyUsage=data.usage; lsSet('pestisida_usage',JSON.stringify(dailyUsage)); }
-      dirty.list=dirty.inventory=dirty.usage=false;
+      dirty.list=dirty.inventory=dirty.usage=false; saveDirty();
       ensureAutoMutasi();
       renderPestisidaList(); renderInventory(); renderUsage();
       if(!silent) showToast('✓ Dimuat','ok');
@@ -1294,6 +1296,7 @@
     document.getElementById('installBanner').classList.remove('show');
   }
 
+  function retrySync(){ if(isAuthenticated && scriptUrl && (dirty.list||dirty.inventory||dirty.usage)) syncToSheets(false); }
   // ================= INIT =================
   function init() {
     try {
@@ -1308,6 +1311,7 @@
     renderInventory();
     renderUsage();
 
+    window.addEventListener('online', retrySync); document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) retrySync(); }); setInterval(retrySync, 20000); setTimeout(retrySync, 1500);
     console.log('✓ AWB Pestisida App v2.2 loaded');
     console.log('  - pestisidaList:', pestisidaList.length);
     console.log('  - inventory:', inventory.length);

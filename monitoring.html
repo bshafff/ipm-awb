@@ -6,6 +6,7 @@
   <title>HPT Monitoring System - PT. Agri Wangi Berry</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="./outbox.js"></script>
   <style>
     :root {
       --primary: #378add;
@@ -683,12 +684,26 @@
   let editKey = null; // 'tanggal|lokasi' saat mode edit
 
   async function postJSON(body) {
-    const res = await fetch(scriptUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(body)
-    });
-    return res.json();
+    const c = new AbortController(), t = setTimeout(() => c.abort(), 20000);
+    try {
+      const res = await fetch(scriptUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(body), signal: c.signal });
+      return await res.json();
+    } finally { clearTimeout(t); }
+  }
+  async function delRemote(t, l) {
+    try {
+      const c = new AbortController(); setTimeout(() => c.abort(), 20000);
+      await fetch(scriptUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'delete', tanggal: t, lokasi: l }), signal: c.signal });
+    } catch (e) { Outbox.add({ action: 'delete', tanggal: t, lokasi: l }); }
+  }
+  Outbox.init(async item => {
+    if (item.action === 'delete') { await delRemoteOnce(item); return true; }
+    const r = await postJSON({ ...item, overwrite: true });
+    return r.status === 'success';
+  }, (n, left) => { showToast('successMsg', '✓ ' + n + ' data offline terkirim' + (left ? ', sisa ' + left : '')); fetchDashboardData(); });
+  async function delRemoteOnce(item) {
+    const c = new AbortController(); setTimeout(() => c.abort(), 20000);
+    await fetch(scriptUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(item), signal: c.signal });
   }
 
   function setSaveBtn(busy) {
@@ -725,7 +740,12 @@
       showToast('successMsg', '✓ Tersimpan & Tersinkronisasi!');
       setTimeout(fetchDashboardData, 800);
     } catch (e) {
-      showToast('warningMsg', 'Gagal kirim: ' + e.message);
+      if (e instanceof TypeError || e.name === 'AbortError') {
+        Outbox.add({ ...data, action: 'submit' });
+        if (editKey && editKey !== data.tanggal + '|' + data.lokasi) { const [t, l] = editKey.split('|'); Outbox.add({ action: 'delete', tanggal: t, lokasi: l }); }
+        editKey = null;
+        showToast('infoMsg', '📴 Belum ada sinyal — tersimpan di HP, otomatis terkirim saat ada sinyal');
+      } else showToast('warningMsg', 'Gagal kirim: ' + e.message);
     } finally {
       isSaving = false; setSaveBtn(false);
     }
@@ -739,12 +759,7 @@
     if (!tgl || !lok) return alert('Pilih tanggal dan lokasi!');
     if (!confirm(`Hapus data ${tgl} (${lok})?`)) return;
     localStorage.removeItem('hpt_' + tgl + '_' + lok);
-    if (scriptUrl) {
-      fetch(scriptUrl, {
-        method: 'POST', mode: 'no-cors',
-        body: JSON.stringify({ action: 'delete', tanggal: tgl, lokasi: lok })
-      }).catch(() => {});
-    }
+    if (scriptUrl) delRemote(tgl, lok);
     clearForm(false); showToast('deleteMsg', '✓ Data dihapus');
     setTimeout(fetchDashboardData, 800);
   }
@@ -754,13 +769,26 @@
     try {
       const res = await fetch(scriptUrl + '?action=list');
       hptData = await res.json();
+      try { localStorage.setItem('hpt_cache', JSON.stringify(hptData)); } catch (_) {}
       const fetchedLocs = Object.keys(hptData);
       if (fetchedLocs.length > 0) availableLocations = fetchedLocs;
       selectedLocations = selectedLocations.filter(l => availableLocations.includes(l));
       if (selectedLocations.length === 0) selectedLocations = [...availableLocations];
       updateLocationListUI(); updateHistoryLocationOptions();
       renderDashboard(); renderHistoryTable();
-    } catch (e) { console.log("Offline / Fetch error:", e); }
+    } catch (e) {
+      console.log("Offline / Fetch error:", e);
+      try {
+        const c = JSON.parse(localStorage.getItem('hpt_cache') || 'null');
+        if (c && !Object.keys(hptData).length) {
+          hptData = c; const fl = Object.keys(c); if (fl.length) availableLocations = fl;
+          selectedLocations = selectedLocations.filter(l => availableLocations.includes(l));
+          if (!selectedLocations.length) selectedLocations = [...availableLocations];
+          updateLocationListUI(); updateHistoryLocationOptions(); renderDashboard(); renderHistoryTable();
+          showToast('infoMsg', '📴 Offline — menampilkan data terakhir');
+        }
+      } catch (_) {}
+    }
   }
 
   function buildSummaryCards(aggregatedData, group) {
@@ -868,10 +896,7 @@
 
   async function deleteRecord(tgl, lok) {
     if (!confirm(`Hapus data ${tgl} (${lok})?`)) return;
-    await fetch(scriptUrl, {
-      method: 'POST', mode: 'no-cors',
-      body: JSON.stringify({ action: 'delete', tanggal: tgl, lokasi: lok })
-    });
+    await delRemote(tgl, lok);
     showToast('deleteMsg', 'Data dihapus!');
     setTimeout(fetchDashboardData, 800);
   }
