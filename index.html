@@ -73,9 +73,11 @@
     .app-card.hpt::before { background: #16a34a; }
     .app-card.pest::before { background: #7c3aed; }
     .app-card.suhu::before { background: #ea580c; }
+    .app-card.ana::before { background: #0f766e; }
     .app-card-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; flex-shrink: 0; color: #fff; }
     .app-card.hpt .app-card-icon { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
     .app-card.suhu .app-card-icon { background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%); }
+    .app-card.ana .app-card-icon { background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%); }
     .app-card.pest .app-card-icon { background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); }
     .app-card-body { flex: 1; min-width: 0; }
     .app-card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--text); }
@@ -138,8 +140,17 @@
     <div class="app-card-arrow">›</div>
   </a>
 
+  <a class="app-card ana" href="./analisis.html">
+    <div class="app-card-icon">📊</div>
+    <div class="app-card-body">
+      <div class="app-card-title">Analisis IPM</div>
+      <div class="app-card-desc">Gabungan scouting, penyemprotan, suhu &amp; RH: efektivitas semprot dan pengaruh cuaca</div>
+    </div>
+    <div class="app-card-arrow">›</div>
+  </a>
+
   <div class="info-card">
-    💡 <strong>Tips:</strong> Setiap aplikasi tersambung ke <em>Google Sheet yang berbeda</em>. Data monitoring HPT, pestisida, serta suhu &amp; kelembapan tersimpan terpisah.
+    💡 <strong>Tips:</strong> Setiap aplikasi tersambung ke <em>Google Sheet yang berbeda</em>. Menu Analisis hanya membaca ketiganya (tidak menyimpan data sendiri).
   </div>
 
   <div class="install-banner" id="installBanner">
