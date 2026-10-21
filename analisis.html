@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<title>Analisis IPM - PT. Agri Wangi Berry</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<style>
+:root{--p:#0f766e;--bg:#f0f0ee;--card:#fff;--bd:#d8d8d0;--tx:#1a1a18;--mu:#666;--ok:#16a34a;--bad:#dc2626;--mid:#d97706}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--tx);line-height:1.45;font-size:14px;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+header{background:linear-gradient(135deg,#14b8a6,#0f766e);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 14px 16px}
+header a{color:#fff;text-decoration:none;font-size:13px;opacity:.9}
+header h1{font-size:18px;margin:4px 0 2px}
+header p{font-size:12px;opacity:.9}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{font-size:11px;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.2)}
+.chip.x{background:#fee2e2;color:#991b1b}
+.wrap{max-width:900px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px}
+h2{font-size:14px;margin-bottom:8px}
+.mu{color:var(--mu);font-size:12px}
+.fl{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+label{display:block;font-size:11px;font-weight:700;color:var(--mu);margin-bottom:2px}
+select,input[type=date]{width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;font-size:14px;background:#fff}
+.ck{display:flex;gap:6px;align-items:center;margin-top:8px;font-size:12px}
+button{background:var(--p);color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;font-size:13px;margin-top:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.k{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:10px}
+.k b{display:block;font-size:20px}
+.k span{font-size:11px;color:var(--mu)}
+.cv{position:relative;height:280px}
+.sc{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:6px 5px;border-bottom:1px solid #eee;text-align:left;white-space:nowrap}
+th{background:#f7f7f5;font-size:11px;color:var(--mu)}
+td.n,th.n{text-align:right}
+td.w{white-space:normal;min-width:130px}td.c{cursor:pointer}.sm{font-size:11px;color:var(--mu);display:block;margin-top:3px}
+.ok{color:var(--ok);font-weight:700}.bad{color:var(--bad);font-weight:700}.mid{color:var(--mid);font-weight:700}
+ul{padding-left:18px;font-size:13px}li{margin-bottom:4px}
+.note{font-size:11px;color:var(--mu);margin-top:8px}
+.empty{padding:14px;text-align:center;color:var(--mu);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <a href="./index.html">‹ Portal IPM</a>
+  <h1>📊 Analisis IPM</h1>
+  <p>Scouting × Penyemprotan × Suhu &amp; Kelembapan</p>
+  <div class="chips" id="chips"></div>
+</header>
+<div class="wrap">
+  <div class="card">
+    <div class="fl">
+      <div><label>Greenhouse</label><select id="fGH"><option value="ALL">GH 1 + GH 2</option><option>GH1</option><option>GH2</option></select></div>
+      <div><label>Dari</label><input type="date" id="fFrom"></div>
+      <div><label>Sampai</label><input type="date" id="fTo"></div>
+      <div><label>Jendela evaluasi</label><select id="fN"><option value="5">5 hari</option><option value="7" selected>7 hari</option><option value="10">10 hari</option><option value="14">14 hari</option></select></div>
+      <div><label>Hama/penyakit (grafik)</label><select id="fP"></select></div>
+    </div>
+    <label class="ck"><input type="checkbox" id="fEx" checked> Buang data yang tercampur penyemprotan lain (lebih adil)</label>
+    <button onclick="load()">🔄 Muat ulang data</button>
+  </div>
+
+  <div class="cards" id="sum"></div>
+
+  <div class="card"><h2>Ringkasan status hama per blok</h2>
+    <p class="mu" style="margin-bottom:6px">Dari scouting terakhir tiap blok (level: &lt;3% hijau, 3–5% kuning, ≥5% merah, sama seperti Monitoring HPT).</p>
+    <div class="sc" id="tBlk"></div>
+    <p class="note">Klik sel <b>Cakupan Bay</b>, <b>Level</b> (ganti urutan: otomatis → hijau → kuning → merah), atau <b>Catatan</b> untuk mengisi manual, mis. Cyclamen Mite yang belum ada di form scouting. Tersimpan di perangkat ini.</p></div>
+
+  <div class="card"><h2>1. Gabungan: scouting, suhu/RH, dan penyemprotan</h2>
+    <div class="cv"><canvas id="cTL"></canvas></div>
+    <p class="note" id="tlNote"></p></div>
+
+  <div class="card"><h2>2. Apakah penyemprotan efektif?</h2>
+    <p class="mu" style="margin-bottom:6px">Scouting terakhir sebelum semprot dibanding rata-rata scouting setelah semprot (dalam jendela evaluasi), untuk hama/penyakit sasaran.</p>
+    <div class="sc" id="tEff"></div>
+    <h2 style="margin-top:12px">Detail per penyemprotan</h2>
+    <div class="sc" id="tDet"></div></div>
+
+  <div class="card"><h2>3. Apakah suhu &amp; kelembapan berpengaruh?</h2>
+    <p class="mu" style="margin-bottom:6px">Korelasi antara perubahan hasil scouting (antar dua scouting berurutan) dengan rata-rata suhu / RH di antara keduanya. <b>+</b> = hama naik saat nilainya tinggi, <b>−</b> = hama turun saat nilainya tinggi.</p>
+    <ul id="ins"></ul>
+    <div class="sc" id="tCor" style="margin-top:8px"></div>
+    <div class="fl" style="margin-top:10px"><div><label>Sumbu X scatter</label><select id="fX"><option value="t">Suhu rata-rata (°C)</option><option value="rh">RH rata-rata (%)</option></select></div></div>
+    <div class="cv" style="margin-top:8px"><canvas id="cSC"></canvas></div>
+    <p class="note" id="split"></p></div>
+
+  <div class="card"><h2>Catatan cara baca</h2>
+    <ul class="mu">
+      <li>Ini <b>indikasi</b>, bukan bukti sebab-akibat. Makin banyak data (n), makin bisa dipercaya. Korelasi dengan n &lt; 6 tidak ditampilkan.</li>
+      <li>Penyemprotan dicatat per GH (bukan per block), jadi analisis memakai rata-rata semua block di GH tersebut.</li>
+      <li>Hasil: <b>Efektif</b> = turun ≥30%; <b>Terjaga</b> = awal &lt;1% dan setelahnya &lt;3%; <b>Naik</b> = naik ≥10% (min. +0,5 poin); selain itu <b>Tetap</b>.</li>
+      <li>Sasaran dibaca dari kolom "Sasaran" di Manajemen Pestisida. Jika kosong, dipakai jenis obatnya (akarisida → spidermites, fungisida → mildew/botrytis/antraknosa).</li>
+      <li>Sumber data sama dengan 3 menu lain; sambungkan Sheets di menu masing-masing (sekali saja) agar terbaca di sini.</li>
+    </ul></div>
+</div>
+
+<script>
+const HPT_DEF='https://script.google.com/macros/s/AKfycbyY2_2eqEiabNCRV2y1eCZ7DLHQIEKQNjZB7TvCR1IN0Qz737ltAsHvo4OImtXIU5WBFA/exec';
+const DAY=864e5, $=id=>document.getElementById(id);
+const PEST={spidermites:{n:'Spidermites',re:/spider|tungau|mite/},aphids:{n:'Aphids',re:/aphid|kutu daun/},thrips:{n:'Thrips',re:/thrips/},ulat:{n:'Ulat',re:/ulat|penggerek/},kutu:{n:'Kutu Kebul',re:/kebul|whitefly|bemisia/},mildew:{n:'Mildew',re:/mildew|embun|powder|tepung/},botrytis:{n:'Botrytis',re:/botrytis|kelabu|busuk/},antrak:{n:'Antraknosa',re:/antrak/},layu:{n:'Layu Mati',re:/layu|fusarium|phytoph/}};
+const PK=Object.keys(PEST), HRS=['06','09','12','15'];
+const LS=k=>{try{return localStorage.getItem(k)||''}catch(e){return ''}};
+const U=s=>{const[p,q,r]=s.split('-').map(Number);return Date.UTC(p,q-1,r)}, iso=ms=>new Date(ms).toISOString().slice(0,10);
+const nd=s=>{s=String(s||'').trim();if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;if(/^\d{4}-\d{2}-\d{2}T/.test(s))return iso(new Date(s).getTime()+7*36e5);const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);return m?m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0'):''};
+const nv=v=>(v===''||v==null||isNaN(v))?null:+v;
+const mean=a=>{a=a.filter(x=>x!=null);return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
+const f=(v,d=1)=>v==null?'–':v.toFixed(d).replace('.',',');
+const sg=(v,d=1)=>v==null?'–':(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(d).replace('.',',');
+let SB={},MAN={},SC={},SP=[],WX={},SPE=[],ST={},charts={};
+
+async function jget(u){const r=await fetch(u,{redirect:'follow'});const j=JSON.parse(await r.text());if(j&&j.error)throw new Error(j.error);return j}
+function targets(u){
+  const s=String(u.sasaran||'').toLowerCase(),t=PK.filter(k=>PEST[k].re.test(s));
+  if(t.length)return t;
+  const j=String(u.jenisPenyemprotan||'').toLowerCase();
+  if(j.includes('akarisida'))return['spidermites'];
+  if(j.includes('fungisida'))return['mildew','botrytis','antrak'];
+  return[];
+}
+async function load(){
+  ST={};
+  try{const j=await jget((LS('hpt_script_url')||HPT_DEF)+'?action=list'),agg={};
+    Object.keys(j).forEach(loc=>{const g=loc.split('-')[0].replace(/\s/g,'').toUpperCase();agg[g]=agg[g]||{};
+      (j[loc]||[]).forEach(it=>{const d=nd(it.date);if(!d)return;const o=agg[g][d]=agg[g][d]||{n:0,s:{}};o.n++;PK.forEach(k=>o.s[k]=(o.s[k]||0)+(+it[k]||0))})});
+    SC={};Object.keys(agg).forEach(g=>SC[g]=Object.keys(agg[g]).sort().map(d=>{const o=agg[g][d],v={};PK.forEach(k=>v[k]=o.s[k]/o.n*100);return{d,ms:U(d),v}}));
+    SB={};Object.keys(j).forEach(loc=>{SB[loc]=(j[loc]||[]).map(it=>{const d=nd(it.date),v={};PK.forEach(k=>v[k]=(+it[k]||0)*100);return{d,ms:d?U(d):0,v}}).filter(x=>x.d).sort((a,b)=>a.ms-b.ms)});
+    ST.s=Object.values(SC).reduce((a,b)=>a+b.length,0)+' hari scouting';
+  }catch(e){SC={};ST.s=''}
+  try{const u=LS('pestisida_script_url');if(!u)throw 0;SP=(await jget(u+'?action=getAll')).usage||[];ST.p=SP.length+' catatan semprot'}
+  catch(e){SP=[];try{SP=JSON.parse(LS('pestisida_usage')||'[]')}catch(x){}ST.p=SP.length?SP.length+' catatan semprot (lokal)':''}
+  try{const u=LS('suhu_url');if(!u)throw 0;const j=await jget(u);WX={};['GH1','GH2'].forEach(g=>{WX[g]={};(j[g]||[]).forEach(r=>{const d=nd(r.tanggal);if(d)WX[g][d]=r})});ST.w='suhu/RH GH1 & GH2'}
+  catch(e){try{WX=JSON.parse(LS('suhu_cache')||'{}')}catch(x){WX={}}ST.w=Object.values(WX).some(o=>o&&Object.keys(o).length)?'suhu/RH (lokal)':''}
+  SPE=SP.map(u=>({d:nd(u.tanggal),g:String(u.gh||'').replace(/\s/g,'').toUpperCase(),obat:u.namaObat||'?',sas:u.sasaran||'',tg:targets(u)})).filter(e=>e.d&&e.g);
+  $('chips').innerHTML=[['s','Scouting'],['p','Pestisida'],['w','Suhu & RH']].map(([k,n])=>ST[k]?`<span class="chip">✓ ${n}: ${ST[k]}</span>`:`<span class="chip x">✗ ${n}: belum tersambung</span>`).join('');
+  const ds=Object.values(SC).flat().map(x=>x.d).sort();
+  if(!$('fFrom').value&&ds.length)$('fFrom').value=ds[0];
+  if(!$('fTo').value)$('fTo').value=iso(Date.now()+7*36e5);
+  if(!$('fP').options.length)$('fP').innerHTML=PK.map(k=>`<option value="${k}">${PEST[k].n}</option>`).join('');
+  run();
+}
+function F(){const g=$('fGH').value,gs=Object.keys(SC).filter(x=>g==='ALL'||x===g);return{g,gs,from:$('fFrom').value,to:$('fTo').value,N:+$('fN').value,ex:$('fEx').checked,p:$('fP').value}}
+function wd(g,d){const r=(WX[g]||{})[d];if(!r)return null;return{t:mean(HRS.map(h=>nv(r['t'+h]))),rh:mean(HRS.map(h=>nv(r['rh'+h])))}}
+function wi(g,a,b){const T=[],R=[];let n=0;for(let m=a+DAY;m<=b;m+=DAY){n++;const w=wd(g,iso(m));if(w){if(w.t!=null)T.push(w.t);if(w.rh!=null)R.push(w.rh)}}return n&&T.length>=n/2&&R.length>=n/2?{t:mean(T),rh:mean(R)}:null}
+function verdict(b,a){if(b<1&&a<3)return['Terjaga','ok'];if(a<=b*.7)return['Efektif','ok'];if(a>=b*1.1&&a-b>=.5)return['Naik','bad'];return['Tetap','mid']}
+function pearson(x,y){const n=x.length;if(n<6)return null;const mx=mean(x),my=mean(y);let a=0,b=0,c=0;for(let i=0;i<n;i++){a+=(x[i]-mx)*(y[i]-my);b+=(x[i]-mx)**2;c+=(y[i]-my)**2}return b&&c?a/Math.sqrt(b*c):null}
+const median=a=>{const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2};
+
+function effects(P){
+  const out=[];
+  SPE.filter(e=>P.gs.includes(e.g)&&e.d>=P.from&&e.d<=P.to).forEach(e=>{
+    const arr=SC[e.g]||[],ms=U(e.d);
+    e.tg.forEach(p=>{
+      const bef=arr.filter(x=>x.ms<=ms&&x.ms>=ms-P.N*DAY),aft=arr.filter(x=>x.ms>ms&&x.ms<=ms+P.N*DAY);
+      if(!bef.length||!aft.length)return;
+      const b=bef[bef.length-1].v[p],a=mean(aft.map(x=>x.v[p])),v=verdict(b,a);
+      const ov=SPE.some(o=>o!==e&&o.g===e.g&&o.tg.includes(p)&&U(o.d)>=ms&&U(o.d)<=ms+P.N*DAY&&!(o.d===e.d&&o.obat===e.obat));
+      out.push({d:e.d,g:e.g,obat:e.obat,p,b,a,dl:a-b,v:v[0],c:v[1],ov});
+    });
+  });
+  return out.sort((x,y)=>y.d.localeCompare(x.d));
+}
+function intervals(P){
+  const out=[];
+  P.gs.forEach(g=>{const arr=(SC[g]||[]).filter(x=>x.d>=P.from&&x.d<=P.to);
+    for(let i=1;i<arr.length;i++){const A=arr[i-1],B=arr[i];if(B.ms-A.ms>14*DAY)continue;const w=wi(g,A.ms,B.ms);if(!w)continue;
+      PK.forEach(p=>{const sp=P.ex&&SPE.some(o=>o.g===g&&o.tg.includes(p)&&U(o.d)>=A.ms&&U(o.d)<=B.ms);if(sp)return;
+        out.push({g,p,d:B.d,x:{t:w.t,rh:w.rh},dy:B.v[p]-A.v[p]})})}});
+  return out;
+}
+function run(){
+  const P=F();if(!P.gs.length){$('sum').innerHTML='<div class="empty" style="grid-column:1/-1">Data scouting belum terbaca. Buka Monitoring HPT lalu Connect Sheets.</div>';return}
+  const E=effects(P),Eu=P.ex?E.filter(e=>!e.ov):E,IV=intervals(P);
+  /* efektivitas */
+  const G={};Eu.forEach(e=>{const k=e.obat+'|'+e.p,o=G[k]=G[k]||{obat:e.obat,p:e.p,n:0,b:[],a:[],ok:0};o.n++;o.b.push(e.b);o.a.push(e.a);if(e.c==='ok')o.ok++});
+  const rows=Object.values(G).sort((x,y)=>y.n-x.n||x.obat.localeCompare(y.obat));
+  $('tEff').innerHTML=rows.length?'<table><tr><th>Obat</th><th>Sasaran</th><th class="n">n</th><th class="n">Sebelum %</th><th class="n">Sesudah %</th><th class="n">Δ poin</th><th class="n">Berhasil</th></tr>'+rows.map(o=>{const b=mean(o.b),a=mean(o.a),r=o.ok/o.n*100;return`<tr><td><b>${o.obat}</b></td><td>${PEST[o.p].n}</td><td class="n">${o.n}</td><td class="n">${f(b,2)}</td><td class="n">${f(a,2)}</td><td class="n ${a<b?'ok':a>b?'bad':''}">${sg(a-b,2)}</td><td class="n ${r>=60?'ok':r>=35?'mid':'bad'}">${f(r,0)}%</td></tr>`}).join('')+'</table>':'<div class="empty">Belum ada penyemprotan yang punya scouting sebelum &amp; sesudahnya di periode ini.</div>';
+  $('tDet').innerHTML=E.length?'<table><tr><th>Tgl</th><th>GH</th><th>Obat</th><th>Sasaran</th><th class="n">Sblm %</th><th class="n">Ssdh %</th><th class="n">Δ</th><th>Hasil</th></tr>'+E.slice(0,60).map(e=>`<tr style="${e.ov?'opacity:.55':''}"><td>${e.d.slice(5)}</td><td>${e.g}</td><td>${e.obat}</td><td>${PEST[e.p].n}</td><td class="n">${f(e.b,2)}</td><td class="n">${f(e.a,2)}</td><td class="n">${sg(e.dl,2)}</td><td class="${e.c}">${e.v}${e.ov?' *':''}</td></tr>`).join('')+'</table>'+(E.some(e=>e.ov)?'<p class="note">* tercampur penyemprotan lain pada sasaran &amp; GH yang sama dalam jendela evaluasi.</p>':''):'<div class="empty">Tidak ada data.</div>';
+  /* korelasi */
+  const C=PK.map(p=>{const s=IV.filter(i=>i.p===p),y=s.map(i=>i.dy);return{p,n:s.length,t:pearson(s.map(i=>i.x.t),y),rh:pearson(s.map(i=>i.x.rh),y)}});
+  const cell=r=>{if(r==null)return'<td class="n mu">–</td>';const a=Math.abs(r),c=r>0?'220,38,38':'37,99,235';return`<td class="n" style="background:rgba(${c},${Math.min(a,1)*.45});font-weight:${a>=.5?700:400}">${sg(r,2)}</td>`};
+  $('tCor').innerHTML='<table><tr><th>Hama / penyakit</th><th class="n">n interval</th><th class="n">vs Suhu</th><th class="n">vs RH</th></tr>'+C.map(c=>`<tr><td>${PEST[c.p].n}</td><td class="n">${c.n}</td>${cell(c.t)}${cell(c.rh)}</tr>`).join('')+'</table>';
+  const L=[];C.forEach(c=>[['t','suhu'],['rh','RH']].forEach(([k,nm])=>{if(c[k]!=null&&Math.abs(c[k])>=.3)L.push({p:c.p,nm,r:c[k],n:c.n})}));
+  L.sort((x,y)=>Math.abs(y.r)-Math.abs(x.r));
+  $('ins').innerHTML=L.length?L.slice(0,4).map(l=>`<li><b>${PEST[l.p].n}</b> cenderung ${l.r>0?'<span class="bad">naik</span>':'<span class="ok">turun</span>'} saat ${l.nm} lebih tinggi (r = ${sg(l.r,2)}, n = ${l.n}, ${Math.abs(l.r)>=.6?'kuat':'sedang'})</li>`).join(''):'<li class="mu">Belum ada hubungan yang cukup jelas (|r| ≥ 0,3) atau data belum cukup. Coba perlebar periode.</li>';
+  /* ringkasan */
+  const best=rows.filter(o=>o.n>=3).sort((x,y)=>y.ok/y.n-x.ok/x.n)[0],ok=Eu.filter(e=>e.c==='ok').length;
+  $('sum').innerHTML=[
+    [Eu.length,'penyemprotan dievaluasi'+(P.ex&&E.length-Eu.length?` (${E.length-Eu.length} dibuang karena tercampur)`:'')],
+    [Eu.length?f(ok/Eu.length*100,0)+'%':'–','berhasil (efektif / terjaga)'],
+    [best?best.obat:'–',best?`paling konsisten untuk ${PEST[best.p].n} (${f(best.ok/best.n*100,0)}%, n=${best.n})`:'perlu ≥3 data per obat'],
+    [L.length?PEST[L[0].p].n:'–',L.length?`paling terkait ${L[0].nm} (r ${sg(L[0].r,2)})`:'belum ada kaitan cuaca yang jelas']
+  ].map(([b,s])=>`<div class="k"><b style="font-size:${String(b).length>9?15:20}px">${b}</b><span>${s}</span></div>`).join('');
+  blocks(P,E);drawTL(P);drawSC(P,IV);
+}
+try{MAN=JSON.parse(LS('ana_man')||'{}')}catch(e){MAN={}}
+const BAY={B1:'Bay 1-4',B2:'Bay 5-7',B3:'Bay 8-10'},LV=[['Aman - Waspada','#b6d7a8'],['Siaga','#fde68a'],['Siaga - Awas','#ff0000']];
+const REC={spidermites:'Kuratif akarisida; monitoring skoring tiap hari',thrips:'Kuratif insektisida; cek bunga & perangkap',aphids:'Kuratif insektisida; cek pucuk & daun muda',ulat:'Hand-picking + insektisida',kutu:'Insektisida; cek perangkap kuning',mildew:'Fungisida kuratif; turunkan RH, bersihkan daun sakit',botrytis:'Fungisida kuratif; buang buah/daun terinfeksi, turunkan RH',antrak:'Fungisida; sanitasi tanaman sakit',layu:'Cabut tanaman layu & sanitasi'};
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function editM(loc,k){const m=MAN[loc]=MAN[loc]||{};
+  if(k==='lvl'){if(m.lvl==null)m.lvl=0;else if(m.lvl>=2)delete m.lvl;else m.lvl++}
+  else{const v=prompt(k==='bay'?'Cakupan bay (mis. Bay 1-4):':'Catatan manual (mis. CM Bay 7, eradikasi tanaman bergejala):',m[k]||'');if(v===null)return;if(v.trim())m[k]=v.trim();else delete m[k]}
+  try{localStorage.setItem('ana_man',JSON.stringify(MAN))}catch(e){}run()}
+function blocks(P,E){
+  const locs=Object.keys(SB).filter(l=>P.gs.includes(l.split('-')[0].replace(/\s/g,'').toUpperCase())).sort();let h='';
+  locs.forEach(loc=>{
+    const arr=SB[loc].filter(x=>x.d<=P.to);if(!arr.length)return;
+    const L=arr[arr.length-1],V=arr.length>1?arr[arr.length-2]:null,g=loc.split('-')[0].replace(/\s/g,'').toUpperCase(),m=MAN[loc]||{};
+    const top=PK.filter(k=>L.v[k]>0).sort((a,b)=>L.v[b]-L.v[a]).slice(0,2),mx=top.length?L.v[top[0]]:0;
+    const auto=mx<3?0:mx<5?1:2,li=m.lvl!=null?m.lvl:auto;
+    const dom=top.length?top.map(k=>{const d=V?L.v[k]-V.v[k]:0;return PEST[k].n+' '+f(L.v[k],1)+'%'+(d>.3?' ↑':d<-.3?' ↓':'')}).join(', '):'Tidak ada temuan';
+    const rec=top.filter(k=>L.v[k]>=1).map(k=>REC[k]);if(li>=2)rec.push('Eradikasi tanaman bergejala berat');
+    const k0=top[0],sp=k0&&SPE.filter(e=>e.g===g&&e.tg.includes(k0)&&e.d<=P.to).sort((a,b)=>b.d.localeCompare(a.d))[0];
+    if(sp){const ev=E.find(e=>e.g===g&&e.p===k0&&e.d===sp.d&&e.obat===sp.obat);rec.push('Semprot terakhir '+sp.obat+' ('+sp.d.slice(5)+')'+(ev?' → '+ev.v:' (belum ada scouting sesudahnya)'))}
+    const w=wi(g,L.ms-7*DAY,L.ms),dis=top.some(k=>['mildew','botrytis','antrak'].includes(k));
+    let wx='';if(w)wx='7 hari terakhir: '+f(w.t)+'°C, RH '+f(w.rh,0)+'%'+(dis&&w.rh>=85?' (RH tinggi, risiko penyakit)':'');
+    h+=`<tr><td class="w"><b>${loc}</b><span class="sm">scouting ${L.d.slice(5)}</span></td><td class="w c" onclick="editM('${loc}','bay')">${esc(m.bay||BAY[loc.split('-')[1]]||'(isi)')}</td><td class="w">${dom}</td><td class="c" style="background:${LV[li][1]};font-weight:700;color:${li===2?'#000':'#1a1a18'}" onclick="editM('${loc}','lvl')">${LV[li][0]}${m.lvl!=null?'<span class="sm">manual</span>':''}</td><td class="w c" onclick="editM('${loc}','note')">${rec.map(r=>'• '+esc(r)).join('<br>')||'• Pertahankan rutinitas'}${m.note?'<br>• '+esc(m.note):''}${wx?'<span class="sm">'+wx+'</span>':''}</td></tr>`;
+  });
+  $('tBlk').innerHTML=h?'<table><tr><th>Blok</th><th>Cakupan Bay</th><th>HPT Dominan</th><th>Level</th><th>Rekomendasi Prioritas</th></tr>'+h+'</table>':'<div class="empty">Belum ada data scouting.</div>';
+}
+function kill(id){if(charts[id]){charts[id].destroy();delete charts[id]}}
+function drawTL(P){
+  const g=P.gs[0],p=P.p;kill('TL');
+  let a=P.from,b=P.to;if(!a||!b)return;if(U(b)-U(a)>400*DAY)a=iso(U(b)-400*DAY);
+  const L=[];for(let m=U(a);m<=U(b);m+=DAY)L.push(iso(m));
+  const sm={};(SC[g]||[]).forEach(x=>sm[x.d]=x.v[p]);
+  const sp=L.map(()=>null),info=L.map(()=>'');
+  SPE.filter(e=>e.g===g&&e.tg.includes(p)).forEach(e=>{const i=L.indexOf(e.d);if(i>=0){sp[i]=0;info[i]=(info[i]?info[i]+', ':'')+e.obat}});
+  $('tlNote').textContent=`Ditampilkan: ${g} · ${PEST[p].n}. ▲ = penyemprotan dengan sasaran ${PEST[p].n}. Pilih "GH 1" / "GH 2" di atas untuk ganti GH.`;
+  charts.TL=new Chart($('cTL'),{type:'line',data:{labels:L.map(d=>d.slice(5)),datasets:[
+    {label:PEST[p].n+' (%)',data:L.map(d=>sm[d]??null),borderColor:'#dc2626',backgroundColor:'#dc2626',yAxisID:'y',spanGaps:true,pointRadius:3,borderWidth:2,tension:.15},
+    {label:'Suhu (°C)',data:L.map(d=>{const w=wd(g,d);return w?w.t:null}),borderColor:'#f59e0b',yAxisID:'y2',pointRadius:0,borderWidth:1.5,spanGaps:true},
+    {label:'RH (%)',data:L.map(d=>{const w=wd(g,d);return w?w.rh:null}),borderColor:'#0ea5e9',yAxisID:'y2',pointRadius:0,borderWidth:1.5,spanGaps:true},
+    {label:'Semprot',data:sp,info,showLine:false,pointStyle:'triangle',pointRadius:8,backgroundColor:'#7c3aed',borderColor:'#7c3aed',yAxisID:'y'}]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:c=>c.dataset.info?(c.dataset.info[c.dataIndex]?'Semprot: '+c.dataset.info[c.dataIndex]:null):c.dataset.label+': '+f(c.parsed.y)}}},
+      scales:{y:{beginAtZero:true,title:{display:true,text:'% serangan'}},y2:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'°C / %RH'}},x:{ticks:{maxRotation:60,font:{size:10}}}}}});
+}
+function drawSC(P,IV){
+  kill('SC');const xk=$('fX').value,p=P.p,S=IV.filter(i=>i.p===p),COL={GH1:'#378add',GH2:'#16a34a'};
+  charts.SC=new Chart($('cSC'),{type:'scatter',data:{datasets:P.gs.map(g=>({label:g,data:S.filter(i=>i.g===g).map(i=>({x:i.x[xk],y:i.dy,d:i.d})),backgroundColor:COL[g]||'#666'}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12}},title:{display:true,text:'Perubahan '+PEST[p].n+' vs '+(xk==='t'?'suhu':'RH')},tooltip:{callbacks:{label:c=>`${c.raw.d}: ${f(c.raw.x)} → ${sg(c.raw.y,2)} poin`}}},
+      scales:{x:{title:{display:true,text:xk==='t'?'Suhu rata-rata (°C)':'RH rata-rata (%)'}},y:{title:{display:true,text:'Δ % serangan antar scouting'}}}}});
+  const sp=$('split');if(S.length<8){sp.textContent='Data interval belum cukup untuk perbandingan tinggi vs rendah.';return}
+  sp.innerHTML=[['t','suhu','°C'],['rh','RH','%']].map(([k,n,u])=>{const m=median(S.map(i=>i.x[k])),hi=S.filter(i=>i.x[k]>=m),lo=S.filter(i=>i.x[k]<m);
+    return`${PEST[p].n}: saat ${n} ≥ ${f(m)}${u} (n=${hi.length}) rata-rata berubah <b>${sg(mean(hi.map(i=>i.dy)),2)}</b> poin, saat &lt; ${f(m)}${u} (n=${lo.length}) <b>${sg(mean(lo.map(i=>i.dy)),2)}</b> poin.`}).join('<br>');
+}
+['fGH','fFrom','fTo','fN','fEx','fP'].forEach(id=>$(id).addEventListener('change',run));
+$('fX').addEventListener('change',run);
+load();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+</script>
+</body>
+</html>
