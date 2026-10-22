@@ -1,10 +1,5 @@
-/* AWB Apps — Service Worker v8
- * Strategi:
- *  - HTML/CSS/JS  → network-first (selalu coba ambil terbaru)
- *  - Gambar/icon  → cache-first (jarang berubah, biar cepat)
- *  - Apps Script  → bypass total (jangan di-cache)
- */
-const CACHE_NAME = 'awb-apps-v8'; // naikkan angka ini tiap kali mau paksa update
+/* AWB Apps — Service Worker v9 */
+const CACHE_NAME = 'awb-apps-v9';
 
 const PRECACHE = [
   './',
@@ -14,12 +9,14 @@ const PRECACHE = [
   './suhu.html',
   './analisis.html',
   './outbox.js',
+  './core.js',
   'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
   './manifest.json',
   './LOGO_AWB.png',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './version.json'
 ];
 
 const isHtmlLike = (req) =>
@@ -32,20 +29,14 @@ const isImage = (req) =>
   req.destination === 'image' ||
   /\.(png|jpe?g|gif|svg|webp|ico)$/i.test(new URL(req.url).pathname);
 
-// Install: precache + langsung aktif
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache =>
-      Promise.all(
-        PRECACHE.map(url =>
-          cache.add(url).catch(err => console.log('Gagal cache:', url, err))
-        )
-      )
+      Promise.all(PRECACHE.map(url => cache.add(url).catch(err => console.log('Gagal cache:', url, err))))
     ).then(() => self.skipWaiting())
   );
 });
 
-// Activate: hapus semua cache versi lama
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
@@ -54,42 +45,26 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Fetch
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
-
-  // 1. Apps Script → bypass total
   if (url.hostname.includes('script.google.com')) return;
 
-  // 2. HTML/JS/CSS → network-first (kunci utama agar update langsung kelihatan)
   if (isHtmlLike(e.request)) {
     e.respondWith(
       fetch(e.request)
-        .then(res => {
-          const copy = res.clone();
-          caches.open(CACHE_NAME).then(c => c.put(e.request, copy));
-          return res;
-        })
+        .then(res => { const copy = res.clone(); caches.open(CACHE_NAME).then(c => c.put(e.request, copy)); return res; })
         .catch(() => caches.match(e.request).then(c => c || caches.match('./index.html')))
     );
     return;
   }
-
-  // 3. Gambar/icon → cache-first
   if (isImage(e.request)) {
     e.respondWith(
       caches.match(e.request).then(cached =>
-        cached || fetch(e.request).then(res => {
-          const copy = res.clone();
-          caches.open(CACHE_NAME).then(c => c.put(e.request, copy));
-          return res;
-        })
+        cached || fetch(e.request).then(res => { const copy = res.clone(); caches.open(CACHE_NAME).then(c => c.put(e.request, copy)); return res; })
       )
     );
     return;
   }
-
-  // 4. Sisanya → cache-first dengan fallback network
   e.respondWith(
     caches.match(e.request).then(cached =>
       cached || fetch(e.request).catch(() => caches.match('./index.html'))
