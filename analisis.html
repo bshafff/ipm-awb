@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0f766e">
 <title>Analisis IPM - PT. Agri Wangi Berry</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="./core.js"></script>
 <style>
 :root{--p:#0f766e;--bg:#f0f0ee;--card:#fff;--bd:#d8d8d0;--tx:#1a1a18;--mu:#666;--ok:#16a34a;--bad:#dc2626;--mid:#d97706}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -99,7 +100,7 @@ ul{padding-left:18px;font-size:13px}li{margin-bottom:4px}
 </div>
 
 <script>
-const HPT_DEF='https://script.google.com/macros/s/AKfycbyY2_2eqEiabNCRV2y1eCZ7DLHQIEKQNjZB7TvCR1IN0Qz737ltAsHvo4OImtXIU5WBFA/exec';
+const HPT_DEF='https://script.google.com/macros/s/AKfycbw08XF1H8bdZ6Oe_oI-F2cCsKxynCVNFs_51rhzEm2AlzeMqkfVApaxmhWBl_Syy7PQ/exec';
 const DAY=864e5, $=id=>document.getElementById(id);
 const PEST={spidermites:{n:'Spidermites',re:/spider|tungau|mite/},aphids:{n:'Aphids',re:/aphid|kutu daun/},thrips:{n:'Thrips',re:/thrips/},ulat:{n:'Ulat',re:/ulat|penggerek/},kutu:{n:'Kutu Kebul',re:/kebul|whitefly|bemisia/},mildew:{n:'Mildew',re:/mildew|embun|powder|tepung/},botrytis:{n:'Botrytis',re:/botrytis|kelabu|busuk/},antrak:{n:'Antraknosa',re:/antrak/},layu:{n:'Layu Mati',re:/layu|fusarium|phytoph/}};
 const PK=Object.keys(PEST), HRS=['06','09','12','15'];
@@ -174,19 +175,16 @@ function intervals(P){
 function run(){
   const P=F();if(!P.gs.length){$('sum').innerHTML='<div class="empty" style="grid-column:1/-1">Data scouting belum terbaca. Buka Monitoring HPT lalu Connect Sheets.</div>';return}
   const E=effects(P),Eu=P.ex?E.filter(e=>!e.ov):E,IV=intervals(P);
-  /* efektivitas */
   const G={};Eu.forEach(e=>{const k=e.obat+'|'+e.p,o=G[k]=G[k]||{obat:e.obat,p:e.p,n:0,b:[],a:[],ok:0};o.n++;o.b.push(e.b);o.a.push(e.a);if(e.c==='ok')o.ok++});
   const rows=Object.values(G).sort((x,y)=>y.n-x.n||x.obat.localeCompare(y.obat));
   $('tEff').innerHTML=rows.length?'<table><tr><th>Obat</th><th>Sasaran</th><th class="n">n</th><th class="n">Sebelum %</th><th class="n">Sesudah %</th><th class="n">Δ poin</th><th class="n">Berhasil</th></tr>'+rows.map(o=>{const b=mean(o.b),a=mean(o.a),r=o.ok/o.n*100;return`<tr><td><b>${o.obat}</b></td><td>${PEST[o.p].n}</td><td class="n">${o.n}</td><td class="n">${f(b,2)}</td><td class="n">${f(a,2)}</td><td class="n ${a<b?'ok':a>b?'bad':''}">${sg(a-b,2)}</td><td class="n ${r>=60?'ok':r>=35?'mid':'bad'}">${f(r,0)}%</td></tr>`}).join('')+'</table>':'<div class="empty">Belum ada penyemprotan yang punya scouting sebelum &amp; sesudahnya di periode ini.</div>';
   $('tDet').innerHTML=E.length?'<table><tr><th>Tgl</th><th>GH</th><th>Obat</th><th>Sasaran</th><th class="n">Sblm %</th><th class="n">Ssdh %</th><th class="n">Δ</th><th>Hasil</th></tr>'+E.slice(0,60).map(e=>`<tr style="${e.ov?'opacity:.55':''}"><td>${e.d.slice(5)}</td><td>${e.g}</td><td>${e.obat}</td><td>${PEST[e.p].n}</td><td class="n">${f(e.b,2)}</td><td class="n">${f(e.a,2)}</td><td class="n">${sg(e.dl,2)}</td><td class="${e.c}">${e.v}${e.ov?' *':''}</td></tr>`).join('')+'</table>'+(E.some(e=>e.ov)?'<p class="note">* tercampur penyemprotan lain pada sasaran &amp; GH yang sama dalam jendela evaluasi.</p>':''):'<div class="empty">Tidak ada data.</div>';
-  /* korelasi */
   const C=PK.map(p=>{const s=IV.filter(i=>i.p===p),y=s.map(i=>i.dy);return{p,n:s.length,t:pearson(s.map(i=>i.x.t),y),rh:pearson(s.map(i=>i.x.rh),y)}});
   const cell=r=>{if(r==null)return'<td class="n mu">–</td>';const a=Math.abs(r),c=r>0?'220,38,38':'37,99,235';return`<td class="n" style="background:rgba(${c},${Math.min(a,1)*.45});font-weight:${a>=.5?700:400}">${sg(r,2)}</td>`};
   $('tCor').innerHTML='<table><tr><th>Hama / penyakit</th><th class="n">n interval</th><th class="n">vs Suhu</th><th class="n">vs RH</th></tr>'+C.map(c=>`<tr><td>${PEST[c.p].n}</td><td class="n">${c.n}</td>${cell(c.t)}${cell(c.rh)}</tr>`).join('')+'</table>';
   const L=[];C.forEach(c=>[['t','suhu'],['rh','RH']].forEach(([k,nm])=>{if(c[k]!=null&&Math.abs(c[k])>=.3)L.push({p:c.p,nm,r:c[k],n:c.n})}));
   L.sort((x,y)=>Math.abs(y.r)-Math.abs(x.r));
   $('ins').innerHTML=L.length?L.slice(0,4).map(l=>`<li><b>${PEST[l.p].n}</b> cenderung ${l.r>0?'<span class="bad">naik</span>':'<span class="ok">turun</span>'} saat ${l.nm} lebih tinggi (r = ${sg(l.r,2)}, n = ${l.n}, ${Math.abs(l.r)>=.6?'kuat':'sedang'})</li>`).join(''):'<li class="mu">Belum ada hubungan yang cukup jelas (|r| ≥ 0,3) atau data belum cukup. Coba perlebar periode.</li>';
-  /* ringkasan */
   const best=rows.filter(o=>o.n>=3).sort((x,y)=>y.ok/y.n-x.ok/x.n)[0],ok=Eu.filter(e=>e.c==='ok').length;
   $('sum').innerHTML=[
     [Eu.length,'penyemprotan dievaluasi'+(P.ex&&E.length-Eu.length?` (${E.length-Eu.length} dibuang karena tercampur)`:'')],
@@ -251,7 +249,6 @@ function drawSC(P,IV){
 $('fX').addEventListener('change',run);
 addEventListener('online',load);
 load();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
 </script>
 </body>
 </html>
