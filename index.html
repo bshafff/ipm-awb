@@ -14,110 +14,77 @@
   <link rel="apple-touch-icon" href="./icon-192.png">
   <title>IPM PT. Agri Wangi Berry</title>
   <style>
-    :root {
-      --primary: #378add;
-      --bg: #f0f0ee;
-      --card: #ffffff;
-      --border: #d8d8d0;
-      --text: #1a1a18;
-      --muted: #666;
-    }
+    :root { --primary: #378add; --bg: #f0f0ee; --card: #ffffff; --border: #d8d8d0; --text: #1a1a18; --muted: #666; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html { font-size: 16px; }
-    body {
-      margin: 0; min-height: 100vh; min-height: 100dvh;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg); color: var(--text); line-height: 1.5;
-      -webkit-font-smoothing: antialiased; overscroll-behavior-y: none;
-      display: flex; flex-direction: column;
-    }
-    .app-header {
-      background: linear-gradient(135deg, #378add 0%, #2d6fb8 100%);
-      color: #fff; padding: 2rem 1rem 2.5rem;
-      padding-top: calc(2rem + env(safe-area-inset-top));
-      text-align: center; display: flex; flex-direction: column;
-      align-items: center; gap: 0.5rem;
-      position: relative; overflow: hidden;
-    }
-    .app-header::after {
-      content: ''; position: absolute; inset: auto 0 -1px 0;
-      height: 24px; background: var(--bg); border-radius: 24px 24px 0 0;
-    }
-    .app-header-logo {
-      width: 100px; height: 100px;
-      display: flex; align-items: center; justify-content: center;
-      background: #fff; border-radius: 22px; padding: 8px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.14);
-    }
-    .app-header-logo img {
-      max-width: 100%; max-height: 100%; object-fit: contain;
-    }
-    .app-header h1 {
-      font-size: 1.25rem; margin: 0; font-weight: 700;
-      letter-spacing: -0.3px; max-width: 95%;
-    }
-    .app-header p { font-size: 0.875rem; margin: 0; opacity: 0.92; font-weight: 500; }
-    .container { flex: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 0 1rem 2rem; position: relative; z-index: 1; }
-    .section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 1.5rem 0 0.75rem; padding-left: 0.25rem; }
-    .app-card {
-      display: flex; align-items: center; gap: 1rem;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 1.125rem 1rem; margin-bottom: 0.875rem;
-      text-decoration: none; color: inherit;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      transition: transform 0.15s, box-shadow 0.15s;
-      position: relative; overflow: hidden;
-    }
-    .app-card:active { transform: scale(0.98); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-    .app-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
-    .app-card.hpt::before { background: #16a34a; }
-    .app-card.pest::before { background: #7c3aed; }
-    .app-card.suhu::before { background: #ea580c; }
-    .app-card.ana::before { background: #0f766e; }
-    .app-card-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; flex-shrink: 0; color: #fff; }
+    body { margin: 0; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; display: flex; flex-direction: column; }
+
+    /* WELCOME SCREEN */
+    #welcome-screen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; text-align: center; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); }
+    .w-logo { width: 120px; height: 120px; margin-bottom: 1rem; border-radius: 24px; box-shadow: 0 10px 25px rgba(55,138,221,0.2); background: #fff; padding: 10px; object-fit: contain; }
+    .w-title { font-size: 1.75rem; font-weight: 800; color: #1e3a8a; margin: 0 0 0.5rem; }
+    .w-subtitle { font-size: 1rem; color: #64748b; margin: 0 0 2rem; }
+    .w-card { background: #fff; border-radius: 20px; padding: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 400px; width: 100%; }
+    .w-card h2 { font-size: 1.25rem; margin-top: 0; color: #0f172a; }
+    .w-desc { font-size: 0.9rem; color: #475569; line-height: 1.6; margin-bottom: 1.5rem; }
+    .w-btn { background: var(--primary); color: #fff; border: none; border-radius: 12px; padding: 1rem; font-size: 1rem; font-weight: 700; width: 100%; cursor: pointer; transition: background 0.2s; }
+    .w-btn:hover { background: #2d6fb8; }
+    .w-btn:disabled { opacity: 0.7; cursor: wait; }
+
+    /* HEADER */
+    .app-header { background: linear-gradient(135deg, #378add 0%, #2d6fb8 100%); color: #fff; padding: 1.5rem 1rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .brand-logo { width: 70px; height: 70px; background: #fff; border-radius: 16px; padding: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); object-fit: contain; }
+    .app-header h1 { font-size: 1.25rem; margin: 0; font-weight: 700; }
+    .app-header p { font-size: 0.85rem; margin: 0; opacity: 0.9; }
+    .app-version { font-size: 0.7rem; opacity: 0.7; margin-bottom: 0.25rem; }
+
+    /* CONTAINER & CARDS */
+    .container { flex: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 1.5rem 1rem; }
+    .section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 1rem 0 0.75rem; }
+    .app-card { display: flex; align-items: center; gap: 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.125rem 1rem; margin-bottom: 0.875rem; text-decoration: none; color: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .app-card:active { transform: scale(0.98); }
+    .app-card-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; color: #fff; }
     .app-card.hpt .app-card-icon { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
     .app-card.suhu .app-card-icon { background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%); }
     .app-card.ana .app-card-icon { background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%); }
     .app-card.pest .app-card-icon { background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); }
-    .app-card-body { flex: 1; min-width: 0; }
-    .app-card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--text); }
-    .app-card-desc { font-size: 0.8125rem; color: var(--muted); line-height: 1.35; }
-    .app-card-arrow { font-size: 1.25rem; color: #bbb; flex-shrink: 0; margin-left: 0.25rem; }
-    .info-card { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 0.875rem 1rem; margin-top: 1.5rem; font-size: 0.8125rem; color: #1e40af; line-height: 1.5; }
-    .info-card strong { color: #1e3a8a; }
-    .footer { text-align: center; padding: 1rem; padding-bottom: calc(1rem + env(safe-area-inset-bottom)); font-size: 0.75rem; color: #999; }
-    .install-banner { display: none; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 0.875rem; margin-top: 1rem; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
-    .install-banner.show { display: flex; }
-    .install-banner p { flex: 1; font-size: 0.8125rem; color: #9a3412; margin: 0; min-width: 180px; }
-    .install-banner button { background: #f97316; color: #fff; border: none; border-radius: 10px; padding: 0.6rem 1rem; font-size: 0.8125rem; font-weight: 700; cursor: pointer; min-height: 40px; }
-    .toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 16px; right: 16px; max-width: 400px; margin: 0 auto; background: #1f2937; color: #fff; padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.8125rem; z-index: 999; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.25); border-left: 4px solid #378add; }
-    .toast.show { display: block; }
-    @media (min-width: 640px) {
-      .app-header { padding-top: 2.5rem; padding-bottom: 3rem; }
-      .app-header h1 { font-size: 1.5rem; }
-      .app-header-logo { width: 120px; height: 120px; }
-      .app-card { padding: 1.25rem 1.25rem; }
-    }
+    .app-card-body { flex: 1; }
+    .app-card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .app-card-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.35; }
+    .app-card-arrow { font-size: 1.25rem; color: #bbb; margin-left: auto; }
+    .footer { text-align: center; padding: 1rem; font-size: 0.75rem; color: #999; }
   </style>
 </head>
 <body>
 
-<div class="app-header">
-  <div class="app-header-logo">
-    <img src="LOGO_AWB.png" alt="Logo IPM PT. Agri Wangi Berry" onerror="this.style.display='none'">
+<!-- ========== WELCOME SCREEN ========== -->
+<div id="welcome-screen">
+  <img class="w-logo" src="./LOGO_AWB.png" alt="Agri Wangi Berry" onerror="this.src='./icon-192.png'">
+  <h1 class="w-title">IPM AWB</h1>
+  <p class="w-subtitle">PT. Agri Wangi Berry · Ciwidey</p>
+  <div class="w-card">
+    <h2>👋 Selamat Datang</h2>
+    <p class="w-desc">Aplikasi monitoring hama, manajemen pestisida, dan suhu greenhouse. Data otomatis tersimpan di perangkat & tersinkron ke Google Sheet.</p>
+    <button id="welcome-btn" class="w-btn" onclick="welcomeConnect()">🔗 Sambung &amp; Mulai</button>
   </div>
-  <h1>IPM PT. Agri Wangi Berry</h1>
-  <p>Integrated Pest Management · Ciwidey</p>
 </div>
 
-<div class="container">
+<!-- ========== HEADER ========== -->
+<header class="app-header" id="app-header" style="display:none;">
+  <img class="brand-logo" src="./LOGO_AWB.png" alt="AWB" onerror="this.src='./icon-192.png'">
+  <h1>IPM AWB</h1>
+  <p>PT. Agri Wangi Berry</p>
+  <div class="app-version" id="app-version-label">v1.0.1</div>
+</header>
+
+<!-- ========== MAIN CONTAINER ========== -->
+<div class="container" id="app-container" style="display:none;">
   <div class="section-title">Pilih Aplikasi</div>
 
   <a class="app-card hpt" href="./monitoring.html">
     <div class="app-card-icon">🌿</div>
     <div class="app-card-body">
       <div class="app-card-title">Monitoring HPT</div>
-      <div class="app-card-desc">Form monitoring hama &amp; penyakit strawberry per greenhouse / block</div>
+      <div class="app-card-desc">Form monitoring hama & penyakit</div>
     </div>
     <div class="app-card-arrow">›</div>
   </a>
@@ -126,7 +93,7 @@
     <div class="app-card-icon">🧪</div>
     <div class="app-card-body">
       <div class="app-card-title">Manajemen Pestisida</div>
-      <div class="app-card-desc">Master data, stok opname, dan catatan penggunaan harian</div>
+      <div class="app-card-desc">Stok & penggunaan harian</div>
     </div>
     <div class="app-card-arrow">›</div>
   </a>
@@ -134,8 +101,8 @@
   <a class="app-card suhu" href="./suhu.html">
     <div class="app-card-icon">🌡️</div>
     <div class="app-card-body">
-      <div class="app-card-title">Suhu &amp; Kelembapan</div>
-      <div class="app-card-desc">Data suhu &amp; RH GH 1 dan GH 2, dashboard per bulan / minggu</div>
+      <div class="app-card-title">Suhu & Kelembapan</div>
+      <div class="app-card-desc">Data GH 1 & GH 2</div>
     </div>
     <div class="app-card-arrow">›</div>
   </a>
@@ -144,61 +111,14 @@
     <div class="app-card-icon">📊</div>
     <div class="app-card-body">
       <div class="app-card-title">Analisis IPM</div>
-      <div class="app-card-desc">Gabungan scouting, penyemprotan, suhu &amp; RH: efektivitas semprot dan pengaruh cuaca</div>
+      <div class="app-card-desc">Korelasi & efektivitas</div>
     </div>
     <div class="app-card-arrow">›</div>
   </a>
 
-  <div class="info-card">
-    💡 <strong>Tips:</strong> Setiap aplikasi tersambung ke <em>Google Sheet yang berbeda</em>. Menu Analisis hanya membaca ketiganya (tidak menyimpan data sendiri).
-  </div>
-
-  <div class="install-banner" id="installBanner">
-    <p>📲 Install ke layar utama agar tampil seperti aplikasi.</p>
-    <button onclick="installPWA()">Install</button>
-  </div>
+  <div class="footer">© PT. Agri Wangi Berry · Ciwidey</div>
 </div>
 
-<div class="footer">© PT. Agri Wangi Berry · Ciwidey</div>
-<div class="toast" id="toast"></div>
-
-<script>
-  let deferredPrompt = null;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('installBanner').classList.add('show');
-  });
-  window.addEventListener('appinstalled', () => {
-    deferredPrompt = null;
-    document.getElementById('installBanner').classList.remove('show');
-    showToast('✓ App berhasil di-install!');
-  });
-  async function installPWA() {
-    if (!deferredPrompt) {
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      if (isIOS) alert('Di iPhone/iPad:\n1. Tap Share (kotak panah)\n2. Pilih "Add to Home Screen"\n3. Tap Add');
-      else alert('Install belum tersedia.\n\nCoba: Chrome ⋮ → Install app / Add to Home screen');
-      return;
-    }
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    document.getElementById('installBanner').classList.remove('show');
-  }
-  function showToast(msg) {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(el._t);
-    el._t = setTimeout(() => el.classList.remove('show'), 2800);
-  }
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(() => console.log('✓ SW registered'))
-      .catch((e) => console.log('SW failed:', e));
-  }
-</script>
-
+<script src="./core.js"></script>
 </body>
 </html>
