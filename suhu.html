@@ -69,7 +69,6 @@ td.a{background:#eee;color:#1a56a0}tr.cl{cursor:pointer}tr.cl:hover{background:#
 </div>
 <div class="wrap">
 
-<!-- INPUT -->
 <div class="tab on" id="in">
   <div class="card">
     <div class="row">
@@ -85,7 +84,6 @@ td.a{background:#eee;color:#1a56a0}tr.cl{cursor:pointer}tr.cl:hover{background:#
   </div>
 </div>
 
-<!-- DASHBOARD -->
 <div class="tab" id="db">
   <div class="card">
     <div class="row">
@@ -102,7 +100,6 @@ td.a{background:#eee;color:#1a56a0}tr.cl{cursor:pointer}tr.cl:hover{background:#
   <div class="card"><label>Pola rata-rata per jam — RH (%)</label><div class="ch"><canvas id="c4"></canvas></div></div>
 </div>
 
-<!-- DATA -->
 <div class="tab" id="dt">
   <div class="card"><div class="row">
     <div><label>Greenhouse</label><select id="dtGH" onchange="renderTable()"><option value="GH1">GH 1</option><option value="GH2">GH 2</option></select></div>
@@ -111,10 +108,9 @@ td.a{background:#eee;color:#1a56a0}tr.cl{cursor:pointer}tr.cl:hover{background:#
   <div class="card tw" id="dtTable"></div>
 </div>
 
-<!-- IMPORT -->
 <div class="tab" id="im">
   <div class="card">
-    <p class="mu" style="margin-bottom:8px">Upload Excel/CSV dengan kolom seperti Google Sheet (No, Tanggal, Hari, Jam 06:00 °C/RH, 09:00, 12:00, 15:00). Format tanggal "1 Jul 2026", "16/07/2026", atau 2026-07-16 sama-sama terbaca. Tab bernama GH1 / GH2 di dalam file otomatis dikenali.</p>
+    <p class="mu" style="margin-bottom:8px">Upload Excel/CSV dengan kolom seperti Google Sheet. Tab bernama GH1 / GH2 di dalam file otomatis dikenali.</p>
     <div class="row"><div><label>Untuk greenhouse (jika tab tidak bernama GH1/GH2)</label><select id="imGH"><option>GH1</option><option>GH2</option></select></div>
     <div><label>File</label><input type="file" id="imFile" accept=".xlsx,.xls,.csv" onchange="readFile(this.files[0])"></div></div>
     <div class="row" style="margin-top:10px"><div><button class="btn s" style="width:100%" onclick="tpl(false)">📄 Template Excel (GH1 + GH2)</button></div><div><button class="btn s" style="width:100%" onclick="tpl(true)">📄 Template CSV</button></div></div>
@@ -150,18 +146,16 @@ function tab(id,b){document.querySelectorAll('.tab').forEach(x=>x.classList.remo
 function cache(){localStorage.setItem('suhu_cache',JSON.stringify(DATA))}
 
 function connect(){
-  // Jika URL sudah ada di localStorage (di-inject oleh core.js), langsung pakai
   let saved = localStorage.getItem('suhu_url');
   if(saved) { url = saved; upd(); load(); return; }
-
-  // Jika belum ada, baru minta manual
   const u = prompt('URL Apps Script Web App (/exec) untuk sheet SUHU:', url);
   if(u === null) return;
   url = u.trim();
   localStorage.setItem('suhu_url', url);
   upd(); load();
 }
-  function upd(){$('cbtn').textContent=url?'✓ Terhubung':'☁️ Connect Sheets'}
+function upd(){$('cbtn').textContent=url?'✓ Terhubung':'☁️ Connect Sheets'}
+
 async function load(){
   if(!url)return toast('Belum connect ke Sheets (data lokal)');
   try{const j=await (await fetch(url)).json();
@@ -320,33 +314,6 @@ const today=iso(Date.now()+7*36e5);
 $('inDate').value=today;$('dbMonth').value=today.slice(0,7);$('dtMonth').value=today.slice(0,7);
 initForm();loadForm();fillWeeks(true);upd();if(url)load();
 Outbox.init(async it=>post(it),(n,left)=>{toast('✓ '+n+' data offline terkirim'+(left?', sisa '+left:''));load()});
-  // ==========================================
-// AUTO PULL & AUTO SYNC SUHU
-// ==========================================
-window.addEventListener('app-online', () => {
-  if (url) {
-    console.log('Koneksi kembali! Memuat data suhu terbaru...');
-    load();
-  }
-});
-
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && url) {
-    load();
-  }
-});
-
-// Pastikan URL terisi otomatis jika user sudah pernah klik "Sambung & Mulai" di menu utama
-document.addEventListener('DOMContentLoaded', () => {
-  if (!url) {
-    const savedUrl = localStorage.getItem('suhu_url');
-    if (savedUrl) {
-      url = savedUrl;
-      upd();
-      load();
-    }
-  }
-});
 </script>
 </body>
 </html>
