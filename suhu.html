@@ -149,8 +149,19 @@ function toast(t){const m=$('msg');m.textContent=t;m.style.display='block';clear
 function tab(id,b){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));$(id).classList.add('on');document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');if(id=='db')renderDB();if(id=='dt')renderTable()}
 function cache(){localStorage.setItem('suhu_cache',JSON.stringify(DATA))}
 
-function connect(){const u=prompt('URL Apps Script Web App (/exec) untuk sheet SUHU:',url);if(u===null)return;url=u.trim();localStorage.setItem('suhu_url',url);upd();load()}
-function upd(){$('cbtn').textContent=url?'✓ Terhubung':'☁️ Connect Sheets'}
+function connect(){
+  // Jika URL sudah ada di localStorage (di-inject oleh core.js), langsung pakai
+  let saved = localStorage.getItem('suhu_url');
+  if(saved) { url = saved; upd(); load(); return; }
+
+  // Jika belum ada, baru minta manual
+  const u = prompt('URL Apps Script Web App (/exec) untuk sheet SUHU:', url);
+  if(u === null) return;
+  url = u.trim();
+  localStorage.setItem('suhu_url', url);
+  upd(); load();
+}
+  function upd(){$('cbtn').textContent=url?'✓ Terhubung':'☁️ Connect Sheets'}
 async function load(){
   if(!url)return toast('Belum connect ke Sheets (data lokal)');
   try{const j=await (await fetch(url)).json();
