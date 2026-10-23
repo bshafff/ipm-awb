@@ -42,8 +42,9 @@
     .grid-inputs b { font-size: 0.9rem; }
     .grid-inputs input { padding: 0.6rem; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.9rem; width: 100%; }
     
-    .btn { padding: 0.75rem; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; width: 100%; color: #fff; background: var(--primary); margin-top: 10px; }
+    .btn { padding: 0.75rem; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; width: 100%; color: #fff; background: var(--primary); margin-top: 10px; transition: 0.2s; }
     .btn:active { transform: scale(0.97); }
+    .btn.edit-mode { background: #f59e0b; } /* Tombol kuning kalau mode edit */
     
     .summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
     .sc { background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: 10px; }
@@ -121,7 +122,7 @@
       
       <div id="inputContainer"></div>
 
-      <button class="btn" onclick="saveCM()">💾 Simpan Data CM</button>
+      <button class="btn" id="btnSimpan" onclick="saveCM()">💾 Simpan Data CM</button>
     </div>
   </div>
 
@@ -204,14 +205,15 @@
 
   function loadFormData() {
     const tgl = document.getElementById('cmTanggal').value;
+    const btn = document.getElementById('btnSimpan');
     
-    // Reset form
+    // Reset form dulu
     document.getElementById('cmPopAwal').value = '';
     document.getElementById('cmPopUpdate').value = '';
     document.getElementById('cmTindakan').value = '';
     BAYS.forEach(bay => document.getElementById('cm_count_' + bay.replace(/\s/g,'')).value = '');
 
-    // Jika data ada, timpa dengan data dari cache
+    // Jika data sudah ada di tanggal & GH ini, tampilkan datanya
     if (cmData[tgl] && cmData[tgl][currentGH]) {
       const d = cmData[tgl][currentGH];
       document.getElementById('cmPopAwal').value = d.popAwal || '';
@@ -223,6 +225,16 @@
           document.getElementById('cm_count_' + bay.replace(/\s/g,'')).value = d.bays[bay];
         }
       });
+
+      // Ubah tombol jadi "Update Data" dan warnanya jadi Kuning
+      btn.textContent = '💾 Update Data (Edit)';
+      btn.classList.add('edit-mode');
+      showToast('ℹ️ Data sudah ada. Silakan edit jika ada yang salah.');
+      
+    } else {
+      // Kembalikan tombol jadi "Simpan" biasa
+      btn.textContent = '💾 Simpan Data CM';
+      btn.classList.remove('edit-mode');
     }
   }
 
@@ -293,6 +305,7 @@
       if(!cmData[tgl]) cmData[tgl] = {};
       cmData[tgl][currentGH] = { popAwal, popUpdate, tindakan, bays };
       localStorage.setItem('cm_cache', JSON.stringify(cmData));
+      loadFormData(); // Update UI
       return showToast('✓ Tersimpan di HP (Lokal)');
     }
 
@@ -300,8 +313,8 @@
       showToast('☁️ Mengirim data...');
       const res = await postJSON(payload);
       if (res.status === 'success') {
-        showToast('✓ Tersimpan & Tersinkronisasi!');
-        fetchCM();
+        showToast('✓ Data berhasil disimpan/diupdate!');
+        fetchCM(); // Tarik ulang data agar sinkron
       } else throw new Error(res.message);
     } catch (e) {
       showToast('Gagal: ' + e.message);
@@ -346,7 +359,6 @@
     const labels = BAYS;
     const dataCounts = new Array(10).fill(0);
 
-    // Kumpulkan data berdasarkan filter GH
     const ghs = ghFilter === 'ALL' ? ['GH1', 'GH2'] : [ghFilter];
     
     ghs.forEach(gh => {
@@ -354,7 +366,7 @@
       if (!d) return;
       totalPopAwal += (d.popAwal || 0);
       totalPopUpdate += (d.popUpdate || 0);
-      if (d.tindakan) tindakanList.push(`[${gh}] ${d.tindakan}`);
+      if (d.tindakan) tindakanList.push(`<b>[${gh}]</b> ${d.tindakan}`);
       
       BAYS.forEach((bay, idx) => {
         const count = d.bays ? (d.bays[bay] || 0) : 0;
@@ -363,7 +375,6 @@
       });
     });
 
-    // Render Tabel Rincian
     const tableBody = document.getElementById('cmTable').querySelector('tbody');
     tableBody.innerHTML = labels.map((bay, i) => `
       <tr>
@@ -372,7 +383,6 @@
       </tr>
     `).join('');
 
-    // Hitung Penurunan (vs tanggal sebelumnya)
     const dates = Object.keys(cmData).sort();
     const idx = dates.indexOf(tgl);
     let deltaHTML = '<span style="color:#666">-</span>';
@@ -422,7 +432,6 @@
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });
 
-    // Line Chart (Tren)
     const trendLabels = dates.slice(-7);
     
     const trendInfeksi = trendLabels.map(d => {
