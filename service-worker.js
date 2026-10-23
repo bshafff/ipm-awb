@@ -1,5 +1,5 @@
-/* AWB Apps — Service Worker v12 */
-const CACHE_NAME = 'awb-apps-v16';
+/* AWB Apps — Service Worker v13 */
+const CACHE_NAME = 'awb-apps-v17'; // Naikkan versi agar browser memuat SW baru
 
 const PRECACHE = [
   './',
@@ -8,6 +8,7 @@ const PRECACHE = [
   './pestisida.html',
   './suhu.html',
   './analisis.html',
+  './cm.html', // <-- TAMBAHKAN INI
   './outbox.js',
   './core.js',
   'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js',
@@ -47,6 +48,8 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
+  
+  // Jangan cache Google Apps Script
   if (url.hostname.includes('script.google.com')) return;
 
   if (isHtmlLike(e.request)) {
@@ -57,6 +60,7 @@ self.addEventListener('fetch', (e) => {
     );
     return;
   }
+  
   if (isImage(e.request)) {
     e.respondWith(
       caches.match(e.request).then(cached =>
@@ -65,6 +69,7 @@ self.addEventListener('fetch', (e) => {
     );
     return;
   }
+  
   e.respondWith(
     caches.match(e.request).then(cached =>
       cached || fetch(e.request).catch(() => caches.match('./index.html'))
