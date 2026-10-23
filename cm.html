@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Cyclamen Mite - PT. Agri Wangi Berry</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="./core.js"></script>
+  <style>
+    :root { --primary: #dc2626; --primary-dark: #b91c1c; --bg: #f0f0ee; --card: #ffffff; --border: #d8d8d0; --text: #1a1a18; --text-secondary: #666666; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
+    .app-header { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; padding: 1.2rem 1rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+    .app-header-logo { width: 80px; height: auto; background: #fff; border-radius: 50%; padding: 5px; object-fit: contain; }
+    .app-header h1 { font-size: 1.2rem; font-weight: 700; }
+    .app-header p { font-size: 0.8rem; opacity: 0.9; }
+    .auth-status { font-size: 0.75rem; opacity: 0.95; }
+    .auth-status.ok { color: #bbf7d0; }
+    .header-actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 0.5rem; }
+    .hdr-btn { padding: 0.4rem 0.75rem; border-radius: 8px; cursor: pointer; font-size: 0.75rem; font-weight: 700; border: none; }
+    .hdr-btn-connect { background: #fff; color: var(--primary); }
+    .hdr-btn-sync { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.35); }
+    .hdr-btn-logout { background: #fee2e2; color: #dc2626; }
+    .nav-tabs { display: flex; background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 40; }
+    .tab-btn { flex: 1; padding: 12px 5px; text-align: center; font-size: 0.8rem; font-weight: 700; border: none; background: none; cursor: pointer; color: var(--text-secondary); border-bottom: 3px solid transparent; }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .container { padding: 12px; padding-bottom: 90px; max-width: 800px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-bottom: 12px; }
+    .grid-inputs { display: grid; grid-template-columns: 80px 1fr 1fr; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .grid-inputs.header { font-weight: 700; font-size: 0.8rem; color: var(--text-secondary); text-align: center; }
+    .grid-inputs b { font-size: 0.9rem; }
+    .grid-inputs input { padding: 0.6rem; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.9rem; width: 100%; }
+    .btn { padding: 0.75rem; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; width: 100%; color: #fff; background: var(--primary); margin-top: 10px; }
+    .btn:active { transform: scale(0.97); }
+    .summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .sc { background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: 10px; }
+    .sc small { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); display: block; }
+    .sc b { font-size: 1.2rem; color: var(--primary); }
+    .chart-box { position: relative; height: 300px; width: 100%; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    th, td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; }
+    th { background: #f8fafc; font-weight: 700; }
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1f2937; color: #fff; padding: 10px 20px; border-radius: 99px; font-size: 0.85rem; display: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .toast.show { display: block; }
+    .action-cell { font-size: 0.75rem; color: #475569; line-height: 1.2; margin-top: 4px; display: block; }
+  </style>
+</head>
+<body>
+
+<div class="app-header">
+  <img class="app-header-logo" src="LOGO_AWB.png" alt="AWB" onerror="this.style.display='none'">
+  <h1>🦠 CYCLAMEN MITE (CM)</h1>
+  <p>Monitoring Penyebaran & Tindakan</p>
+  <div class="auth-status" id="authStatus"></div>
+  <div class="header-actions">
+    <button class="hdr-btn hdr-btn-sync" id="pushBtn" onclick="syncCM(true)" style="display:none">⬆️ Sync</button>
+    <button class="hdr-btn hdr-btn-sync" id="pullBtn" onclick="fetchCM()" style="display:none">⬇️ Muat</button>
+    <button class="hdr-btn hdr-btn-connect" id="authBtn" onclick="handleAuthClick()">☁️ Connect Sheets</button>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('form')">📝 Input Harian</button>
+  <button class="tab-btn" onclick="switchTab('dashboard')">📊 Dashboard</button>
+</div>
+
+<div class="container">
+  <div class="toast" id="toastMsg"></div>
+
+  <!-- TAB FORM -->
+  <div id="tab-form" class="tab-content">
+    <div class="card">
+      <label style="font-size:0.8rem; font-weight:700; color:#666; margin-bottom:5px; display:block;">Tanggal Monitoring</label>
+      <input type="date" id="cmTanggal" style="width:100%; padding:10px; border:1.5px solid #d8d8d0; border-radius:8px; margin-bottom:15px; font-size:1rem;">
+      
+      <div class="grid-inputs header">
+        <div>BAY</div>
+        <div>Terinfeksi</div>
+        <div>Tindakan</div>
+      </div>
+      
+      <div id="inputContainer"></div>
+
+      <button class="btn" onclick="saveCM()">💾 Simpan Data CM</button>
+    </div>
+  </div>
+
+  <!-- TAB DASHBOARD -->
+  <div id="tab-dashboard" class="tab-content" style="display:none;">
+    <div class="card">
+      <label style="font-size:0.8rem; font-weight:700; color:#666; margin-bottom:5px; display:block;">Pilih Tanggal Laporan</label>
+      <select id="cmFilterDate" onchange="renderDashboard()" style="width:100%; padding:10px; border:1.5px solid #d8d8d0; border-radius:8px; font-size:1rem; margin-bottom:15px;"></select>
+    </div>
+
+    <div class="summary-cards" id="summaryCards"></div>
+
+    <div class="card">
+      <h3 style="font-size:0.9rem; margin-bottom:10px;">Tingkat Penyebaran per BAY</h3>
+      <div class="chart-box"><canvas id="cmBarChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:0.9rem; margin-bottom:10px;">Tren Total Terinfeksi</h3>
+      <div class="chart-box"><canvas id="cmLineChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:0.9rem; margin-bottom:10px;">Rincian Tindakan & Data</h3>
+      <div style="overflow-x:auto;">
+        <table id="cmTable">
+          <thead><tr><th>BAY</th><th>Terinfeksi</th><th>Tindakan</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const BAYS = ['BAY 1','BAY 2','BAY 3','BAY 4','BAY 5','BAY 6','BAY 7','BAY 8','BAY 9','BAY 10'];
+  const scriptUrl = localStorage.getItem('hpt_script_url') || '';
+  let isAuth = JSON.parse(localStorage.getItem('hpt_auth') || 'false');
+  if (scriptUrl) isAuth = true;
+  
+  let cmData = {}; 
+  let barChart = null, lineChart = null;
+
+  window.onload = () => {
+    document.getElementById('cmTanggal').value = new Date().toISOString().split('T')[0];
+    generateInputs();
+    updateAuthStatus();
+    fetchCM();
+  };
+
+  function generateInputs() {
+    const cont = document.getElementById('inputContainer');
+    cont.innerHTML = BAYS.map(bay => `
+      <div class="grid-inputs">
+        <b>${bay}</b>
+        <input type="number" id="cm_count_${bay.replace(/\s/g,'')}" min="0" placeholder="0">
+        <input type="text" id="cm_act_${bay.replace(/\s/g,'')}" placeholder="Mis: Semprot">
+      </div>
+    `).join('');
+  }
+
+  function updateAuthStatus() {
+    const s = document.getElementById('authStatus');
+    const a = document.getElementById('authBtn');
+    const p = document.getElementById('pushBtn');
+    const l = document.getElementById('pullBtn');
+    if (isAuth && scriptUrl) {
+      s.innerHTML = '✓ Terhubung ke Sheets'; s.className = 'auth-status ok';
+      a.textContent = 'Putuskan'; a.className = 'hdr-btn hdr-btn-logout';
+      p.style.display = l.style.display = 'inline-flex';
+    } else {
+      s.innerHTML = ''; s.className = 'auth-status';
+      a.textContent = '☁️ Connect Sheets'; a.className = 'hdr-btn hdr-btn-connect';
+      p.style.display = l.style.display = 'none';
+    }
+  }
+
+  function handleAuthClick() {
+    if (isAuth) { isAuth = false; localStorage.setItem('hpt_auth', 'false'); updateAuthStatus(); return; }
+    let url = prompt('URL Apps Script IPM (/exec):', scriptUrl);
+    if (url && url.includes('/exec')) {
+      localStorage.setItem('hpt_script_url', url);
+      localStorage.setItem('hpt_auth', 'true');
+      location.reload();
+    }
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toastMsg');
+    el.textContent = msg; el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  async function postJSON(body) {
+    const c = new AbortController(), t = setTimeout(() => c.abort(), 20000);
+    try {
+      const res = await fetch(scriptUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(body), signal: c.signal });
+      return await res.json();
+    } finally { clearTimeout(t); }
+  }
+
+  async function saveCM() {
+    const tgl = document.getElementById('cmTanggal').value;
+    if (!tgl) return alert('Pilih tanggal!');
+    
+    const data = [];
+    BAYS.forEach(bay => {
+      const id = bay.replace(/\s/g,'');
+      const count = parseFloat(document.getElementById('cm_count_'+id).value) || 0;
+      const action = document.getElementById('cm_act_'+id).value.trim();
+      data.push({ bay, count, action });
+    });
+
+    if (!scriptUrl) {
+      cmData[tgl] = {};
+      data.forEach(d => cmData[tgl][d.bay] = { count: d.count, action: d.action });
+      localStorage.setItem('cm_cache', JSON.stringify(cmData));
+      return showToast('✓ Tersimpan di HP (Lokal)');
+    }
+
+    try {
+      showToast('☁️ Mengirim data...');
+      const res = await postJSON({ action: 'cmSubmit', tanggal: tgl, data });
+      if (res.status === 'success') {
+        showToast('✓ Tersimpan & Tersinkronisasi!');
+        fetchCM();
+      } else throw new Error(res.message);
+    } catch (e) {
+      showToast('Gagal: ' + e.message);
+    }
+  }
+
+  async function fetchCM() {
+    if (!scriptUrl) {
+      try { cmData = JSON.parse(localStorage.getItem('cm_cache') || '{}'); } catch(e) {}
+      populateFilter(); renderDashboard();
+      return;
+    }
+    try {
+      const res = await fetch(scriptUrl + '?action=getCM');
+      cmData = await res.json();
+      populateFilter(); renderDashboard();
+    } catch(e) { console.error('Gagal fetch CM:', e); }
+  }
+
+  function populateFilter() {
+    const sel = document.getElementById('cmFilterDate');
+    const dates = Object.keys(cmData).sort().reverse();
+    sel.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
+    if (dates.length === 0) sel.innerHTML = '<option value="">Belum ada data</option>';
+  }
+
+  function renderDashboard() {
+    const tgl = document.getElementById('cmFilterDate').value;
+    if (!tgl || !cmData[tgl]) {
+      document.getElementById('summaryCards').innerHTML = '<div style="grid-column:1/-1; text-align:center; color:#999; padding:20px;">Belum ada data untuk tanggal ini</div>';
+      document.getElementById('cmTable').querySelector('tbody').innerHTML = '';
+      if(barChart) barChart.destroy(); if(lineChart) lineChart.destroy();
+      return;
+    }
+
+    let totalHariIni = 0;
+    let maxBay = { name: '-', count: 0 };
+    const labels = [];
+    const dataCounts = [];
+    
+    const tableBody = document.getElementById('cmTable').querySelector('tbody');
+    tableBody.innerHTML = '';
+
+    BAYS.forEach(bay => {
+      const d = cmData[tgl][bay] || { count: 0, action: '' };
+      totalHariIni += d.count;
+      if (d.count > maxBay.count) maxBay = { name: bay, count: d.count };
+      labels.push(bay);
+      dataCounts.push(d.count);
+      
+      tableBody.innerHTML += `<tr>
+        <td style="font-weight:bold;">${bay}</td>
+        <td style="${d.count > 50 ? 'color:#dc2626;font-weight:bold' : ''}">${d.count}</td>
+        <td class="action-cell">${d.action || '-'}</td>
+      </tr>`;
+    });
+
+    const dates = Object.keys(cmData).sort();
+    const idx = dates.indexOf(tgl);
+    let deltaHTML = '<span style="color:#666">-</span>';
+    if (idx > 0) {
+      const prevTgl = dates[idx - 1];
+      let totalPrev = 0;
+      BAYS.forEach(bay => totalPrev += (cmData[prevTgl][bay]?.count || 0));
+      const diff = totalHariIni - totalPrev;
+      if (diff < 0) deltaHTML = `<span style="color:#16a34a">▼ Turun ${Math.abs(diff)}</span>`;
+      else if (diff > 0) deltaHTML = `<span style="color:#dc2626">▲ Naik ${diff}</span>`;
+      else deltaHTML = `<span style="color:#666">Sama (=)</span>`;
+    }
+
+    document.getElementById('summaryCards').innerHTML = `
+      <div class="sc">
+        <small>TOTAL TERINFEKSI</small>
+        <b>${totalHariIni} <span style="font-size:0.8rem; font-weight:normal">tanaman</span></b>
+        <div style="font-size:0.75rem; margin-top:5px;">vs Hari Sblm: ${deltaHTML}</div>
+      </div>
+      <div class="sc" style="border-left-color:#f59e0b;">
+        <small>BAY TERPARAH</small>
+        <b style="color:#f59e0b">${maxBay.name}</b>
+        <div style="font-size:0.75rem; margin-top:5px;">${maxBay.count} tanaman</div>
+      </div>
+    `;
+
+    if (barChart) barChart.destroy();
+    barChart = new Chart(document.getElementById('cmBarChart'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Jumlah Terinfeksi',
+          data: dataCounts,
+          backgroundColor: dataCounts.map(c => c > 100 ? '#dc2626' : c > 0 ? '#f59e0b' : '#e5e7eb'),
+          borderRadius: 4
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    const trendLabels = dates.slice(-7);
+    const trendData = trendLabels.map(d => {
+      let sum = 0;
+      BAYS.forEach(b => sum += (cmData[d][b]?.count || 0));
+      return sum;
+    });
+
+    if (lineChart) lineChart.destroy();
+    lineChart = new Chart(document.getElementById('cmLineChart'), {
+      type: 'line',
+      data: {
+        labels: trendLabels,
+        datasets: [{
+          label: 'Total Terinfeksi (Semua Bay)',
+          data: trendData,
+          borderColor: '#dc2626',
+          backgroundColor: 'rgba(220,38,38,0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+    document.getElementById('tab-' + tab).style.display = 'block';
+    event.target.classList.add('active');
+    if (tab === 'dashboard') {
+      if (!document.getElementById('cmFilterDate').value) populateFilter();
+      renderDashboard();
+    }
+  }
+</script>
+</body>
+</html>
