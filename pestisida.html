@@ -659,20 +659,27 @@
   }
 
   function handleAuthClick() {
-    if (isAuthenticated) {
-      isAuthenticated=false; lsSet('pestisida_auth','false');
-      updateAuthStatus(); showToast('Koneksi diputus','info'); return;
-    }
-    const url=prompt('URL Web App Apps Script (/exec):\nWho has access = Anyone', scriptUrl||'');
-    if(!url||!url.trim()) return;
-    scriptUrl=url.trim().replace(/\/$/,'');
-    if(scriptUrl.indexOf('/exec')<0) return alert('URL harus mengandung /exec');
-    lsSet('pestisida_script_url',scriptUrl);
-    lsSet('pestisida_auth','true');
-    isAuthenticated=true; dirty.list=dirty.inventory=dirty.usage=true;
-    updateAuthStatus(); showToast('✓ Tersambung','ok');
-    setTimeout(()=>{ pullFromSheets(true).finally(()=>{ dirty.list=dirty.inventory=dirty.usage=true; syncToSheets(false); }); },300);
+  if (isAuthenticated) {
+    isAuthenticated=false; lsSet('pestisida_auth','false');
+    updateAuthStatus(); showToast('Koneksi diputus','info'); return;
   }
+  
+  // Cek apakah ada URL dari core.js
+  let savedUrl = lsGet('pestisida_script_url');
+  if(!savedUrl) {
+    savedUrl = prompt('URL Web App Apps Script (/exec):\nWho has access = Anyone', scriptUrl||'');
+  }
+  
+  if(!savedUrl || !savedUrl.trim()) return;
+  scriptUrl = savedUrl.trim().replace(/\/$/,'');
+  if(scriptUrl.indexOf('/exec') < 0) return alert('URL harus mengandung /exec');
+  
+  lsSet('pestisida_script_url',scriptUrl);
+  lsSet('pestisida_auth','true');
+  isAuthenticated=true; dirty.list=dirty.inventory=dirty.usage=true;
+  updateAuthStatus(); showToast('✓ Tersambung','ok');
+  setTimeout(()=>{ pullFromSheets(true).finally(()=>{ dirty.list=dirty.inventory=dirty.usage=true; syncToSheets(false); }); },300);
+}
 
   async function syncToSheets(force) {
     force=!!force;
