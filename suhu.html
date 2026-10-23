@@ -309,6 +309,33 @@ const today=iso(Date.now()+7*36e5);
 $('inDate').value=today;$('dbMonth').value=today.slice(0,7);$('dtMonth').value=today.slice(0,7);
 initForm();loadForm();fillWeeks(true);upd();if(url)load();
 Outbox.init(async it=>post(it),(n,left)=>{toast('✓ '+n+' data offline terkirim'+(left?', sisa '+left:''));load()});
+  // ==========================================
+// AUTO PULL & AUTO SYNC SUHU
+// ==========================================
+window.addEventListener('app-online', () => {
+  if (url) {
+    console.log('Koneksi kembali! Memuat data suhu terbaru...');
+    load();
+  }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && url) {
+    load();
+  }
+});
+
+// Pastikan URL terisi otomatis jika user sudah pernah klik "Sambung & Mulai" di menu utama
+document.addEventListener('DOMContentLoaded', () => {
+  if (!url) {
+    const savedUrl = localStorage.getItem('suhu_url');
+    if (savedUrl) {
+      url = savedUrl;
+      upd();
+      load();
+    }
+  }
+});
 </script>
 </body>
 </html>
