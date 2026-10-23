@@ -665,21 +665,26 @@
   }
 
   function handleAuthClick() {
-    if (isAuthenticated) {
-      isAuthenticated = false;
-      localStorage.setItem('hpt_auth', 'false');
-      updateAuthStatus(); showToast('infoMsg', 'Koneksi diputus');
-      return;
-    }
-    const url = prompt('Masukkan URL Apps Script Web App (/exec):', scriptUrl || '');
-    if (!url || !url.trim()) return;
-    scriptUrl = url.trim();
-    localStorage.setItem('hpt_script_url', scriptUrl);
-    localStorage.setItem('hpt_auth', 'true');
-    isAuthenticated = true;
-    updateAuthStatus(); showToast('infoMsg', '✓ Tersambung ke Sheets');
-    fetchDashboardData();
+  if (isAuthenticated) {
+    isAuthenticated = false;
+    localStorage.setItem('hpt_auth', 'false');
+    updateAuthStatus(); showToast('infoMsg', 'Koneksi diputus');
+    return;
   }
+  
+  let savedUrl = localStorage.getItem('hpt_script_url') || CONFIG.APPS_SCRIPT_URL;
+  if(!savedUrl) {
+    savedUrl = prompt('Masukkan URL Apps Script Web App (/exec):', scriptUrl || '');
+  }
+  
+  if (!savedUrl || !savedUrl.trim()) return;
+  scriptUrl = savedUrl.trim();
+  localStorage.setItem('hpt_script_url', scriptUrl);
+  localStorage.setItem('hpt_auth', 'true');
+  isAuthenticated = true;
+  updateAuthStatus(); showToast('infoMsg', '✓ Tersambung ke Sheets');
+  fetchDashboardData();
+}
 
   let isSaving = false;
   let editKey = null;
