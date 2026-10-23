@@ -1,5 +1,5 @@
-/* AWB Apps — Service Worker v11 */
-const CACHE_NAME = 'awb-apps-v11';
+/* AWB Apps — Service Worker v12 */
+const CACHE_NAME = 'awb-apps-v12';
 
 const PRECACHE = [
   './',
