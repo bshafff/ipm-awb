@@ -8,6 +8,21 @@ const DEFAULT_URLS = {
 const APP_VERSION_KEY = 'ipm_awb_app_version_v1';
 const WELCOMED_KEY    = 'ipm_awb_welcomed_v1';
 
+// AUTO-INJECT: Memasukkan URL ke localStorage secara paksa saat halaman dimuat
+function autoInjectUrls() {
+  if (DEFAULT_URLS.hpt && !localStorage.getItem('hpt_script_url')) {
+    localStorage.setItem('hpt_script_url', DEFAULT_URLS.hpt);
+    localStorage.setItem('hpt_auth', 'true');
+  }
+  if (DEFAULT_URLS.pestisida && !localStorage.getItem('pestisida_script_url')) {
+    localStorage.setItem('pestisida_script_url', DEFAULT_URLS.pestisida);
+    localStorage.setItem('pestisida_auth', 'true');
+  }
+  if (DEFAULT_URLS.suhu && !localStorage.getItem('suhu_url')) {
+    localStorage.setItem('suhu_url', DEFAULT_URLS.suhu);
+  }
+}
+
 function isWelcomed() { return localStorage.getItem(WELCOMED_KEY) === '1'; }
 function markWelcomed() { localStorage.setItem(WELCOMED_KEY, '1'); }
 
@@ -31,11 +46,7 @@ async function welcomeConnect() {
   const btn = document.getElementById('welcome-btn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Menyambungkan...'; }
   markWelcomed();
-
-  if (DEFAULT_URLS.hpt) { localStorage.setItem('hpt_script_url', DEFAULT_URLS.hpt); localStorage.setItem('hpt_auth', 'true'); }
-  if (DEFAULT_URLS.pestisida) { localStorage.setItem('pestisida_script_url', DEFAULT_URLS.pestisida); localStorage.setItem('pestisida_auth', 'true'); }
-  if (DEFAULT_URLS.suhu) { localStorage.setItem('suhu_url', DEFAULT_URLS.suhu); }
-
+  autoInjectUrls(); // Panggil inject di sini juga
   showAppScreen();
 }
 
@@ -110,13 +121,13 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('SW gagal:', err));
 }
 
-// EVENT GLOBAL: Saat koneksi kembali online, beritahu semua halaman
 window.addEventListener('online', () => {
   window.dispatchEvent(new Event('app-online'));
   checkVersion();
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+  autoInjectUrls(); // Pastikan URL terisi otomatis saat dibuka
   checkVersion();
   setInterval(checkVersion, 30 * 60 * 1000);
 
