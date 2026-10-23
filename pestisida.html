@@ -1299,9 +1299,15 @@
     renderInventory();
     renderUsage();
 
-    window.addEventListener('online', retrySync); document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) retrySync(); }); setInterval(retrySync, 20000); setTimeout(retrySync, 1500);
-    console.log('✓ AWB Pestisida App v2.2 loaded');
-  }
+        window.addEventListener('online', retrySync); 
+    window.addEventListener('app-online', () => {
+      if (isAuthenticated && scriptUrl) {
+        syncToSheets(false).then(() => pullFromSheets(true));
+      }
+    });
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) retrySync(); }); 
+    setInterval(retrySync, 20000); 
+    setTimeout(retrySync, 1500);
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
