@@ -1,14 +1,14 @@
 // core.js — Welcome, Auto-Connect, Auto-Update
 const DEFAULT_URLS = {
   hpt:       'https://script.google.com/macros/s/AKfycbyY2_2eqEiabNCRV2y1eCZ7DLHQIEKQNjZB7TvCR1IN0Qz737ltAsHvo4OImtXIU5WBFA/exec',
-  pestisida: 'https://script.google.com/macros/s/AKfycbw08XF1H8bdZ6Oe_oI-F2cCsKxynCVNFs_51rhzEm2AlzeMqkfVApaxmhWBl_Syy7PQ/exec', // ← isi URL Apps Script PESTISIDA di sini
-  suhu:      'https://script.google.com/macros/s/AKfycbzLqgDZHfeAjYZK88SupPa3LJs-39_8hsGDgzwmDRiiUdXUobhDUwVdqI1vYNpnd4EaxQ/exec'  // ← isi URL Apps Script SUHU di sini
+  pestisida: 'https://script.google.com/macros/s/AKfycbw08XF1H8bdZ6Oe_oI-F2cCsKxynCVNFs_51rhzEm2AlzeMqkfVApaxmhWBl_Syy7PQ/exec',
+  suhu:      'https://script.google.com/macros/s/AKfycbzLqgDZHfeAjYZK88SupPa3LJs-39_8hsGDgzwmDRiiUdXUobhDUwVdqI1vYNpnd4EaxQ/exec'
 };
 
 const APP_VERSION_KEY = 'ipm_awb_app_version_v1';
 const WELCOMED_KEY    = 'ipm_awb_welcomed_v1';
 
-// AUTO-INJECT: Memasukkan URL ke localStorage secara paksa saat halaman dimuat
+// AUTO-INJECT: Memasukkan URL ke localStorage secara paksa
 function autoInjectUrls() {
   if (DEFAULT_URLS.hpt && !localStorage.getItem('hpt_script_url')) {
     localStorage.setItem('hpt_script_url', DEFAULT_URLS.hpt);
@@ -46,7 +46,7 @@ async function welcomeConnect() {
   const btn = document.getElementById('welcome-btn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Menyambungkan...'; }
   markWelcomed();
-  autoInjectUrls(); // Panggil inject di sini juga
+  autoInjectUrls();
   showAppScreen();
 }
 
@@ -126,8 +126,10 @@ window.addEventListener('online', () => {
   checkVersion();
 });
 
+// EKSEKUSI LANGSUNG SAAT FILE DIBACA (Jangan tunggu DOMContentLoaded)
+autoInjectUrls();
+
 document.addEventListener('DOMContentLoaded', () => {
-  autoInjectUrls(); // Pastikan URL terisi otomatis saat dibuka
   checkVersion();
   setInterval(checkVersion, 30 * 60 * 1000);
 
