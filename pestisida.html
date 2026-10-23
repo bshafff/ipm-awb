@@ -99,8 +99,6 @@
     .toast.ok { border-left: 4px solid #10b981; }
     .toast.err { border-left: 4px solid #ef4444; }
     .toast.info { border-left: 4px solid #0ea5e9; }
-
-    /* ===== MODAL ===== */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.55); z-index: 9998;
@@ -257,7 +255,6 @@
   </div>
 </div>
 
-<!-- MODAL IMPORT -->
 <div class="modal-overlay" id="importModal">
   <div class="modal-box">
     <div class="modal-header">
@@ -309,7 +306,6 @@
 (function() {
   'use strict';
 
-  // ================= STORAGE WRAPPER =================
   function lsGet(key, fallback) {
     try { const v = localStorage.getItem(key); return v === null ? fallback : v; }
     catch (e) { console.warn('localStorage get blocked:', e); return fallback; }
@@ -321,7 +317,6 @@
     try { localStorage.removeItem(key); } catch (e) { console.warn('ls del fail:', e); }
   }
 
-  // ================= DATA INIT =================
   const obatDatabase = {
     'Preventif - Insektisida': ['Matador','Decis','Prevathon','Curacron'],
     'Preventif - Akarisida': ['Vertimec','Sulfur 95'],
@@ -334,8 +329,12 @@
   let pestisidaList = JSON.parse(lsGet('pestisida_list', '[]')).map(p => Object.assign({ stokAwal:0, isi:'' }, p));
   let inventory     = JSON.parse(lsGet('pestisida_inventory', '[]'));
   let dailyUsage    = JSON.parse(lsGet('pestisida_usage', '[]'));
+  
   let isAuthenticated = JSON.parse(lsGet('pestisida_auth', 'false'));
   let scriptUrl     = lsGet('pestisida_script_url', '');
+  
+  // PAKSA AUTH JIKA URL ADA
+  if (scriptUrl) { isAuthenticated = true; lsSet('pestisida_auth', 'true'); }
 
   const dirty = Object.assign({ list:false, inventory:false, usage:false }, (()=>{ try { return JSON.parse(lsGet('pestisida_dirty','{}')); } catch(e){ return {}; } })());
   let isSyncing=false, pendingSync=false, autoSyncTimer=null, lastSyncAt=0;
@@ -345,7 +344,6 @@
   let currentImportType = null;
   let parsedImportRows = [];
 
-  // ================= TOAST =================
   function showToast(msg, type) {
     const el = document.getElementById('syncToast');
     if (!el) return;
@@ -355,7 +353,6 @@
     el._t = setTimeout(() => el.classList.remove('show'), 3500);
   }
 
-  // ================= GLOBAL ERROR =================
   window.addEventListener('error', function(ev) {
     console.error('JS Error:', ev.message, ev.filename, ev.lineno);
     showToast('⚠️ ' + ev.message, 'err');
@@ -365,7 +362,6 @@
     showToast('⚠️ ' + (ev.reason && ev.reason.message || ev.reason), 'err');
   });
 
-  // ================= HELPERS =================
   function getMaster(n) { return pestisidaList.find(p => p.nama === n); }
   function parseDateVal(dStr) { if (!dStr) return 0; const d = new Date(dStr); return isNaN(d.getTime()) ? 0 : d.getTime(); }
   function getMutasiSorted() {
@@ -401,7 +397,6 @@
     }, DEBOUNCE_MS);
   }
 
-  // ================= CRUD =================
   function addPestisida() {
     const nama = document.getElementById('listNama').value.trim();
     if (!nama) return alert('Isi nama');
@@ -560,7 +555,6 @@
     return changed;
   }
 
-  // ================= RENDER =================
   function formatIsi(p) { return (p.isi===''||p.isi==null) ? '-' : (p.isi+' '+(p.satuan||'')); }
 
   function renderPestisidaList() {
@@ -643,7 +637,6 @@
     else renderUsage();
   }
 
-  // ================= AUTH & SYNC =================
   function updateAuthStatus() {
     const s=document.getElementById('authStatus'), a=document.getElementById('authBtn');
     const p=document.getElementById('pushBtn'), l=document.getElementById('pullBtn');
@@ -659,27 +652,24 @@
   }
 
   function handleAuthClick() {
-  if (isAuthenticated) {
-    isAuthenticated=false; lsSet('pestisida_auth','false');
-    updateAuthStatus(); showToast('Koneksi diputus','info'); return;
+    if (isAuthenticated) {
+      isAuthenticated=false; lsSet('pestisida_auth','false');
+      updateAuthStatus(); showToast('Koneksi diputus','info'); return;
+    }
+    let savedUrl = lsGet('pestisida_script_url');
+    if(!savedUrl) {
+      savedUrl = prompt('URL Web App Apps Script (/exec):\nWho has access = Anyone', scriptUrl||'');
+    }
+    if(!savedUrl || !savedUrl.trim()) return;
+    scriptUrl = savedUrl.trim().replace(/\/$/,'');
+    if(scriptUrl.indexOf('/exec') < 0) return alert('URL harus mengandung /exec');
+    
+    lsSet('pestisida_script_url',scriptUrl);
+    lsSet('pestisida_auth','true');
+    isAuthenticated=true; dirty.list=dirty.inventory=dirty.usage=true;
+    updateAuthStatus(); showToast('✓ Tersambung','ok');
+    setTimeout(()=>{ pullFromSheets(true).finally(()=>{ dirty.list=dirty.inventory=dirty.usage=true; syncToSheets(false); }); },300);
   }
-  
-  // Cek apakah ada URL dari core.js
-  let savedUrl = lsGet('pestisida_script_url');
-  if(!savedUrl) {
-    savedUrl = prompt('URL Web App Apps Script (/exec):\nWho has access = Anyone', scriptUrl||'');
-  }
-  
-  if(!savedUrl || !savedUrl.trim()) return;
-  scriptUrl = savedUrl.trim().replace(/\/$/,'');
-  if(scriptUrl.indexOf('/exec') < 0) return alert('URL harus mengandung /exec');
-  
-  lsSet('pestisida_script_url',scriptUrl);
-  lsSet('pestisida_auth','true');
-  isAuthenticated=true; dirty.list=dirty.inventory=dirty.usage=true;
-  updateAuthStatus(); showToast('✓ Tersambung','ok');
-  setTimeout(()=>{ pullFromSheets(true).finally(()=>{ dirty.list=dirty.inventory=dirty.usage=true; syncToSheets(false); }); },300);
-}
 
   async function syncToSheets(force) {
     force=!!force;
@@ -732,7 +722,6 @@
     }
   }
 
-  // ================= EXPORT CSV =================
   function exportCSV(type) {
     let data, fn;
     if(type==='list'){
@@ -750,7 +739,6 @@
     showToast('✓ CSV didownload','ok');
   }
 
-  // ================= IMPORT EXCEL =================
   const IMPORT_CONFIGS = {
     list: {
       title: '📥 Import Daftar Pestisida',
@@ -1191,7 +1179,6 @@
     }, 400);
   }
 
-  // ================= EVENT BINDING =================
   function bind() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
@@ -1266,7 +1253,6 @@
     });
   }
 
-  // ================= PWA =================
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -1292,7 +1278,6 @@
 
   function retrySync(){ if(isAuthenticated && scriptUrl && (dirty.list||dirty.inventory||dirty.usage)) syncToSheets(false); }
 
-  // ================= INIT =================
   function init() {
     try {
       document.getElementById('usageTanggal').valueAsDate = new Date();
@@ -1306,7 +1291,7 @@
     renderInventory();
     renderUsage();
 
-        window.addEventListener('online', retrySync); 
+    window.addEventListener('online', retrySync); 
     window.addEventListener('app-online', () => {
       if (isAuthenticated && scriptUrl) {
         syncToSheets(false).then(() => pullFromSheets(true));
@@ -1315,6 +1300,7 @@
     document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) retrySync(); }); 
     setInterval(retrySync, 20000); 
     setTimeout(retrySync, 1500);
+  }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
