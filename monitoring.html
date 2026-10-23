@@ -1119,6 +1119,21 @@
       fetchDashboardData();
     }, 800);
   }
+  // ==========================================
+// AUTO PULL: Tarik data otomatis saat online / pindah tab
+// ==========================================
+window.addEventListener('app-online', () => {
+  if (isAuthenticated && scriptUrl) {
+    console.log('Koneksi kembali! Auto-pulling data HPT...');
+    fetchDashboardData();
+  }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && isAuthenticated && scriptUrl) {
+    fetchDashboardData();
+  }
+});
 </script>
 </body>
 </html>
