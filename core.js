@@ -1,9 +1,4 @@
-// ============================================
 // core.js — Welcome, Auto-Connect, Auto-Update
-// Sync TETAP di masing-masing halaman (beda backend)
-// ============================================
-
-// ==== ISI 3 URL APPS SCRIPT ANDA DI SINI (sekali saja) ====
 const DEFAULT_URLS = {
   hpt:       'https://script.google.com/macros/s/AKfycbyY2_2eqEiabNCRV2y1eCZ7DLHQIEKQNjZB7TvCR1IN0Qz737ltAsHvo4OImtXIU5WBFA/exec',
   pestisida: 'https://script.google.com/macros/s/AKfycbw08XF1H8bdZ6Oe_oI-F2cCsKxynCVNFs_51rhzEm2AlzeMqkfVApaxmhWBl_Syy7PQ/exec', // ← isi URL Apps Script PESTISIDA di sini
@@ -13,7 +8,6 @@ const DEFAULT_URLS = {
 const APP_VERSION_KEY = 'ipm_awb_app_version_v1';
 const WELCOMED_KEY    = 'ipm_awb_welcomed_v1';
 
-// ========== WELCOME SCREEN ==========
 function isWelcomed() { return localStorage.getItem(WELCOMED_KEY) === '1'; }
 function markWelcomed() { localStorage.setItem(WELCOMED_KEY, '1'); }
 
@@ -38,34 +32,28 @@ async function welcomeConnect() {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Menyambungkan...'; }
   markWelcomed();
 
-  // Auto-connect semua aplikasi (kalau URL sudah diisi di DEFAULT_URLS)
-  if (DEFAULT_URLS.hpt) {
-    localStorage.setItem('hpt_script_url', DEFAULT_URLS.hpt);
-    localStorage.setItem('hpt_auth', 'true');
-  }
-  if (DEFAULT_URLS.pestisida) {
-    localStorage.setItem('pestisida_script_url', DEFAULT_URLS.pestisida);
-    localStorage.setItem('pestisida_auth', 'true');
-  }
-  if (DEFAULT_URLS.suhu) {
-    localStorage.setItem('suhu_url', DEFAULT_URLS.suhu);
-  }
+  if (DEFAULT_URLS.hpt) { localStorage.setItem('hpt_script_url', DEFAULT_URLS.hpt); localStorage.setItem('hpt_auth', 'true'); }
+  if (DEFAULT_URLS.pestisida) { localStorage.setItem('pestisida_script_url', DEFAULT_URLS.pestisida); localStorage.setItem('pestisida_auth', 'true'); }
+  if (DEFAULT_URLS.suhu) { localStorage.setItem('suhu_url', DEFAULT_URLS.suhu); }
 
   showAppScreen();
 }
 
-// ========== VERSION CHECK + AUTO UPDATE ==========
+// ========== UPDATE BUTTON ==========
 let _updateBtn = null;
 function getUpdateBtn() {
   if (_updateBtn) return _updateBtn;
   _updateBtn = document.createElement('button');
   _updateBtn.id = 'globalUpdateBtn';
-  _updateBtn.style.cssText = 'position:fixed;top:calc(10px + env(safe-area-inset-top));right:10px;z-index:9998;padding:8px 14px;background:#f59e0b;color:#fff;border:none;border-radius:99px;font-weight:700;font-size:12px;cursor:pointer;display:none;box-shadow:0 2px 10px rgba(0,0,0,0.25);';
+  _updateBtn.style.cssText = 'position:fixed;top:calc(10px + env(safe-area-inset-top));right:10px;z-index:9998;padding:8px 14px;background:#9ca3af;color:#fff;border:none;border-radius:99px;font-weight:700;font-size:12px;cursor:pointer;display:block;box-shadow:0 2px 10px rgba(0,0,0,0.25);transition:0.3s;';
   _updateBtn.onclick = manualUpdate;
+  _updateBtn.textContent = '🔄 Update';
   document.body.appendChild(_updateBtn);
   return _updateBtn;
 }
+
 async function checkVersion() {
+  const btn = getUpdateBtn();
   try {
     const res = await fetch('./version.json?t=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) return;
@@ -73,13 +61,21 @@ async function checkVersion() {
     const localVer = localStorage.getItem(APP_VERSION_KEY);
     const labelEl = document.getElementById('app-version-label');
     if (labelEl) labelEl.textContent = 'v' + (localVer || remote.version || '?');
+    
     if (!localVer) { localStorage.setItem(APP_VERSION_KEY, remote.version); return; }
-    if (localVer === remote.version) return;
-    const btn = getUpdateBtn();
-    btn.textContent = '🆕 Update v' + remote.version;
-    btn.style.display = 'block';
+    
+    if (localVer === remote.version) {
+      btn.textContent = '🔄 Update';
+      btn.style.background = '#9ca3af';
+      btn.disabled = false;
+    } else {
+      btn.textContent = '🆕 v' + remote.version;
+      btn.style.background = '#f59e0b';
+      btn.disabled = false;
+    }
   } catch (e) {}
 }
+
 async function performHardReset(newVersion) {
   if (newVersion) localStorage.setItem(APP_VERSION_KEY, newVersion);
   if ('serviceWorker' in navigator) {
@@ -92,38 +88,40 @@ async function performHardReset(newVersion) {
   }
   setTimeout(() => { location.replace(location.pathname + '?v=' + Date.now()); }, 400);
 }
+
 async function manualUpdate() {
   const btn = getUpdateBtn();
-  if (btn) { btn.disabled = true; btn.textContent = '⏳...'; }
+  btn.disabled = true; btn.textContent = '⏳...';
   try {
     const res = await fetch('./version.json?t=' + Date.now(), { cache: 'no-store' });
     const remote = await res.json();
     const localVer = localStorage.getItem(APP_VERSION_KEY);
     if (localVer === remote.version) {
-      if (btn) { btn.disabled = false; btn.textContent = '🔄 Update'; btn.style.display = 'none'; }
+      btn.disabled = false; btn.textContent = '🔄 Update'; btn.style.background = '#9ca3af';
       return;
     }
     await performHardReset(remote.version);
   } catch (e) {
-    if (btn) { btn.disabled = false; btn.textContent = '🔄 Update'; }
+    btn.disabled = false; btn.textContent = '🔄 Update';
   }
 }
 
-// ========== SERVICE WORKER (didaftarkan sekali di sini untuk semua halaman) ==========
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('SW gagal:', err));
 }
 
-// ========== INIT ==========
+// EVENT GLOBAL: Saat koneksi kembali online, beritahu semua halaman
+window.addEventListener('online', () => {
+  window.dispatchEvent(new Event('app-online'));
+  checkVersion();
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   checkVersion();
   setInterval(checkVersion, 30 * 60 * 1000);
 
-  // Welcome hanya untuk halaman yang punya elemen #welcome-screen (index.html)
   if (document.getElementById('welcome-screen')) {
     if (isWelcomed()) showAppScreen();
     else showWelcomeScreen();
   }
 });
-
-window.addEventListener('online', () => checkVersion());
