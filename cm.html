@@ -26,23 +26,37 @@
     .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
     .container { padding: 12px; padding-bottom: 90px; max-width: 800px; margin: 0 auto; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-bottom: 12px; }
-    .grid-inputs { display: grid; grid-template-columns: 80px 1fr 1fr; gap: 8px; align-items: center; margin-bottom: 8px; }
+    
+    /* Form Layout */
+    .form-header { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+    .form-group { flex: 1; min-width: 120px; }
+    .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px; }
+    .form-group input, .form-group select { width: 100%; padding: 0.6rem; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
+    
+    .gh-selector { display: flex; gap: 6px; margin-bottom: 15px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
+    .gh-btn { flex: 1; padding: 8px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; background: transparent; color: #64748b; }
+    .gh-btn.active { background: var(--primary); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+    .grid-inputs { display: grid; grid-template-columns: 80px 1fr; gap: 8px; align-items: center; margin-bottom: 8px; }
     .grid-inputs.header { font-weight: 700; font-size: 0.8rem; color: var(--text-secondary); text-align: center; }
     .grid-inputs b { font-size: 0.9rem; }
     .grid-inputs input { padding: 0.6rem; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.9rem; width: 100%; }
+    
     .btn { padding: 0.75rem; border-radius: 8px; font-weight: 700; border: none; cursor: pointer; width: 100%; color: #fff; background: var(--primary); margin-top: 10px; }
     .btn:active { transform: scale(0.97); }
+    
     .summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
     .sc { background: #fff; border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 8px; padding: 10px; }
     .sc small { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); display: block; }
     .sc b { font-size: 1.2rem; color: var(--primary); }
     .chart-box { position: relative; height: 300px; width: 100%; }
+    
     table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
     th, td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; }
     th { background: #f8fafc; font-weight: 700; }
+    
     .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1f2937; color: #fff; padding: 10px 20px; border-radius: 99px; font-size: 0.85rem; display: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     .toast.show { display: block; }
-    .action-cell { font-size: 0.75rem; color: #475569; line-height: 1.2; margin-top: 4px; display: block; }
   </style>
 </head>
 <body>
@@ -53,8 +67,7 @@
   <p>Monitoring Penyebaran & Tindakan</p>
   <div class="auth-status" id="authStatus"></div>
   <div class="header-actions">
-    <button class="hdr-btn hdr-btn-sync" id="pushBtn" onclick="syncCM(true)" style="display:none">⬆️ Sync</button>
-    <button class="hdr-btn hdr-btn-sync" id="pullBtn" onclick="fetchCM()" style="display:none">⬇️ Muat</button>
+    <button class="hdr-btn hdr-btn-sync" id="pushBtn" onclick="fetchCM()" style="display:none">⬇️ Muat Data</button>
     <button class="hdr-btn hdr-btn-connect" id="authBtn" onclick="handleAuthClick()">☁️ Connect Sheets</button>
   </div>
 </div>
@@ -70,13 +83,40 @@
   <!-- TAB FORM -->
   <div id="tab-form" class="tab-content">
     <div class="card">
-      <label style="font-size:0.8rem; font-weight:700; color:#666; margin-bottom:5px; display:block;">Tanggal Monitoring</label>
-      <input type="date" id="cmTanggal" style="width:100%; padding:10px; border:1.5px solid #d8d8d0; border-radius:8px; margin-bottom:15px; font-size:1rem;">
+      
+      <div class="form-header">
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input type="date" id="cmTanggal" onchange="loadFormData()">
+        </div>
+      </div>
+
+      <div class="gh-selector">
+        <button class="gh-btn active" id="btnGH1" onclick="setGH('GH1')">GH 1</button>
+        <button class="gh-btn" id="btnGH2" onclick="setGH('GH2')">GH 2</button>
+      </div>
+
+      <div class="form-header">
+        <div class="form-group">
+          <label>Populasi Awal</label>
+          <input type="number" id="cmPopAwal" min="0" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Update Populasi</label>
+          <input type="number" id="cmPopUpdate" min="0" placeholder="0">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 15px;">
+        <label>Tindakan / Catatan (Per GH)</label>
+        <input type="text" id="cmTindakan" placeholder="Mis: Semprot Akarisida, Sanitasi, dll">
+      </div>
+
+      <hr style="border:0; border-top:1px dashed #d8d8d0; margin:15px 0;">
       
       <div class="grid-inputs header">
         <div>BAY</div>
-        <div>Terinfeksi</div>
-        <div>Tindakan</div>
+        <div>Jumlah Terinfeksi</div>
       </div>
       
       <div id="inputContainer"></div>
@@ -88,8 +128,20 @@
   <!-- TAB DASHBOARD -->
   <div id="tab-dashboard" class="tab-content" style="display:none;">
     <div class="card">
-      <label style="font-size:0.8rem; font-weight:700; color:#666; margin-bottom:5px; display:block;">Pilih Tanggal Laporan</label>
-      <select id="cmFilterDate" onchange="renderDashboard()" style="width:100%; padding:10px; border:1.5px solid #d8d8d0; border-radius:8px; font-size:1rem; margin-bottom:15px;"></select>
+      <div class="form-header">
+        <div class="form-group">
+          <label>Pilih Tanggal</label>
+          <select id="cmFilterDate" onchange="renderDashboard()" style="width:100%; padding:10px; border:1.5px solid #d8d8d0; border-radius:8px; font-size:1rem;"></select>
+        </div>
+        <div class="form-group">
+          <label>Greenhouse</label>
+          <select id="cmFilterGH" onchange="renderDashboard()" style="width:100%; padding:10px; border:1.5px solid #d8d8d0; border-radius:8px; font-size:1rem;">
+            <option value="ALL">Gabungan (GH 1 + GH 2)</option>
+            <option value="GH1">GH 1</option>
+            <option value="GH2">GH 2</option>
+          </select>
+        </div>
+      </div>
     </div>
 
     <div class="summary-cards" id="summaryCards"></div>
@@ -100,15 +152,15 @@
     </div>
 
     <div class="card">
-      <h3 style="font-size:0.9rem; margin-bottom:10px;">Tren Total Terinfeksi</h3>
+      <h3 style="font-size:0.9rem; margin-bottom:10px;">Tren Total Terinfeksi & Populasi</h3>
       <div class="chart-box"><canvas id="cmLineChart"></canvas></div>
     </div>
 
     <div class="card">
-      <h3 style="font-size:0.9rem; margin-bottom:10px;">Rincian Tindakan & Data</h3>
+      <h3 style="font-size:0.9rem; margin-bottom:10px;">Rincian Data</h3>
       <div style="overflow-x:auto;">
         <table id="cmTable">
-          <thead><tr><th>BAY</th><th>Terinfeksi</th><th>Tindakan</th></tr></thead>
+          <thead><tr><th>BAY</th><th>Terinfeksi</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -123,6 +175,7 @@
   if (scriptUrl) isAuth = true;
   
   let cmData = {}; 
+  let currentGH = 'GH1';
   let barChart = null, lineChart = null;
 
   window.onload = () => {
@@ -138,24 +191,53 @@
       <div class="grid-inputs">
         <b>${bay}</b>
         <input type="number" id="cm_count_${bay.replace(/\s/g,'')}" min="0" placeholder="0">
-        <input type="text" id="cm_act_${bay.replace(/\s/g,'')}" placeholder="Mis: Semprot">
       </div>
     `).join('');
+  }
+
+  function setGH(gh) {
+    currentGH = gh;
+    document.getElementById('btnGH1').classList.toggle('active', gh === 'GH1');
+    document.getElementById('btnGH2').classList.toggle('active', gh === 'GH2');
+    loadFormData();
+  }
+
+  function loadFormData() {
+    const tgl = document.getElementById('cmTanggal').value;
+    
+    // Reset form
+    document.getElementById('cmPopAwal').value = '';
+    document.getElementById('cmPopUpdate').value = '';
+    document.getElementById('cmTindakan').value = '';
+    BAYS.forEach(bay => document.getElementById('cm_count_' + bay.replace(/\s/g,'')).value = '');
+
+    // Jika data ada, timpa dengan data dari cache
+    if (cmData[tgl] && cmData[tgl][currentGH]) {
+      const d = cmData[tgl][currentGH];
+      document.getElementById('cmPopAwal').value = d.popAwal || '';
+      document.getElementById('cmPopUpdate').value = d.popUpdate || '';
+      document.getElementById('cmTindakan').value = d.tindakan || '';
+      
+      BAYS.forEach(bay => {
+        if (d.bays && d.bays[bay] !== undefined) {
+          document.getElementById('cm_count_' + bay.replace(/\s/g,'')).value = d.bays[bay];
+        }
+      });
+    }
   }
 
   function updateAuthStatus() {
     const s = document.getElementById('authStatus');
     const a = document.getElementById('authBtn');
     const p = document.getElementById('pushBtn');
-    const l = document.getElementById('pullBtn');
     if (isAuth && scriptUrl) {
       s.innerHTML = '✓ Terhubung ke Sheets'; s.className = 'auth-status ok';
       a.textContent = 'Putuskan'; a.className = 'hdr-btn hdr-btn-logout';
-      p.style.display = l.style.display = 'inline-flex';
+      p.style.display = 'inline-flex';
     } else {
       s.innerHTML = ''; s.className = 'auth-status';
       a.textContent = '☁️ Connect Sheets'; a.className = 'hdr-btn hdr-btn-connect';
-      p.style.display = l.style.display = 'none';
+      p.style.display = 'none';
     }
   }
 
@@ -187,24 +269,36 @@
     const tgl = document.getElementById('cmTanggal').value;
     if (!tgl) return alert('Pilih tanggal!');
     
-    const data = [];
+    const popAwal = parseFloat(document.getElementById('cmPopAwal').value) || 0;
+    const popUpdate = parseFloat(document.getElementById('cmPopUpdate').value) || 0;
+    const tindakan = document.getElementById('cmTindakan').value.trim();
+    
+    const bays = {};
     BAYS.forEach(bay => {
-      const id = bay.replace(/\s/g,'');
-      const count = parseFloat(document.getElementById('cm_count_'+id).value) || 0;
-      const action = document.getElementById('cm_act_'+id).value.trim();
-      data.push({ bay, count, action });
+      const count = parseFloat(document.getElementById('cm_count_'+bay.replace(/\s/g,'')).value) || 0;
+      bays[bay] = count;
     });
 
+    const payload = {
+      action: 'cmSubmit',
+      tanggal: tgl,
+      gh: currentGH,
+      popAwal: popAwal,
+      popUpdate: popUpdate,
+      tindakan: tindakan,
+      bays: bays
+    };
+
     if (!scriptUrl) {
-      cmData[tgl] = {};
-      data.forEach(d => cmData[tgl][d.bay] = { count: d.count, action: d.action });
+      if(!cmData[tgl]) cmData[tgl] = {};
+      cmData[tgl][currentGH] = { popAwal, popUpdate, tindakan, bays };
       localStorage.setItem('cm_cache', JSON.stringify(cmData));
       return showToast('✓ Tersimpan di HP (Lokal)');
     }
 
     try {
       showToast('☁️ Mengirim data...');
-      const res = await postJSON({ action: 'cmSubmit', tanggal: tgl, data });
+      const res = await postJSON(payload);
       if (res.status === 'success') {
         showToast('✓ Tersimpan & Tersinkronisasi!');
         fetchCM();
@@ -217,13 +311,13 @@
   async function fetchCM() {
     if (!scriptUrl) {
       try { cmData = JSON.parse(localStorage.getItem('cm_cache') || '{}'); } catch(e) {}
-      populateFilter(); renderDashboard();
+      populateFilter(); loadFormData(); renderDashboard();
       return;
     }
     try {
       const res = await fetch(scriptUrl + '?action=getCM');
       cmData = await res.json();
-      populateFilter(); renderDashboard();
+      populateFilter(); loadFormData(); renderDashboard();
     } catch(e) { console.error('Gagal fetch CM:', e); }
   }
 
@@ -236,6 +330,8 @@
 
   function renderDashboard() {
     const tgl = document.getElementById('cmFilterDate').value;
+    const ghFilter = document.getElementById('cmFilterGH').value;
+    
     if (!tgl || !cmData[tgl]) {
       document.getElementById('summaryCards').innerHTML = '<div style="grid-column:1/-1; text-align:center; color:#999; padding:20px;">Belum ada data untuk tanggal ini</div>';
       document.getElementById('cmTable').querySelector('tbody').innerHTML = '';
@@ -243,36 +339,52 @@
       return;
     }
 
-    let totalHariIni = 0;
-    let maxBay = { name: '-', count: 0 };
-    const labels = [];
-    const dataCounts = [];
-    
-    const tableBody = document.getElementById('cmTable').querySelector('tbody');
-    tableBody.innerHTML = '';
+    let totalInfeksi = 0;
+    let totalPopAwal = 0;
+    let totalPopUpdate = 0;
+    let tindakanList = [];
+    const labels = BAYS;
+    const dataCounts = new Array(10).fill(0);
 
-    BAYS.forEach(bay => {
-      const d = cmData[tgl][bay] || { count: 0, action: '' };
-      totalHariIni += d.count;
-      if (d.count > maxBay.count) maxBay = { name: bay, count: d.count };
-      labels.push(bay);
-      dataCounts.push(d.count);
+    // Kumpulkan data berdasarkan filter GH
+    const ghs = ghFilter === 'ALL' ? ['GH1', 'GH2'] : [ghFilter];
+    
+    ghs.forEach(gh => {
+      const d = cmData[tgl][gh];
+      if (!d) return;
+      totalPopAwal += (d.popAwal || 0);
+      totalPopUpdate += (d.popUpdate || 0);
+      if (d.tindakan) tindakanList.push(`[${gh}] ${d.tindakan}`);
       
-      tableBody.innerHTML += `<tr>
-        <td style="font-weight:bold;">${bay}</td>
-        <td style="${d.count > 50 ? 'color:#dc2626;font-weight:bold' : ''}">${d.count}</td>
-        <td class="action-cell">${d.action || '-'}</td>
-      </tr>`;
+      BAYS.forEach((bay, idx) => {
+        const count = d.bays ? (d.bays[bay] || 0) : 0;
+        dataCounts[idx] += count;
+        totalInfeksi += count;
+      });
     });
 
+    // Render Tabel Rincian
+    const tableBody = document.getElementById('cmTable').querySelector('tbody');
+    tableBody.innerHTML = labels.map((bay, i) => `
+      <tr>
+        <td style="font-weight:bold;">${bay}</td>
+        <td style="${dataCounts[i] > 50 ? 'color:#dc2626;font-weight:bold' : ''}">${dataCounts[i]}</td>
+      </tr>
+    `).join('');
+
+    // Hitung Penurunan (vs tanggal sebelumnya)
     const dates = Object.keys(cmData).sort();
     const idx = dates.indexOf(tgl);
     let deltaHTML = '<span style="color:#666">-</span>';
     if (idx > 0) {
       const prevTgl = dates[idx - 1];
-      let totalPrev = 0;
-      BAYS.forEach(bay => totalPrev += (cmData[prevTgl][bay]?.count || 0));
-      const diff = totalHariIni - totalPrev;
+      let prevInfeksi = 0;
+      ghs.forEach(gh => {
+        if(cmData[prevTgl][gh]) {
+          BAYS.forEach(bay => prevInfeksi += (cmData[prevTgl][gh].bays?.[bay] || 0));
+        }
+      });
+      const diff = totalInfeksi - prevInfeksi;
       if (diff < 0) deltaHTML = `<span style="color:#16a34a">▼ Turun ${Math.abs(diff)}</span>`;
       else if (diff > 0) deltaHTML = `<span style="color:#dc2626">▲ Naik ${diff}</span>`;
       else deltaHTML = `<span style="color:#666">Sama (=)</span>`;
@@ -281,13 +393,17 @@
     document.getElementById('summaryCards').innerHTML = `
       <div class="sc">
         <small>TOTAL TERINFEKSI</small>
-        <b>${totalHariIni} <span style="font-size:0.8rem; font-weight:normal">tanaman</span></b>
+        <b>${totalInfeksi} <span style="font-size:0.8rem; font-weight:normal">tanaman</span></b>
         <div style="font-size:0.75rem; margin-top:5px;">vs Hari Sblm: ${deltaHTML}</div>
       </div>
-      <div class="sc" style="border-left-color:#f59e0b;">
-        <small>BAY TERPARAH</small>
-        <b style="color:#f59e0b">${maxBay.name}</b>
-        <div style="font-size:0.75rem; margin-top:5px;">${maxBay.count} tanaman</div>
+      <div class="sc" style="border-left-color:#3b82f6;">
+        <small>POPULASI TANAMAN</small>
+        <b style="color:#3b82f6; font-size:1rem;">Awal: ${totalPopAwal}</b><br>
+        <b style="color:#3b82f6; font-size:1rem;">Sisa : ${totalPopUpdate}</b>
+      </div>
+      <div class="sc" style="border-left-color:#f59e0b; grid-column: 1 / -1;">
+        <small>TINDAKAN / CATATAN</small>
+        <div style="font-size:0.85rem; margin-top:4px;">${tindakanList.length ? tindakanList.join('<br>') : '<i>Tidak ada catatan</i>'}</div>
       </div>
     `;
 
@@ -299,17 +415,29 @@
         datasets: [{
           label: 'Jumlah Terinfeksi',
           data: dataCounts,
-          backgroundColor: dataCounts.map(c => c > 100 ? '#dc2626' : c > 0 ? '#f59e0b' : '#e5e7eb'),
+          backgroundColor: dataCounts.map(c => c > 50 ? '#dc2626' : c > 0 ? '#f59e0b' : '#e5e7eb'),
           borderRadius: 4
         }]
       },
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });
 
+    // Line Chart (Tren)
     const trendLabels = dates.slice(-7);
-    const trendData = trendLabels.map(d => {
+    
+    const trendInfeksi = trendLabels.map(d => {
       let sum = 0;
-      BAYS.forEach(b => sum += (cmData[d][b]?.count || 0));
+      ghs.forEach(gh => {
+        if(cmData[d][gh]) BAYS.forEach(b => sum += (cmData[d][gh].bays?.[b] || 0));
+      });
+      return sum;
+    });
+
+    const trendPopulasi = trendLabels.map(d => {
+      let sum = 0;
+      ghs.forEach(gh => {
+        if(cmData[d][gh]) sum += (cmData[d][gh].popUpdate || 0);
+      });
       return sum;
     });
 
@@ -318,17 +446,31 @@
       type: 'line',
       data: {
         labels: trendLabels,
-        datasets: [{
-          label: 'Total Terinfeksi (Semua Bay)',
-          data: trendData,
-          borderColor: '#dc2626',
-          backgroundColor: 'rgba(220,38,38,0.1)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 4
-        }]
+        datasets: [
+          {
+            label: 'Total Terinfeksi',
+            data: trendInfeksi,
+            borderColor: '#dc2626',
+            backgroundColor: 'rgba(220,38,38,0.1)',
+            fill: true, tension: 0.3, yAxisID: 'y'
+          },
+          {
+            label: 'Update Populasi',
+            data: trendPopulasi,
+            borderColor: '#3b82f6',
+            borderDash: [5, 5],
+            fill: false, tension: 0.3, yAxisID: 'y1'
+          }
+        ]
       },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      options: { 
+        responsive: true, maintainAspectRatio: false, 
+        plugins: { legend: { position: 'bottom' } }, 
+        scales: { 
+          y: { beginAtZero: true, position: 'left', title: {display:true, text:'Infeksi'} },
+          y1: { beginAtZero: true, position: 'right', grid: {drawOnChartArea: false}, title: {display:true, text:'Populasi'} }
+        } 
+      }
     });
   }
 
