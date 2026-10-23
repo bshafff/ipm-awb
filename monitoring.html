@@ -411,20 +411,26 @@
 </div>
 
 <script>
+  // ==========================================
+  // DEKLARASI VARIABEL GLOBAL DI PALING ATAS
+  // ==========================================
   const TODAY = new Date().toISOString().split('T')[0];
   const CONFIG = {
-    APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyOtfKILBzOP_i7w9kTj0-tsJEQmhkW_tnmpF0MMdnRTlDDEctQ12uejKjR8Sbw0j4WTw/exec'
+    APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyY2_2eqEiabNCRV2y1eCZ7DLHQIEKQNjZB7TvCR1IN0Qz737ltAsHvo4OImtXIU5WBFA/exec'
   };
   let scriptUrl = localStorage.getItem('hpt_script_url') || CONFIG.APPS_SCRIPT_URL || '';
   let isAuthenticated = JSON.parse(localStorage.getItem('hpt_auth') || 'false');
-  
-  // PAKSA AUTH JIKA URL ADA
-  if (scriptUrl) { isAuthenticated = true; localStorage.setItem('hpt_auth', 'true'); }
+  if (scriptUrl) isAuthenticated = true;
 
   let hptData = {};
   let trendChartInstance = null;
   let availableLocations = ["GH1-B1", "GH1-B2", "GH1-B3", "GH2-B1", "GH2-B2", "GH2-B3"];
   let selectedLocations = [...availableLocations];
+  
+  // INI VARIABEL YANG BIKIN ERROR SEBELUMNYA
+  let parsedImportRows = []; 
+  let isSaving = false;
+  let editKey = null;
 
   const pestConfig = {
     spidermites: { name: 'Spidermites', icon: '🕷️', group: 'hama' },
@@ -461,6 +467,10 @@
     mildew_t1: 'Mildew S1', mildew_t2: 'Mildew S2', mildew_t3: 'Mildew S3', mildew_t4: 'Mildew S4',
     botrytis_affected: 'Botrytis (terserang)', antrak_affected: 'Antrak (terserang)', layu_affected: 'Layu (terserang)'
   };
+
+  // ==========================================
+  // FUNGSI-FUNGSI APLIKASI
+  // ==========================================
 
   window.onload = function() {
     initForm();
@@ -688,9 +698,6 @@
     fetchDashboardData();
   }
 
-  let isSaving = false;
-  let editKey = null;
-
   async function postJSON(body) {
     const c = new AbortController(), t = setTimeout(() => c.abort(), 20000);
     try {
@@ -698,17 +705,20 @@
       return await res.json();
     } finally { clearTimeout(t); }
   }
+  
   async function delRemote(t, l) {
     try {
       const c = new AbortController(); setTimeout(() => c.abort(), 20000);
       await fetch(scriptUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'delete', tanggal: t, lokasi: l }), signal: c.signal });
     } catch (e) { Outbox.add({ action: 'delete', tanggal: t, lokasi: l }); }
   }
+  
   Outbox.init(async item => {
     if (item.action === 'delete') { await delRemoteOnce(item); return true; }
     const r = await postJSON({ ...item, overwrite: true });
     return r.status === 'success';
   }, (n, left) => { showToast('successMsg', '✓ ' + n + ' data offline terkirim' + (left ? ', sisa ' + left : '')); fetchDashboardData(); });
+  
   async function delRemoteOnce(item) {
     const c = new AbortController(); setTimeout(() => c.abort(), 20000);
     await fetch(scriptUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(item), signal: c.signal });
@@ -923,7 +933,9 @@
     } catch (e) { showToast('warningMsg', 'Gagal memuat data: ' + e.message); }
   }
 
-  let parsedImportRows = [];
+  // ==========================================
+  // FUNGSI IMPORT EXCEL
+  // ==========================================
 
   function downloadTemplate() {
     const headers = TEMPLATE_COLUMNS.map(c => COLUMN_LABELS[c] || c);
