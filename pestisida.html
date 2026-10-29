@@ -16,23 +16,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="./core.js"></script>
   <style>
-    :root {
-      --primary: #3b82f6; --primary-dark: #2563eb; --bg: #f0f0ee; --card: #fff;
-      --border: #e5e5e5; --text: #1a1a18; --muted: #666;
-    }
+    :root { --primary: #3b82f6; --primary-dark: #2563eb; --bg: #f0f0ee; --card: #fff; --border: #e5e5e5; --text: #1a1a18; --muted: #666; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
     html { font-size: 16px; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg); color: var(--text); line-height: 1.45;
-      -webkit-font-smoothing: antialiased; overscroll-behavior-y: none;
-      padding-bottom: calc(16px + env(safe-area-inset-bottom));
-    }
-    .app-header {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff;
-      padding: 1.25rem 1rem 1.1rem; padding-top: calc(1.25rem + env(safe-area-inset-top));
-      text-align: center;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.45; -webkit-font-smoothing: antialiased; overscroll-behavior-y: none; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+    .app-header { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff; padding: 1.25rem 1rem 1.1rem; padding-top: calc(1.25rem + env(safe-area-inset-top)); text-align: center; }
     .app-header h1 { font-size: 1.2rem; font-weight: 700; margin: 0 0 0.25rem; letter-spacing: -0.3px; }
     .app-header p { font-size: 0.8rem; opacity: 0.92; margin: 0; }
     .auth-status { font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.95; }
@@ -41,11 +29,7 @@
     .auth-status.error { color: #fecaca; }
     .header-actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 0.75rem; }
     .container { max-width: 720px; margin: 0 auto; padding: 0.75rem; }
-    .btn {
-      padding: 0.65rem 0.9rem; border: none; border-radius: 10px; cursor: pointer;
-      font-size: 0.8125rem; font-weight: 700; display: inline-flex; align-items: center;
-      gap: 4px; min-height: 44px; touch-action: manipulation; font-family: inherit;
-    }
+    .btn { padding: 0.65rem 0.9rem; border: none; border-radius: 10px; cursor: pointer; font-size: 0.8125rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; min-height: 44px; touch-action: manipulation; font-family: inherit; }
     .btn:active { transform: scale(0.97); opacity: 0.92; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-primary { background: #fff; color: var(--primary); }
@@ -66,11 +50,7 @@
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-bottom: 0.75rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
     .card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
-    .form-grid input, .form-grid select {
-      padding: 0.75rem; border: 1.5px solid var(--border); border-radius: 10px;
-      font-size: 0.9375rem; width: 100%; min-height: 48px; background: #fff;
-      -webkit-appearance: none; appearance: none; font-family: inherit;
-    }
+    .form-grid input, .form-grid select { padding: 0.75rem; border: 1.5px solid var(--border); border-radius: 10px; font-size: 0.9375rem; width: 100%; min-height: 48px; background: #fff; -webkit-appearance: none; appearance: none; font-family: inherit; }
     .form-grid input:focus, .form-grid select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
     .form-grid .span2 { grid-column: span 2; }
     .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); background: #fff; -webkit-overflow-scrolling: touch; margin-bottom: 0.75rem; }
@@ -80,6 +60,7 @@
     .tc { text-align: center; }
     .ok { color: #10b981; } .bad { color: #ef4444; } .muted { color: #999; }
     .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; background: #e0e7ff; color: #4338ca; }
+    .badge-kat { background: #fef3c7; color: #92400e; } /* Warna khusus kategori */
     .stok { display: inline-block; padding: 3px 10px; border-radius: 10px; font-weight: 700; font-size: 0.8125rem; background: #d1fae5; color: #065f46; }
     .stok.minus { background: #fee2e2; color: #b91c1c; }
     .stok.nol { background: #f3f4f6; color: #6b7280; }
@@ -89,27 +70,23 @@
     .install-banner { display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 0.75rem; margin-bottom: 0.75rem; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
     .install-banner.show { display: flex; }
     .install-banner p { flex: 1; font-size: 0.8125rem; color: #1e40af; margin: 0; }
-    .toast {
-      position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 16px; right: 16px;
-      max-width: 400px; margin: 0 auto; background: #1f2937; color: #fff;
-      padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.8125rem; z-index: 9999;
-      display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-    }
+    .toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom)); left: 16px; right: 16px; max-width: 400px; margin: 0 auto; background: #1f2937; color: #fff; padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.8125rem; z-index: 9999; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
     .toast.show { display: block; }
     .toast.ok { border-left: 4px solid #10b981; }
     .toast.err { border-left: 4px solid #ef4444; }
     .toast.info { border-left: 4px solid #0ea5e9; }
-    .modal-overlay {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.55); z-index: 9998;
-      align-items: center; justify-content: center; padding: 1rem;
-    }
+
+    /* FILTER BAR CSS */
+    .filter-bar { display: flex; gap: 8px; background: var(--card); padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+    .filter-group { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 120px; }
+    .filter-group label { font-size: 10px; font-weight: 700; color: var(--muted); }
+    .filter-group input, .filter-group select { padding: 6px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; width: 100%; }
+    .filter-btn-reset { padding: 6px 10px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 12px; height: 30px; }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 9998; align-items: center; justify-content: center; padding: 1rem; }
     .modal-overlay.show { display: flex !important; }
-    .modal-box {
-      background: #fff; border-radius: 16px; max-width: 620px; width: 100%;
-      max-height: 92vh; display: flex; flex-direction: column;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.25);
-    }
+    .modal-box { background: #fff; border-radius: 16px; max-width: 620px; width: 100%; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
     .modal-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
     .modal-header h3 { font-size: 1rem; font-weight: 700; }
     .modal-close { background: none; border: none; font-size: 1.75rem; cursor: pointer; color: #999; line-height: 1; padding: 0 0.5rem; font-family: inherit; }
@@ -121,11 +98,7 @@
     .step-body { flex: 1; min-width: 0; }
     .step-body h4 { font-size: 0.875rem; margin-bottom: 3px; }
     .step-body p { font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; }
-    label.upload-zone {
-      display: block; border: 2px dashed var(--primary); border-radius: 10px;
-      padding: 18px 12px; text-align: center; cursor: pointer;
-      background: #f8fbff; transition: background .15s;
-    }
+    label.upload-zone { display: block; border: 2px dashed var(--primary); border-radius: 10px; padding: 18px 12px; text-align: center; cursor: pointer; background: #f8fbff; transition: background .15s; }
     label.upload-zone:hover, label.upload-zone.dragover { background: #e0f2fe; }
     label.upload-zone .icon { font-size: 1.75rem; margin-bottom: 4px; }
     label.upload-zone .title { font-weight: 700; font-size: 0.8125rem; color: var(--primary-dark); }
@@ -177,20 +150,51 @@
     <button type="button" class="tab-btn" data-tab="usage">💊 Penggunaan</button>
   </div>
 
+  <!-- TAB DAFTAR -->
   <div id="pestisidaList" class="tab-content active">
     <div class="card">
       <h3>Tambah Pestisida Baru</h3>
       <div class="form-grid">
         <input type="text" id="listNama" placeholder="Nama (Matador)">
-        <input type="number" id="listIsi" placeholder="Isi (250)" min="0" step="0.1">
-        <select id="listSatuan">
-          <option>ML</option><option>Liter</option><option>Gr</option>
-          <option>Kg</option><option>Botol</option><option>Galon</option><option>Bungkus</option>
+        <select id="listKategori">
+          <option value="Insektisida">Insektisida</option>
+          <option value="Fungisida">Fungisida</option>
+          <option value="Akarisida">Akarisida</option>
+          <option value="Herbisida">Herbisida</option>
+          <option value="Perekat">Perekat</option>
+          <option value="Penunjang">Penunjang</option>
+          <option value="Lainnya">Lainnya</option>
         </select>
+        <input type="number" id="listIsi" placeholder="Isi (250)" min="0" step="0.1">
+        <select id="listSatuan"><option>ML</option><option>Liter</option><option>Gr</option><option>Kg</option><option>Botol</option><option>Galon</option><option>Bungkus</option></select>
         <input type="number" id="listStokAwal" placeholder="Stok Awal (jika ada)" min="0" step="0.1">
         <button type="button" class="btn btn-success span2" id="addPestisidaBtn">➕ Tambah</button>
       </div>
     </div>
+    
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>Filter Kategori</label>
+        <select id="filterKategori" onchange="renderPestisidaList()">
+          <option value="ALL">Semua Kategori</option>
+          <option value="Insektisida">Insektisida</option>
+          <option value="Fungisida">Fungisida</option>
+          <option value="Akarisida">Akarisida</option>
+          <option value="Herbisida">Herbisida</option>
+          <option value="Perekat">Perekat</option>
+          <option value="Penunjang">Penunjang</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Urutkan Nama</label>
+        <select id="sortAZ" onchange="renderPestisidaList()">
+          <option value="AZ">A - Z (Awal ke Akhir)</option>
+          <option value="ZA">Z - A (Akhir ke Awal)</option>
+        </select>
+      </div>
+    </div>
+
     <div class="btn-row">
       <button type="button" class="btn btn-export" data-export="list">⬇️ Export CSV</button>
       <button type="button" class="btn btn-import" data-import="list">📥 Import Excel</button>
@@ -199,22 +203,32 @@
     <div class="alert">Total Masuk = Stok Awal + semua mutasi "Masuk". Stok Saat Ini = Total Masuk − Keluar + Penyesuaian.</div>
   </div>
 
+  <!-- TAB STOK -->
   <div id="inventory" class="tab-content">
     <div class="card">
       <h3>Catat Mutasi Stok</h3>
       <div class="form-grid">
         <input type="date" id="invTanggal">
         <select id="invNama"><option value="">- Pestisida -</option></select>
-        <select id="invJenis">
-          <option value="Masuk">➕ Masuk</option>
-          <option value="Keluar">➖ Keluar</option>
-          <option value="Penyesuaian">✏️ Penyesuaian</option>
-        </select>
+        <select id="invJenis"><option value="Masuk">➕ Masuk</option><option value="Keluar">➖ Keluar</option><option value="Penyesuaian">✏️ Penyesuaian</option></select>
         <input type="number" id="invJumlah" placeholder="Jumlah" min="0" step="0.1">
         <input type="text" id="invKeterangan" placeholder="Keterangan" class="span2">
         <button type="button" class="btn btn-success span2" id="addInventoryBtn">➕ Catat</button>
       </div>
     </div>
+    
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>Dari Tanggal</label>
+        <input type="date" id="invFromDate" onchange="renderInventory()">
+      </div>
+      <div class="filter-group">
+        <label>Sampai Tanggal</label>
+        <input type="date" id="invToDate" onchange="renderInventory()">
+      </div>
+      <button class="filter-btn-reset" onclick="resetInvFilter()">Reset Filter</button>
+    </div>
+
     <div class="btn-row">
       <button type="button" class="btn btn-export" data-export="inventory">⬇️ Export CSV</button>
       <button type="button" class="btn btn-import" data-import="inventory">📥 Import Excel</button>
@@ -222,6 +236,7 @@
     <div id="inventoryContent"></div>
   </div>
 
+  <!-- TAB PENGGUNAAN -->
   <div id="usage" class="tab-content">
     <div class="card">
       <h3>Penggunaan Harian</h3>
@@ -247,6 +262,19 @@
         <button type="button" class="btn btn-success span2" id="addUsageBtn">➕ Catat</button>
       </div>
     </div>
+
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>Dari Tanggal</label>
+        <input type="date" id="usageFromDate" onchange="renderUsage()">
+      </div>
+      <div class="filter-group">
+        <label>Sampai Tanggal</label>
+        <input type="date" id="usageToDate" onchange="renderUsage()">
+      </div>
+      <button class="filter-btn-reset" onclick="resetUsageFilter()">Reset Filter</button>
+    </div>
+
     <div class="btn-row">
       <button type="button" class="btn btn-export" data-export="usage">⬇️ Export CSV</button>
       <button type="button" class="btn btn-import" data-import="usage">📥 Import Excel</button>
@@ -255,6 +283,7 @@
   </div>
 </div>
 
+<!-- MODAL IMPORT -->
 <div class="modal-overlay" id="importModal">
   <div class="modal-box">
     <div class="modal-header">
@@ -274,7 +303,7 @@
         <div class="step-num">2</div>
         <div class="step-body">
           <h4>Upload File Excel</h4>
-          <p>Format: .xlsx / .xls. Kolom harus sesuai template. Bisa dari tab manapun, aplikasi auto-deteksi.</p>
+          <p>Format: .xlsx / .xls. Kolom harus sesuai template.</p>
           <label for="importFile" class="upload-zone" id="importUploadZone">
             <div class="icon">📄</div>
             <div class="title">Klik atau drag & drop file di sini</div>
@@ -326,14 +355,13 @@
     'Kuratif - Fungisida': ['Baycor','Thiram','Mancozeb','Karbendazim','Propineb']
   };
 
-  let pestisidaList = JSON.parse(lsGet('pestisida_list', '[]')).map(p => Object.assign({ stokAwal:0, isi:'' }, p));
+  let pestisidaList = JSON.parse(lsGet('pestisida_list', '[]')).map(p => Object.assign({ stokAwal:0, isi:'', kategori:'Lainnya' }, p));
   let inventory     = JSON.parse(lsGet('pestisida_inventory', '[]'));
   let dailyUsage    = JSON.parse(lsGet('pestisida_usage', '[]'));
   
   let isAuthenticated = JSON.parse(lsGet('pestisida_auth', 'false'));
   let scriptUrl     = lsGet('pestisida_script_url', '');
   
-  // PAKSA AUTH JIKA URL ADA
   if (scriptUrl) { isAuthenticated = true; lsSet('pestisida_auth', 'true'); }
 
   const dirty = Object.assign({ list:false, inventory:false, usage:false }, (()=>{ try { return JSON.parse(lsGet('pestisida_dirty','{}')); } catch(e){ return {}; } })());
@@ -362,6 +390,7 @@
     showToast('⚠️ ' + (ev.reason && ev.reason.message || ev.reason), 'err');
   });
 
+  // ================= HELPERS =================
   function getMaster(n) { return pestisidaList.find(p => p.nama === n); }
   function parseDateVal(dStr) { if (!dStr) return 0; const d = new Date(dStr); return isNaN(d.getTime()) ? 0 : d.getTime(); }
   function getMutasiSorted() {
@@ -397,22 +426,27 @@
     }, DEBOUNCE_MS);
   }
 
+  // ================= CRUD =================
   function addPestisida() {
     const nama = document.getElementById('listNama').value.trim();
     if (!nama) return alert('Isi nama');
     if (pestisidaList.some(p => p.nama.toLowerCase()===nama.toLowerCase())) return alert('Sudah ada');
+    
     const isi = document.getElementById('listIsi').value;
     pestisidaList.push({
       id: Date.now(), nama,
+      kategori: document.getElementById('listKategori').value,
       isi: isi!=='' ? parseFloat(isi) : '',
       satuan: document.getElementById('listSatuan').value,
       stokAwal: parseFloat(document.getElementById('listStokAwal').value)||0
     });
     lsSet('pestisida_list', JSON.stringify(pestisidaList));
     markDirty('list');
+    
     document.getElementById('listNama').value='';
     document.getElementById('listIsi').value='';
     document.getElementById('listStokAwal').value='';
+    
     renderPestisidaList();
     showToast('✓ Pestisida ditambahkan', 'ok');
   }
@@ -555,19 +589,37 @@
     return changed;
   }
 
+  // ================= RENDER =================
   function formatIsi(p) { return (p.isi===''||p.isi==null) ? '-' : (p.isi+' '+(p.satuan||'')); }
 
   function renderPestisidaList() {
     const el = document.getElementById('listContent');
-    if (!pestisidaList.length) {
-      el.innerHTML = '<div class="empty">Belum ada pestisida.</div>';
+    const filterKat = document.getElementById('filterKategori').value;
+    const sortAZ = document.getElementById('sortAZ').value;
+
+    let filtered = [...pestisidaList];
+    
+    // Terapkan Filter Kategori
+    if (filterKat !== 'ALL') {
+      filtered = filtered.filter(p => (p.kategori || 'Lainnya') === filterKat);
+    }
+
+    // Terapkan Sortir A-Z
+    filtered.sort((a, b) => {
+      if (sortAZ === 'AZ') return a.nama.localeCompare(b.nama);
+      else return b.nama.localeCompare(a.nama);
+    });
+
+    if (!filtered.length) {
+      el.innerHTML = '<div class="empty">Belum ada pestisida di kategori ini.</div>';
     } else {
       el.innerHTML = '<div class="table-wrap"><table><thead><tr>'+
-        '<th class="tc">#</th><th>Nama</th><th class="tc">Isi</th><th class="tc">Satuan</th><th class="tc">Total Masuk</th><th class="tc">Stok Saat Ini</th><th class="tc">Aksi</th></tr></thead><tbody>'+
-        pestisidaList.map((p,i)=>{
+        '<th class="tc">#</th><th>Nama</th><th class="tc">Kategori</th><th class="tc">Isi</th><th class="tc">Satuan</th><th class="tc">Total Masuk</th><th class="tc">Stok Saat Ini</th><th class="tc">Aksi</th></tr></thead><tbody>'+
+        filtered.map((p,i)=>{
           const stok=getStokSekarang(p.nama), total=getTotalMasuk(p.nama);
           const cls=stok<0?'stok minus':(stok===0?'stok nol':'stok');
           return '<tr><td class="tc muted">'+(i+1)+'</td><td style="font-weight:600">'+p.nama+'</td>'+
+            '<td class="tc"><span class="badge badge-kat">'+(p.kategori||'Lainnya')+'</span></td>'+
             '<td class="tc"><span class="badge">'+formatIsi(p)+'</span></td>'+
             '<td class="tc muted">'+(p.satuan||'-')+'</td>'+
             '<td class="tc"><span class="total">'+total+'</span></td>'+
@@ -584,11 +636,33 @@
     updateKategoriObat();
   }
 
+  function resetInvFilter() {
+    document.getElementById('invFromDate').value = '';
+    document.getElementById('invToDate').value = '';
+    renderInventory();
+  }
+
   function renderInventory() {
     const el = document.getElementById('inventoryContent');
-    if(!inventory.length){ el.innerHTML='<div class="empty">Belum ada mutasi.</div>'; return; }
-    const saldo={}; pestisidaList.forEach(p=>saldo[p.nama]=parseFloat(p.stokAwal)||0);
-    const rows=getMutasiSorted().map(t=>{
+    const fromDate = document.getElementById('invFromDate').value;
+    const toDate = document.getElementById('invToDate').value;
+
+    let filtered = getMutasiSorted();
+    
+    // Terapkan Filter Tanggal
+    if (fromDate) filtered = filtered.filter(t => t.tanggal >= fromDate);
+    if (toDate) filtered = filtered.filter(t => t.tanggal <= toDate);
+
+    if(!filtered.length){ el.innerHTML='<div class="empty">Tidak ada mutasi di rentang tanggal ini.</div>'; return; }
+    
+    const saldo={}; 
+    pestisidaList.forEach(p=>saldo[p.nama]=parseFloat(p.stokAwal)||0);
+    // Hitung saldo sebelum rentang filter (agar "Setelah" tetap akurat)
+    getMutasiSorted().forEach(t => {
+      if (fromDate && t.tanggal < fromDate) saldo[t.nama] = (saldo[t.nama]||0) + t.delta;
+    });
+
+    const rows=filtered.map(t=>{
       saldo[t.nama]=(saldo[t.nama]||0)+t.delta;
       const badge=t.jenis==='Masuk'?'<span class="ok">Masuk</span>':(t.jenis==='Keluar'?'<span class="bad">Keluar</span>':'<span style="color:#d97706">Sesuai</span>');
       const j=t.delta>0?'<td class="tc ok">+'+t.jumlah+'</td>':'<td class="tc bad">-'+t.jumlah+'</td>';
@@ -603,12 +677,28 @@
       '</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>';
   }
 
+  function resetUsageFilter() {
+    document.getElementById('usageFromDate').value = '';
+    document.getElementById('usageToDate').value = '';
+    renderUsage();
+  }
+
   function renderUsage() {
     const el = document.getElementById('usageContent');
-    if(!dailyUsage.length){ el.innerHTML='<div class="empty">Belum ada penggunaan.</div>'; return; }
+    const fromDate = document.getElementById('usageFromDate').value;
+    const toDate = document.getElementById('usageToDate').value;
+
+    let filtered = dailyUsage;
+    
+    // Terapkan Filter Tanggal
+    if (fromDate) filtered = filtered.filter(i => i.tanggal >= fromDate);
+    if (toDate) filtered = filtered.filter(i => i.tanggal <= toDate);
+
+    if(!filtered.length){ el.innerHTML='<div class="empty">Tidak ada data penggunaan di rentang tanggal ini.</div>'; return; }
+    
     el.innerHTML='<div class="table-wrap"><table style="font-size:12px"><thead><tr>'+
       '<th>Tgl</th><th class="tc">GH</th><th>Jenis</th><th>Obat</th><th class="tc">Kons</th><th class="tc">Air</th><th class="tc">Vol</th><th>Sasaran</th><th class="tc">Buka</th><th class="tc">Aksi</th>'+
-      '</tr></thead><tbody>'+dailyUsage.map(i=>
+      '</tr></thead><tbody>'+filtered.map(i=>
         '<tr><td>'+i.tanggal+'</td><td class="tc">'+i.gh+'</td><td>'+i.jenisPenyemprotan+'</td><td style="font-weight:600">'+i.namaObat+'</td>'+
         '<td class="tc">'+i.konsentrasi+'</td><td class="tc">'+i.volAirBaku+'</td><td class="tc">'+i.volObat+'</td><td>'+i.sasaran+'</td><td class="tc">'+(i.bukaObatBaru||0)+'</td>'+
         '<td class="tc"><button type="button" class="btn btn-danger" data-del-use="'+i.id+'">Hapus</button></td></tr>'
@@ -637,6 +727,7 @@
     else renderUsage();
   }
 
+  // ================= AUTH & SYNC =================
   function updateAuthStatus() {
     const s=document.getElementById('authStatus'), a=document.getElementById('authBtn');
     const p=document.getElementById('pushBtn'), l=document.getElementById('pullBtn');
@@ -703,13 +794,19 @@
   async function pullFromSheets(silent) {
     silent=!!silent;
     if(!scriptUrl){ if(!silent) alert('Belum connect'); return; }
-    if(!silent && !confirm('Muat dari Sheets akan TIMPA data lokal. Lanjut?')) return;
     if(!silent) showToast('⬇️ Memuat...','info');
     try {
-      const res=await fetch(scriptUrl+'?action=getAll',{redirect:'follow'});
-      const data=JSON.parse(await res.text());
+      const res=await fetch(scriptUrl+'?action=getAll',{redirect:'follow', cache: 'no-store'});
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch(e) { throw new Error('Respons bukan JSON. Pastikan Web App di-deploy "Anyone".'); }
+      
       if(data.error) throw new Error(data.error);
-      if(data.list){ pestisidaList=data.list.map(p=>Object.assign({stokAwal:0,isi:''},p)); lsSet('pestisida_list',JSON.stringify(pestisidaList)); }
+      if(data.list){ 
+        // Pastikan kategori diisi default jika dari sheet lama kosong
+        pestisidaList=data.list.map(p=>Object.assign({stokAwal:0,isi:'',kategori:'Lainnya'},p)); 
+        lsSet('pestisida_list',JSON.stringify(pestisidaList)); 
+      }
       if(data.inventory){ inventory=data.inventory; lsSet('pestisida_inventory',JSON.stringify(inventory)); }
       if(data.usage){ dailyUsage=data.usage; lsSet('pestisida_usage',JSON.stringify(dailyUsage)); }
       dirty.list=dirty.inventory=dirty.usage=false; saveDirty();
@@ -722,10 +819,11 @@
     }
   }
 
+  // ================= EXPORT CSV =================
   function exportCSV(type) {
     let data, fn;
     if(type==='list'){
-      data=pestisidaList.map(p=>({nama:p.nama,isi:p.isi,satuan:p.satuan,totalMasuk:getTotalMasuk(p.nama),stokSaatIni:getStokSekarang(p.nama)}));
+      data=pestisidaList.map(p=>({nama:p.nama,kategori:p.kategori||'Lainnya',isi:p.isi,satuan:p.satuan,totalMasuk:getTotalMasuk(p.nama),stokSaatIni:getStokSekarang(p.nama)}));
       fn='daftar-pestisida.csv';
     } else if(type==='inventory'){
       const saldo={}; pestisidaList.forEach(p=>saldo[p.nama]=parseFloat(p.stokAwal)||0);
@@ -739,17 +837,19 @@
     showToast('✓ CSV didownload','ok');
   }
 
+  // ================= IMPORT EXCEL =================
   const IMPORT_CONFIGS = {
     list: {
       title: '📥 Import Daftar Pestisida',
-      hint: 'Kolom: Nama, Isi, Satuan, Stok Awal',
+      hint: 'Kolom: Nama, Kategori, Isi, Satuan, Stok Awal',
       columns: [
         { key: 'nama',     label: 'Nama',      required: true },
+        { key: 'kategori', label: 'Kategori',  default: 'Lainnya' },
         { key: 'isi',      label: 'Isi',       type: 'number' },
         { key: 'satuan',   label: 'Satuan',    default: 'ML' },
         { key: 'stokAwal', label: 'Stok Awal', type: 'number', default: 0 }
       ],
-      contoh: { nama: 'Matador', isi: 250, satuan: 'ML', stokAwal: 10 }
+      contoh: { nama: 'Matador', kategori: 'Insektisida', isi: 250, satuan: 'ML', stokAwal: 10 }
     },
     inventory: {
       title: '📥 Import Mutasi Stok',
@@ -829,8 +929,8 @@
     petunjuk.push(['2. Baris ke-2 adalah CONTOH — silakan hapus/timpa.']);
     petunjuk.push(['3. Tanggal format: YYYY-MM-DD (contoh: 2026-10-06)']);
     if (currentImportType === 'list') {
-      petunjuk.push(['4. Satuan: ML / Liter / Gr / Kg / Botol / Galon / Bungkus']);
-      petunjuk.push(['5. Stok Awal opsional, default 0']);
+      petunjuk.push(['4. Kategori: Insektisida / Fungisida / Akarisida / Herbisida / Perekat / Penunjang']);
+      petunjuk.push(['5. Satuan: ML / Liter / Gr / Kg / Botol / Galon / Bungkus']);
     } else if (currentImportType === 'inventory') {
       petunjuk.push(['4. Nama Pestisida HARUS sudah ada di Daftar']);
       petunjuk.push(['5. Jenis: Masuk / Keluar / Penyesuaian']);
@@ -908,18 +1008,13 @@
 
   function processImportFile(file) {
     if (typeof XLSX === 'undefined') {
-      showToast('❌ Library Excel belum termuat. Cek koneksi internet / refresh.', 'err');
-      console.error('XLSX undefined. CDN gagal load?');
+      showToast('❌ Library Excel belum termuat.', 'err');
       return;
     }
     if (!currentImportType) {
       showToast('❌ Pilih tab dulu sebelum upload', 'err');
       return;
     }
-
-    console.log('════════════════════════════════');
-    console.log('📄 FILE:', file.name, '|', (file.size/1024).toFixed(1) + ' KB');
-    console.log('📄 Tab aktif saat upload:', currentImportType);
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -939,8 +1034,6 @@
         }
         const rawHeaders = (aoa[headerRowIdx] || []).map(h => String(h || '').trim());
         const nonEmptyHeaders = rawHeaders.filter(h => h);
-        console.log('📄 Header row index:', headerRowIdx);
-        console.log('📄 Headers ditemukan:', nonEmptyHeaders);
 
         if (nonEmptyHeaders.length === 0) {
           showToast('❌ Tidak ada header terdeteksi di baris awal file', 'err');
@@ -948,8 +1041,6 @@
         }
 
         const detectedType = detectTypeFromHeaders(nonEmptyHeaders);
-        console.log('📄 Tipe auto-detect:', detectedType, '| Tab aktif:', currentImportType);
-
         let workType = currentImportType;
         if (detectedType && detectedType !== currentImportType) {
           workType = detectedType;
@@ -966,8 +1057,6 @@
           const key = findColumnKeyFlexible(h, cfg.columns);
           if (key) headerMap[idx] = key;
         });
-        console.log('📄 Mapping kolom:', headerMap);
-        console.log('📄 Total kolom ter-map:', Object.keys(headerMap).length, 'dari', rawHeaders.length);
 
         if (Object.keys(headerMap).length === 0) {
           showToast('❌ Header tidak dikenali: ' + nonEmptyHeaders.slice(0,5).join(', '), 'err');
@@ -1000,9 +1089,6 @@
           parsed.push(obj);
         }
 
-        console.log('📄 Baris data terbaca:', parsed.length);
-        if (parsed.length > 0) console.log('📄 Contoh baris ke-1:', parsed[0]);
-
         if (!parsed.length) {
           showToast('❌ Tidak ada baris data (hanya header). Cek file Anda.', 'err');
           return;
@@ -1030,9 +1116,6 @@
             if (!r.namaObat) r.__errors.push('nama obat kosong');
           }
         });
-
-        const valid = parsed.filter(r => r.__errors.length === 0).length;
-        console.log('📄 Valid:', valid, '| Error:', parsed.length - valid);
 
         parsedImportRows = parsed;
         renderImportPreview(parsed);
@@ -1122,6 +1205,7 @@
       validRows.forEach((r, i) => {
         pestisidaList.push({
           id: now + i, nama: r.nama,
+          kategori: r.kategori || 'Lainnya',
           isi: (r.isi === '' || r.isi === undefined) ? '' : (parseFloat(r.isi) || 0),
           satuan: r.satuan || 'ML',
           stokAwal: parseFloat(r.stokAwal) || 0
@@ -1179,6 +1263,7 @@
     }, 400);
   }
 
+  // ================= EVENT BINDING =================
   function bind() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
@@ -1253,6 +1338,7 @@
     });
   }
 
+  // ================= PWA =================
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -1278,10 +1364,23 @@
 
   function retrySync(){ if(isAuthenticated && scriptUrl && (dirty.list||dirty.inventory||dirty.usage)) syncToSheets(false); }
 
+  // ================= INIT =================
   function init() {
     try {
       document.getElementById('usageTanggal').valueAsDate = new Date();
       document.getElementById('invTanggal').valueAsDate = new Date();
+      // Set default filter dates to current month
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const firstDay = `${yyyy}-${mm}-01`;
+      const lastDay = today.toISOString().split('T')[0];
+      
+      document.getElementById('invFromDate').value = firstDay;
+      document.getElementById('invToDate').value = lastDay;
+      document.getElementById('usageFromDate').value = firstDay;
+      document.getElementById('usageToDate').value = lastDay;
+      
     } catch(e) { console.warn('set date fail', e); }
 
     bind();
