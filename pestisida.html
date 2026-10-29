@@ -60,7 +60,7 @@
     .tc { text-align: center; }
     .ok { color: #10b981; } .bad { color: #ef4444; } .muted { color: #999; }
     .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; background: #e0e7ff; color: #4338ca; }
-    .badge-kat { background: #fef3c7; color: #92400e; } /* Warna khusus kategori */
+    .badge-kat { background: #fef3c7; color: #92400e; }
     .stok { display: inline-block; padding: 3px 10px; border-radius: 10px; font-weight: 700; font-size: 0.8125rem; background: #d1fae5; color: #065f46; }
     .stok.minus { background: #fee2e2; color: #b91c1c; }
     .stok.nol { background: #f3f4f6; color: #6b7280; }
@@ -76,14 +76,12 @@
     .toast.err { border-left: 4px solid #ef4444; }
     .toast.info { border-left: 4px solid #0ea5e9; }
 
-    /* FILTER BAR CSS */
     .filter-bar { display: flex; gap: 8px; background: var(--card); padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
-    .filter-group { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 120px; }
+    .filter-group { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 100px; }
     .filter-group label { font-size: 10px; font-weight: 700; color: var(--muted); }
     .filter-group input, .filter-group select { padding: 6px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; width: 100%; }
     .filter-btn-reset { padding: 6px 10px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 12px; height: 30px; }
 
-    /* MODAL */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); z-index: 9998; align-items: center; justify-content: center; padding: 1rem; }
     .modal-overlay.show { display: flex !important; }
     .modal-box { background: #fff; border-radius: 16px; max-width: 620px; width: 100%; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
@@ -271,6 +269,14 @@
       <div class="filter-group">
         <label>Sampai Tanggal</label>
         <input type="date" id="usageToDate" onchange="renderUsage()">
+      </div>
+      <div class="filter-group">
+        <label>Filter GH</label>
+        <select id="usageFilterGH" onchange="renderUsage()">
+          <option value="ALL">Semua GH</option>
+          <option value="GH 1">GH 1</option>
+          <option value="GH 2">GH 2</option>
+        </select>
       </div>
       <button class="filter-btn-reset" onclick="resetUsageFilter()">Reset Filter</button>
     </div>
@@ -599,12 +605,10 @@
 
     let filtered = [...pestisidaList];
     
-    // Terapkan Filter Kategori
     if (filterKat !== 'ALL') {
       filtered = filtered.filter(p => (p.kategori || 'Lainnya') === filterKat);
     }
 
-    // Terapkan Sortir A-Z
     filtered.sort((a, b) => {
       if (sortAZ === 'AZ') return a.nama.localeCompare(b.nama);
       else return b.nama.localeCompare(a.nama);
@@ -649,7 +653,6 @@
 
     let filtered = getMutasiSorted();
     
-    // Terapkan Filter Tanggal
     if (fromDate) filtered = filtered.filter(t => t.tanggal >= fromDate);
     if (toDate) filtered = filtered.filter(t => t.tanggal <= toDate);
 
@@ -657,7 +660,6 @@
     
     const saldo={}; 
     pestisidaList.forEach(p=>saldo[p.nama]=parseFloat(p.stokAwal)||0);
-    // Hitung saldo sebelum rentang filter (agar "Setelah" tetap akurat)
     getMutasiSorted().forEach(t => {
       if (fromDate && t.tanggal < fromDate) saldo[t.nama] = (saldo[t.nama]||0) + t.delta;
     });
@@ -680,6 +682,7 @@
   function resetUsageFilter() {
     document.getElementById('usageFromDate').value = '';
     document.getElementById('usageToDate').value = '';
+    document.getElementById('usageFilterGH').value = 'ALL';
     renderUsage();
   }
 
@@ -687,14 +690,15 @@
     const el = document.getElementById('usageContent');
     const fromDate = document.getElementById('usageFromDate').value;
     const toDate = document.getElementById('usageToDate').value;
+    const filterGH = document.getElementById('usageFilterGH').value;
 
     let filtered = dailyUsage;
     
-    // Terapkan Filter Tanggal
     if (fromDate) filtered = filtered.filter(i => i.tanggal >= fromDate);
     if (toDate) filtered = filtered.filter(i => i.tanggal <= toDate);
+    if (filterGH !== 'ALL') filtered = filtered.filter(i => i.gh === filterGH);
 
-    if(!filtered.length){ el.innerHTML='<div class="empty">Tidak ada data penggunaan di rentang tanggal ini.</div>'; return; }
+    if(!filtered.length){ el.innerHTML='<div class="empty">Tidak ada data penggunaan di rentang/tim ini.</div>'; return; }
     
     el.innerHTML='<div class="table-wrap"><table style="font-size:12px"><thead><tr>'+
       '<th>Tgl</th><th class="tc">GH</th><th>Jenis</th><th>Obat</th><th class="tc">Kons</th><th class="tc">Air</th><th class="tc">Vol</th><th>Sasaran</th><th class="tc">Buka</th><th class="tc">Aksi</th>'+
@@ -803,7 +807,6 @@
       
       if(data.error) throw new Error(data.error);
       if(data.list){ 
-        // Pastikan kategori diisi default jika dari sheet lama kosong
         pestisidaList=data.list.map(p=>Object.assign({stokAwal:0,isi:'',kategori:'Lainnya'},p)); 
         lsSet('pestisida_list',JSON.stringify(pestisidaList)); 
       }
@@ -1369,7 +1372,7 @@
     try {
       document.getElementById('usageTanggal').valueAsDate = new Date();
       document.getElementById('invTanggal').valueAsDate = new Date();
-      // Set default filter dates to current month
+      
       const today = new Date();
       const yyyy = today.getFullYear();
       const mm = String(today.getMonth() + 1).padStart(2, '0');
