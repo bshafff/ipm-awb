@@ -173,7 +173,7 @@
     <div class="filter-bar">
       <div class="filter-group">
         <label>Filter Kategori</label>
-        <select id="filterKategori" onchange="renderPestisidaList()">
+        <select id="filterKategori">
           <option value="ALL">Semua Kategori</option>
           <option value="Insektisida">Insektisida</option>
           <option value="Fungisida">Fungisida</option>
@@ -186,7 +186,7 @@
       </div>
       <div class="filter-group">
         <label>Urutkan Nama</label>
-        <select id="sortAZ" onchange="renderPestisidaList()">
+        <select id="sortAZ">
           <option value="AZ">A - Z (Awal ke Akhir)</option>
           <option value="ZA">Z - A (Akhir ke Awal)</option>
         </select>
@@ -218,13 +218,13 @@
     <div class="filter-bar">
       <div class="filter-group">
         <label>Dari Tanggal</label>
-        <input type="date" id="invFromDate" onchange="renderInventory()">
+        <input type="date" id="invFromDate">
       </div>
       <div class="filter-group">
         <label>Sampai Tanggal</label>
-        <input type="date" id="invToDate" onchange="renderInventory()">
+        <input type="date" id="invToDate">
       </div>
-      <button class="filter-btn-reset" onclick="resetInvFilter()">Reset Filter</button>
+      <button class="filter-btn-reset" id="resetInvBtn">Reset Filter</button>
     </div>
 
     <div class="btn-row">
@@ -264,21 +264,21 @@
     <div class="filter-bar">
       <div class="filter-group">
         <label>Dari Tanggal</label>
-        <input type="date" id="usageFromDate" onchange="renderUsage()">
+        <input type="date" id="usageFromDate">
       </div>
       <div class="filter-group">
         <label>Sampai Tanggal</label>
-        <input type="date" id="usageToDate" onchange="renderUsage()">
+        <input type="date" id="usageToDate">
       </div>
       <div class="filter-group">
         <label>Filter GH</label>
-        <select id="usageFilterGH" onchange="renderUsage()">
+        <select id="usageFilterGH">
           <option value="ALL">Semua GH</option>
           <option value="GH 1">GH 1</option>
           <option value="GH 2">GH 2</option>
         </select>
       </div>
-      <button class="filter-btn-reset" onclick="resetUsageFilter()">Reset Filter</button>
+      <button class="filter-btn-reset" id="resetUsageBtn">Reset Filter</button>
     </div>
 
     <div class="btn-row">
@@ -1282,6 +1282,19 @@
     document.getElementById('addUsageBtn').addEventListener('click', addUsage);
 
     document.getElementById('usageJenis').addEventListener('change', updateKategoriObat);
+
+    // FILTER BINDINGS (Event Listener Baru)
+    document.getElementById('filterKategori').addEventListener('change', renderPestisidaList);
+    document.getElementById('sortAZ').addEventListener('change', renderPestisidaList);
+    
+    document.getElementById('invFromDate').addEventListener('change', renderInventory);
+    document.getElementById('invToDate').addEventListener('change', renderInventory);
+    document.getElementById('resetInvBtn').addEventListener('click', resetInvFilter);
+    
+    document.getElementById('usageFromDate').addEventListener('change', renderUsage);
+    document.getElementById('usageToDate').addEventListener('change', renderUsage);
+    document.getElementById('usageFilterGH').addEventListener('change', renderUsage);
+    document.getElementById('resetUsageBtn').addEventListener('click', resetUsageFilter);
 
     document.body.addEventListener('click', function(e) {
       const t = e.target.closest ? e.target.closest('button') : null;
