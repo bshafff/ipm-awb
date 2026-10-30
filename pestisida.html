@@ -1038,10 +1038,7 @@
       isAuthenticated=false; lsSet('pestisida_auth','false');
       updateAuthStatus(); showToast('Koneksi diputus','info'); return;
     }
-    let savedUrl = lsGet('pestisida_script_url');
-    if(!savedUrl) {
-      savedUrl = prompt('URL Web App Apps Script (/exec):\nWho has access = Anyone', scriptUrl||'');
-    }
+    let savedUrl = prompt('URL Web App Apps Script (/exec):\nPastikan sama dengan deployment terbaru.', scriptUrl||lsGet('pestisida_script_url','')||'');
     if(!savedUrl || !savedUrl.trim()) return;
     scriptUrl = savedUrl.trim().replace(/\/$/,'');
     if(scriptUrl.indexOf('/exec') < 0) return alert('URL harus mengandung /exec');
@@ -1094,13 +1091,21 @@
       
       if(data.error) throw new Error(data.error);
       if(data.list){ 
+        var keptLocal=false;
         const oldById={}; pestisidaList.forEach(o=>{ oldById[o.id]=o; });
-        pestisidaList=data.list.map(p=>{ const o=oldById[p.id]||{}; return Object.assign({stokAwal:0,isi:'',kategori:'Lainnya',bahanAktif:o.bahanAktif||'',kode:o.kode||''},p); }); 
+        pestisidaList=data.list.map(p=>{
+          const o=oldById[p.id]||{};
+          const q=Object.assign({stokAwal:0,isi:'',kategori:'Lainnya',bahanAktif:'',kode:''},p);
+          if(!q.bahanAktif && o.bahanAktif){ q.bahanAktif=o.bahanAktif; keptLocal=true; }
+          if(!q.kode && o.kode){ q.kode=o.kode; keptLocal=true; }
+          return q;
+        }); 
         lsSet('pestisida_list',JSON.stringify(pestisidaList)); 
       }
       if(data.inventory){ inventory=data.inventory; lsSet('pestisida_inventory',JSON.stringify(inventory)); }
       if(data.usage){ dailyUsage=data.usage; lsSet('pestisida_usage',JSON.stringify(dailyUsage)); }
       dirty.list=dirty.inventory=dirty.usage=false; saveDirty();
+      if(keptLocal){ dirty.list=true; saveDirty(); scheduleAutoSync(); }
       ensureAutoMutasi();
       renderPestisidaList(); renderInventory(); renderUsage();
       if(!silent) showToast('✓ Dimuat','ok');
