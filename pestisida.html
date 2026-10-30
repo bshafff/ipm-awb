@@ -1098,7 +1098,9 @@
       isAuthenticated=false; lsSet('pestisida_auth','false');
       updateAuthStatus(); showToast('Koneksi diputus','info'); return;
     }
-    let savedUrl = prompt('URL Web App Apps Script (/exec):\nPastikan sama dengan deployment terbaru.', scriptUrl||lsGet('pestisida_script_url','')||'');
+    // URL diambil dari core.js (DEFAULT_URLS.pestisida); prompt hanya muncul kalau benar-benar kosong
+    let savedUrl = scriptUrl || lsGet('pestisida_script_url','') || (typeof DEFAULT_URLS!=='undefined' ? DEFAULT_URLS.pestisida : '');
+    if(!savedUrl) savedUrl = prompt('URL Web App Apps Script (/exec):', '');
     if(!savedUrl || !savedUrl.trim()) return;
     scriptUrl = savedUrl.trim().replace(/\/$/,'');
     if(scriptUrl.indexOf('/exec') < 0) return alert('URL harus mengandung /exec');
