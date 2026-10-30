@@ -61,6 +61,18 @@
     .ok { color: #10b981; } .bad { color: #ef4444; } .muted { color: #999; }
     .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; background: #e0e7ff; color: #4338ca; }
     .badge-kat { background: #fef3c7; color: #92400e; }
+    .badge-irac { background: #dbeafe; color: #1e40af; }
+    .badge-frac { background: #ede9fe; color: #5b21b6; }
+    .badge-low { background: #f3f4f6; color: #4b5563; }
+    .sub { display: block; font-size: 0.68rem; color: #888; font-weight: 400; margin-top: 1px; }
+    .rot { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+    .rot-good { background: #d1fae5; color: #065f46; }
+    .rot-warn { background: #fef3c7; color: #92400e; }
+    .rot-bad { background: #fee2e2; color: #b91c1c; }
+    .rot-na { background: #f3f4f6; color: #6b7280; }
+    .rotasi-hint { display: none; margin-top: 0.6rem; padding: 0.6rem 0.75rem; border-radius: 10px; font-size: 0.78rem; line-height: 1.4; }
+    .rotasi-hint.show { display: block; }
+    .btn-sm { min-height: 34px; padding: 0.35rem 0.6rem; font-size: 0.75rem; }
     .stok { display: inline-block; padding: 3px 10px; border-radius: 10px; font-weight: 700; font-size: 0.8125rem; background: #d1fae5; color: #065f46; }
     .stok.minus { background: #fee2e2; color: #b91c1c; }
     .stok.nol { background: #f3f4f6; color: #6b7280; }
@@ -127,7 +139,7 @@
 
 <div class="app-header">
   <h1>📋 Manajemen Pestisida AWB</h1>
-  <p>Master Data · Stok Opname · Penggunaan Harian</p>
+  <p>Master Data · Stok Opname · Penggunaan Harian · Rotasi IRAC/FRAC</p>
   <div class="auth-status" id="authStatus"></div>
   <div class="header-actions">
     <button type="button" class="btn btn-sync" id="pushBtn" style="display:none">⬆️ Sync</button>
@@ -146,6 +158,7 @@
     <button type="button" class="tab-btn active" data-tab="pestisidaList">🧪 Daftar</button>
     <button type="button" class="tab-btn" data-tab="inventory">📦 Stok</button>
     <button type="button" class="tab-btn" data-tab="usage">💊 Penggunaan</button>
+    <button type="button" class="tab-btn" data-tab="irac">🧬 IRAC/FRAC</button>
   </div>
 
   <!-- TAB DAFTAR -->
@@ -166,6 +179,8 @@
         <input type="number" id="listIsi" placeholder="Isi (250)" min="0" step="0.1">
         <select id="listSatuan"><option>ML</option><option>Liter</option><option>Gr</option><option>Kg</option><option>Botol</option><option>Galon</option><option>Bungkus</option></select>
         <input type="number" id="listStokAwal" placeholder="Stok Awal (jika ada)" min="0" step="0.1">
+        <input type="text" id="listBahanAktif" placeholder="Bahan aktif (pakai + jika lebih dari 1)">
+        <input type="text" id="listKode" class="span2" placeholder="Kode IRAC/FRAC (contoh: 6  atau  11 + 3)">
         <button type="button" class="btn btn-success span2" id="addPestisidaBtn">➕ Tambah</button>
       </div>
     </div>
@@ -196,6 +211,7 @@
     <div class="btn-row">
       <button type="button" class="btn btn-export" data-export="list">⬇️ Export CSV</button>
       <button type="button" class="btn btn-import" data-import="list">📥 Import Excel</button>
+      <button type="button" class="btn btn-muted" data-action="fill-ref">🔎 Isi Kode dari Referensi</button>
     </div>
     <div id="listContent"></div>
     <div class="alert">Total Masuk = Stok Awal + semua mutasi "Masuk". Stok Saat Ini = Total Masuk − Keluar + Penyesuaian.</div>
@@ -234,6 +250,37 @@
     <div id="inventoryContent"></div>
   </div>
 
+  <!-- TAB IRAC/FRAC -->
+  <div id="irac" class="tab-content">
+    <div class="card">
+      <h3>🧬 Rotasi IRAC/FRAC</h3>
+      <div class="alert" style="margin-top:0">Penilaian ini hanya saran dari riwayat Penggunaan Harian. Keputusan lanjut atau tidaknya tetap di tangan IPM.</div>
+      <div style="font-size:0.75rem;line-height:1.6;margin-top:0.6rem">
+        <span class="rot rot-good">🟢 Bagus</span> kode beda dari 2 semprot terakhir<br>
+        <span class="rot rot-warn">🟡 Hati-hati</span> kode sama dengan 2 semprot sebelumnya<br>
+        <span class="rot rot-bad">🔴 Buruk</span> kode sama dengan semprot terakhir<br>
+        <span class="rot rot-na">⚪ Kode kosong</span> belum bisa dinilai. Dibandingkan per GH dan per sistem (IRAC untuk insektisida/akarisida, FRAC untuk fungisida). Multi-site (M) dan P tidak dinilai.
+      </div>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>GH</label>
+        <select id="iracGH"><option value="ALL">Semua GH</option><option>GH 1</option><option>GH 2</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Sistem</label>
+        <select id="iracSis"><option value="ALL">IRAC + FRAC</option><option value="IRAC">IRAC (insektisida/akarisida)</option><option value="FRAC">FRAC (fungisida)</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Periode</label>
+        <select id="iracDays"><option value="30">30 hari terakhir</option><option value="60" selected>60 hari terakhir</option><option value="90">90 hari terakhir</option><option value="0">Semua</option></select>
+      </div>
+    </div>
+    <div id="iracMissing"></div>
+    <div id="iracSummary"></div>
+    <div id="iracHistory"></div>
+  </div>
+
   <!-- TAB PENGGUNAAN -->
   <div id="usage" class="tab-content">
     <div class="card">
@@ -259,6 +306,7 @@
         <input type="text" id="usageKeterangan" placeholder="Keterangan" class="span2">
         <button type="button" class="btn btn-success span2" id="addUsageBtn">➕ Catat</button>
       </div>
+      <div id="rotasiHint" class="rotasi-hint"></div>
     </div>
 
     <div class="filter-bar">
@@ -361,7 +409,7 @@
     'Kuratif - Fungisida': ['Baycor','Thiram','Mancozeb','Karbendazim','Propineb']
   };
 
-  let pestisidaList = JSON.parse(lsGet('pestisida_list', '[]')).map(p => Object.assign({ stokAwal:0, isi:'', kategori:'Lainnya' }, p));
+  let pestisidaList = JSON.parse(lsGet('pestisida_list', '[]')).map(p => Object.assign({ stokAwal:0, isi:'', kategori:'Lainnya', bahanAktif:'', kode:'' }, p));
   let inventory     = JSON.parse(lsGet('pestisida_inventory', '[]'));
   let dailyUsage    = JSON.parse(lsGet('pestisida_usage', '[]'));
   
@@ -444,7 +492,9 @@
       kategori: document.getElementById('listKategori').value,
       isi: isi!=='' ? parseFloat(isi) : '',
       satuan: document.getElementById('listSatuan').value,
-      stokAwal: parseFloat(document.getElementById('listStokAwal').value)||0
+      stokAwal: parseFloat(document.getElementById('listStokAwal').value)||0,
+      bahanAktif: document.getElementById('listBahanAktif').value.trim(),
+      kode: document.getElementById('listKode').value.trim()
     });
     lsSet('pestisida_list', JSON.stringify(pestisidaList));
     markDirty('list');
@@ -452,6 +502,8 @@
     document.getElementById('listNama').value='';
     document.getElementById('listIsi').value='';
     document.getElementById('listStokAwal').value='';
+    document.getElementById('listBahanAktif').value='';
+    document.getElementById('listKode').value='';
     
     renderPestisidaList();
     showToast('✓ Pestisida ditambahkan', 'ok');
@@ -508,6 +560,8 @@
     const bukaVal = parseFloat(document.getElementById('usageBuka').value) || 0;
     if(!jenis) return alert('Pilih jenis');
     if(!obat) return alert('Pilih obat');
+    const rr=liveRotasi();
+    if(rr && rr.lvl==='bad' && !confirm('🔴 Rotasi IRAC/FRAC: '+rr.txt+'\n\nTetap catat penggunaan ini?')) return;
 
     const tgl = document.getElementById('usageTanggal').value || new Date().toISOString().split('T')[0];
     const gh = document.getElementById('usageGH').value;
@@ -618,17 +672,18 @@
       el.innerHTML = '<div class="empty">Belum ada pestisida di kategori ini.</div>';
     } else {
       el.innerHTML = '<div class="table-wrap"><table><thead><tr>'+
-        '<th class="tc">#</th><th>Nama</th><th class="tc">Kategori</th><th class="tc">Isi</th><th class="tc">Satuan</th><th class="tc">Total Masuk</th><th class="tc">Stok Saat Ini</th><th class="tc">Aksi</th></tr></thead><tbody>'+
+        '<th class="tc">#</th><th>Nama</th><th class="tc">Kategori</th><th class="tc">Kode</th><th class="tc">Isi</th><th class="tc">Satuan</th><th class="tc">Total Masuk</th><th class="tc">Stok Saat Ini</th><th class="tc">Aksi</th></tr></thead><tbody>'+
         filtered.map((p,i)=>{
           const stok=getStokSekarang(p.nama), total=getTotalMasuk(p.nama);
           const cls=stok<0?'stok minus':(stok===0?'stok nol':'stok');
-          return '<tr><td class="tc muted">'+(i+1)+'</td><td style="font-weight:600">'+p.nama+'</td>'+
+          return '<tr><td class="tc muted">'+(i+1)+'</td><td style="font-weight:600">'+p.nama+(p.bahanAktif?'<span class="sub">'+esc(p.bahanAktif)+'</span>':'')+'</td>'+
             '<td class="tc"><span class="badge badge-kat">'+(p.kategori||'Lainnya')+'</span></td>'+
+            '<td class="tc">'+kodeBadges(p)+'</td>'+
             '<td class="tc"><span class="badge">'+formatIsi(p)+'</span></td>'+
             '<td class="tc muted">'+(p.satuan||'-')+'</td>'+
             '<td class="tc"><span class="total">'+total+'</span></td>'+
             '<td class="tc"><span class="'+cls+'">'+stok+'</span></td>'+
-            '<td class="tc"><button type="button" class="btn btn-danger" data-del-pest="'+p.id+'">Hapus</button></td></tr>';
+            '<td class="tc" style="white-space:nowrap"><button type="button" class="btn btn-muted btn-sm" data-edit-pest="'+p.id+'">Edit</button> <button type="button" class="btn btn-danger btn-sm" data-del-pest="'+p.id+'">Hapus</button></td></tr>';
         }).join('')+'</tbody></table></div>';
     }
     const invSel = document.getElementById('invNama');
@@ -700,12 +755,15 @@
 
     if(!filtered.length){ el.innerHTML='<div class="empty">Tidak ada data penggunaan di rentang/tim ini.</div>'; return; }
     
+    const rotMap=buildRotation().map;
+    const RC={good:'🟢',warn:'🟡',bad:'🔴',na:'⚪'};
+    const rc=function(id){ const r=rotMap[id]; return r?'<span title="'+esc(r.txt)+'">'+RC[r.lvl]+'</span>':'-'; };
     el.innerHTML='<div class="table-wrap"><table style="font-size:12px"><thead><tr>'+
-      '<th>Tgl</th><th class="tc">GH</th><th>Jenis</th><th>Obat</th><th class="tc">Kons</th><th class="tc">Air</th><th class="tc">Vol</th><th>Sasaran</th><th class="tc">Buka</th><th class="tc">Aksi</th>'+
+      '<th>Tgl</th><th class="tc">GH</th><th>Jenis</th><th>Obat</th><th class="tc">Kons</th><th class="tc">Air</th><th class="tc">Vol</th><th>Sasaran</th><th class="tc">Buka</th><th class="tc">Rot</th><th class="tc">Aksi</th>'+
       '</tr></thead><tbody>'+filtered.map(i=>
         '<tr><td>'+i.tanggal+'</td><td class="tc">'+i.gh+'</td><td>'+i.jenisPenyemprotan+'</td><td style="font-weight:600">'+i.namaObat+'</td>'+
         '<td class="tc">'+i.konsentrasi+'</td><td class="tc">'+i.volAirBaku+'</td><td class="tc">'+i.volObat+'</td><td>'+i.sasaran+'</td><td class="tc">'+(i.bukaObatBaru||0)+'</td>'+
-        '<td class="tc"><button type="button" class="btn btn-danger" data-del-use="'+i.id+'">Hapus</button></td></tr>'
+        '<td class="tc">'+rc(i.id)+'</td><td class="tc"><button type="button" class="btn btn-danger" data-del-use="'+i.id+'">Hapus</button></td></tr>'
       ).join('')+'</tbody></table></div>';
   }
 
@@ -717,6 +775,7 @@
     let opts=(jenis&&obatDatabase[jenis])?obatDatabase[jenis].slice():[];
     pestisidaList.forEach(p=>{ if(!opts.some(o=>o.toLowerCase()===p.nama.toLowerCase())) opts.push(p.nama); });
     opts.forEach(o=>{ const op=document.createElement('option'); op.value=o; op.textContent=o; if(o===prev)op.selected=true; sel.appendChild(op); });
+    updateRotasiHint();
   }
 
   function switchTab(tab) {
@@ -728,7 +787,235 @@
     if (btn) btn.classList.add('active');
     if (tab==='pestisidaList') renderPestisidaList();
     else if (tab==='inventory') renderInventory();
+    else if (tab==='irac') renderIrac();
     else renderUsage();
+  }
+
+  // ================= IRAC / FRAC =================
+  const KODE_REF = {
+    'agrimec':       { ba:'Abamektin', kode:'6' },
+    'amistartop':    { ba:'Azoksistrobin + Difenokonazol', kode:'11 + 3' },
+    'daconil':       { ba:'Klorotalonil', kode:'M5' },
+    'merivon':       { ba:'Fluksapiroksad + Piraklostrobin', kode:'7 + 11' },
+    'movento':       { ba:'Spirotetramat', kode:'23' },
+    'oberon':        { ba:'Spiromesifen', kode:'23' },
+    'oberon speed':  { ba:'Spiromesifen + Tiakloprid', kode:'23 + 4A' },
+    'orondis opti':  { ba:'Oksatiapiprolin + Klorotalonil', kode:'49 + M5' },
+    'prevathon':     { ba:'Klorantraniliprol', kode:'28' },
+    'ridomil gold':  { ba:'Metalaksil-M + Mankozeb', kode:'4 + M3' },
+    'sivanto':       { ba:'Flupiradifuron', kode:'4D' },
+    'pegasus':       { ba:'Diafentiuron', kode:'12A' },
+    'curacron':      { ba:'Profenofos', kode:'1B' },
+    'bion m':        { ba:'Asibenzolar-S-metil + Mankozeb', kode:'P1 + M3' },
+    'gracia':        { ba:'Fluksametamid', kode:'30' }
+  };
+
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function parseKode(str){
+    return String(str||'').split(/[+,;\/&]|\bdan\b/i).map(function(s){ return s.trim(); }).filter(Boolean).map(function(s){
+      const raw=s.replace(/^(IRAC|FRAC)\s*[:\-]?\s*/i,'').trim();
+      const key=raw.toUpperCase().replace(/\s+/g,'').replace(/^([A-Z]+)0+(?=\d)/,'$1');
+      return { raw:raw, key:key };
+    }).filter(function(c){ return c.key; });
+  }
+
+  function sistemOf(nama, jenis){
+    const m=getMaster(nama)||{};
+    let kat=m.kategori||'';
+    if(/^(Perekat|Penunjang|Herbisida)$/.test(kat)) return '';
+    if(!/^(Insektisida|Akarisida|Fungisida)$/.test(kat)){
+      const mm=String(jenis||'').match(/(Insektisida|Akarisida|Fungisida)/);
+      kat=mm?mm[1]:'';
+    }
+    if(kat==='Insektisida'||kat==='Akarisida') return 'IRAC';
+    if(kat==='Fungisida') return 'FRAC';
+    return '';
+  }
+
+  function annotate(sis, codes){
+    return codes.map(function(c){
+      const unk=/^(UN[A-Z]?|U\d*|NC|NA)$/.test(c.key);
+      const low=sis==='FRAC' && /^(M\d+|P\d+|BM\d+)$/.test(c.key);
+      let grp=c.key;
+      if(sis==='IRAC'){ const m=c.key.match(/^(\d+)[A-Z]?$/); if(m) grp=m[1]; }
+      return { raw:c.raw, key:c.key, grp:grp, unk:unk, low:low };
+    });
+  }
+
+  function kodeBadges(p){
+    const cs=parseKode(p.kode);
+    if(!cs.length) return '<span class="muted">-</span>';
+    const sis=sistemOf(p.nama,'');
+    return (sis?'<span class="sub" style="margin:0 0 2px">'+sis+'</span>':'')+
+      annotate(sis,cs).map(function(c){
+        return '<span class="badge '+(c.low?'badge-low':(sis==='FRAC'?'badge-frac':'badge-irac'))+'">'+esc(c.raw)+'</span>';
+      }).join(' ');
+  }
+
+  // prev = [semprot terakhir, semprot sebelumnya], masing-masing {tanggal, items:[{nama, codes}]}
+  function assess(sis, codes, prev){
+    if(!codes.length) return { lvl:'na', txt:'Kode belum diisi' };
+    const cg=annotate(sis,codes);
+    const risky=cg.filter(function(c){ return !c.unk && !c.low; });
+    if(!risky.length) return { lvl:'good', txt: cg.every(function(c){ return c.low; }) ? 'Multi-site / risiko resistensi rendah, tidak dibatasi rotasi' : 'Kode belum terklasifikasi (UN)' };
+    let partial=false;
+    for(let i=0;i<prev.length;i++){
+      const ev=prev[i]; if(!ev) continue;
+      for(let j=0;j<ev.items.length;j++){
+        const it=ev.items[j];
+        if(!it.codes.length){ partial=true; continue; }
+        const pg=annotate(sis,it.codes).filter(function(c){ return !c.unk && !c.low; });
+        const hit=risky.find(function(c){ return pg.some(function(p){ return p.grp===c.grp; }); });
+        if(hit){
+          const lab=sis+' grup '+hit.grp;
+          return i===0
+            ? { lvl:'bad',  txt: lab+' sama dengan semprot terakhir ('+it.nama+', '+ev.tanggal+')' }
+            : { lvl:'warn', txt: lab+' sama dengan 2 semprot sebelumnya ('+it.nama+', '+ev.tanggal+')' };
+        }
+      }
+    }
+    if(!prev[0]) return { lvl:'good', txt:'Semprot pertama, belum ada pembanding' };
+    return { lvl:'good', txt:'Beda dari 2 semprot terakhir'+(partial?' (ada semprot sebelumnya tanpa kode)':'') };
+  }
+
+  function eventsFor(gh, sis){
+    const by={};
+    dailyUsage.forEach(function(u){
+      if(u.gh!==gh) return;
+      if(sistemOf(u.namaObat,u.jenisPenyemprotan)!==sis) return;
+      const m=getMaster(u.namaObat)||{};
+      (by[u.tanggal]=by[u.tanggal]||[]).push({ id:u.id, nama:u.namaObat, codes:parseKode(m.kode) });
+    });
+    return Object.keys(by).sort().map(function(d){ return { tanggal:d, items:by[d] }; });
+  }
+
+  function buildRotation(){
+    const rows=[], map={}, combos={};
+    dailyUsage.forEach(function(u){
+      const s=sistemOf(u.namaObat,u.jenisPenyemprotan);
+      if(s) combos[u.gh+'|'+s]=[u.gh,s];
+    });
+    Object.keys(combos).forEach(function(k){
+      const gh=combos[k][0], sis=combos[k][1];
+      const evs=eventsFor(gh,sis);
+      evs.forEach(function(ev,idx){
+        const prev=[evs[idx-1]||null, evs[idx-2]||null];
+        const gap=prev[0] ? Math.round((new Date(ev.tanggal)-new Date(prev[0].tanggal))/86400000) : null;
+        ev.items.forEach(function(it){
+          const a=assess(sis,it.codes,prev);
+          const r={ tanggal:ev.tanggal, gh:gh, sis:sis, nama:it.nama, kode:it.codes.map(function(c){ return c.raw; }).join(' + '), gap:gap, lvl:a.lvl, txt:a.txt, id:it.id };
+          rows.push(r); map[it.id]=r;
+        });
+      });
+    });
+    rows.sort(function(a,b){ return b.tanggal.localeCompare(a.tanggal) || b.id-a.id; });
+    return { rows:rows, map:map };
+  }
+
+  function liveRotasi(){
+    const nama=document.getElementById('usageObat').value;
+    if(!nama) return null;
+    const gh=document.getElementById('usageGH').value;
+    const tgl=document.getElementById('usageTanggal').value || new Date().toISOString().split('T')[0];
+    const sis=sistemOf(nama, document.getElementById('usageJenis').value);
+    if(!sis) return { lvl:'none', txt:'Produk ini tidak masuk penilaian IRAC/FRAC (perekat, penunjang, atau herbisida).' };
+    const m=getMaster(nama)||{};
+    const evs=eventsFor(gh,sis).filter(function(e){ return e.tanggal<tgl; });
+    const prev=[evs[evs.length-1]||null, evs[evs.length-2]||null];
+    return assess(sis,parseKode(m.kode),prev);
+  }
+
+  function updateRotasiHint(){
+    const el=document.getElementById('rotasiHint'); if(!el) return;
+    const r=liveRotasi();
+    if(!r){ el.className='rotasi-hint'; el.innerHTML=''; return; }
+    const st={ good:['#d1fae5','#065f46','🟢 Bagus'], warn:['#fef3c7','#92400e','🟡 Hati-hati'], bad:['#fee2e2','#b91c1c','🔴 Buruk'], na:['#f3f4f6','#4b5563','⚪ Kode kosong'], none:['#f3f4f6','#4b5563','ℹ️'] }[r.lvl];
+    el.className='rotasi-hint show'; el.style.background=st[0]; el.style.color=st[1];
+    el.innerHTML='<b>'+st[2]+'</b> '+esc(r.txt)+((r.lvl==='bad'||r.lvl==='warn')?'<br><span style="opacity:.85">Ini saran saja, keputusan tetap di kamu.</span>':'');
+  }
+
+  function renderIrac(){
+    const ghF=document.getElementById('iracGH').value;
+    const sisF=document.getElementById('iracSis').value;
+    const days=parseInt(document.getElementById('iracDays').value,10)||0;
+    const since=days ? new Date(Date.now()-days*86400000).toISOString().split('T')[0] : '';
+    const rows=buildRotation().rows.filter(function(r){
+      return (ghF==='ALL'||r.gh===ghF) && (sisF==='ALL'||r.sis===sisF) && (!since||r.tanggal>=since);
+    });
+
+    // produk belum ada kode
+    const miss=pestisidaList.filter(function(p){ return sistemOf(p.nama,'') && !parseKode(p.kode).length; });
+    document.getElementById('iracMissing').innerHTML = miss.length
+      ? '<div class="alert" style="margin:0 0 0.75rem;background:#fffbeb;border-color:#f59e0b;color:#92400e"><b>'+miss.length+' produk belum ada kode</b> sehingga tidak bisa dinilai: '+miss.map(function(p){ return esc(p.nama); }).join(', ')+'. Isi lewat tombol Edit di tab Daftar.</div>'
+      : '';
+
+    // ringkasan per kode
+    const sum={};
+    rows.forEach(function(r){
+      const m=getMaster(r.nama)||{};
+      annotate(r.sis,parseKode(m.kode)).forEach(function(c){
+        const k=r.sis+'|'+c.grp;
+        const s=sum[k]=sum[k]||{ sis:r.sis, grp:c.grp, low:c.low, unk:c.unk, n:0, prod:{}, last:'' };
+        s.n++; s.prod[r.nama]=1; if(r.tanggal>s.last) s.last=r.tanggal;
+      });
+    });
+    const sumArr=Object.keys(sum).map(function(k){ return sum[k]; }).sort(function(a,b){ return a.sis.localeCompare(b.sis) || b.n-a.n; });
+    document.getElementById('iracSummary').innerHTML = sumArr.length
+      ? '<div class="card"><h3>Ringkasan Kode</h3><div class="table-wrap"><table><thead><tr><th class="tc">Sistem</th><th class="tc">Kode</th><th>Produk</th><th class="tc">Aplikasi</th><th class="tc">Terakhir</th></tr></thead><tbody>'+
+        sumArr.map(function(s){
+          return '<tr><td class="tc"><span class="badge '+(s.sis==='FRAC'?'badge-frac':'badge-irac')+'">'+s.sis+'</span></td>'+
+            '<td class="tc"><span class="badge '+(s.low?'badge-low':'')+'">'+esc(s.grp)+'</span></td>'+
+            '<td>'+Object.keys(s.prod).map(esc).join(', ')+'</td>'+
+            '<td class="tc"><span class="total">'+s.n+'</span></td><td class="tc">'+s.last+'</td></tr>';
+        }).join('')+'</tbody></table></div></div>'
+      : '';
+
+    // riwayat + penilaian
+    const LV={ good:['rot-good','🟢 Bagus'], warn:['rot-warn','🟡 Hati-hati'], bad:['rot-bad','🔴 Buruk'], na:['rot-na','⚪ Kode kosong'] };
+    const shown=rows.slice(0,150);
+    document.getElementById('iracHistory').innerHTML = rows.length
+      ? '<div class="card"><h3>Riwayat Penilaian Rotasi</h3><div class="table-wrap"><table style="font-size:12px"><thead><tr><th>Tgl</th><th class="tc">GH</th><th>Obat</th><th class="tc">Kode</th><th class="tc">Selang</th><th class="tc">Penilaian</th><th>Catatan</th></tr></thead><tbody>'+
+        shown.map(function(r){
+          const l=LV[r.lvl];
+          return '<tr><td>'+r.tanggal+'</td><td class="tc">'+esc(r.gh)+'</td><td style="font-weight:600">'+esc(r.nama)+'</td>'+
+            '<td class="tc">'+(r.kode?'<span class="badge '+(r.sis==='FRAC'?'badge-frac':'badge-irac')+'">'+esc(r.kode)+'</span>':'-')+'</td>'+
+            '<td class="tc">'+(r.gap==null?'-':r.gap+' hr')+'</td>'+
+            '<td class="tc"><span class="rot '+l[0]+'">'+l[1]+'</span></td>'+
+            '<td style="min-width:200px;white-space:normal">'+esc(r.txt)+'</td></tr>';
+        }).join('')+'</tbody></table></div>'+(rows.length>shown.length?'<div class="muted" style="font-size:11px;margin-top:6px">Menampilkan '+shown.length+' dari '+rows.length+' baris terbaru.</div>':'')+'</div>'
+      : '<div class="empty">Belum ada data penyemprotan insektisida/akarisida/fungisida di rentang ini.</div>';
+  }
+
+  function editKode(id){
+    const p=pestisidaList.find(function(x){ return x.id===id; });
+    if(!p) return;
+    const ba=prompt('Bahan aktif '+p.nama+'\n(pakai + kalau lebih dari satu)', p.bahanAktif||'');
+    if(ba===null) return;
+    const kd=prompt('Kode IRAC/FRAC '+p.nama+'\n(contoh: 6   atau   11 + 3   atau   23 + 4A)', p.kode||'');
+    if(kd===null) return;
+    p.bahanAktif=ba.trim(); p.kode=kd.trim();
+    lsSet('pestisida_list', JSON.stringify(pestisidaList));
+    markDirty('list');
+    renderPestisidaList();
+    showToast('✓ Kode disimpan','ok');
+  }
+
+  function fillKodeRef(){
+    let n=0;
+    pestisidaList.forEach(function(p){
+      const r=KODE_REF[String(p.nama).trim().toLowerCase()];
+      if(!r) return;
+      let ch=false;
+      if(!p.bahanAktif){ p.bahanAktif=r.ba; ch=true; }
+      if(!p.kode){ p.kode=r.kode; ch=true; }
+      if(ch) n++;
+    });
+    if(!n){ showToast('Tidak ada produk kosong yang cocok dengan referensi','info'); return; }
+    lsSet('pestisida_list', JSON.stringify(pestisidaList));
+    markDirty('list');
+    renderPestisidaList();
+    showToast('✓ '+n+' produk terisi, cek ulang kodenya','ok');
   }
 
   // ================= AUTH & SYNC =================
@@ -807,7 +1094,8 @@
       
       if(data.error) throw new Error(data.error);
       if(data.list){ 
-        pestisidaList=data.list.map(p=>Object.assign({stokAwal:0,isi:'',kategori:'Lainnya'},p)); 
+        const oldById={}; pestisidaList.forEach(o=>{ oldById[o.id]=o; });
+        pestisidaList=data.list.map(p=>{ const o=oldById[p.id]||{}; return Object.assign({stokAwal:0,isi:'',kategori:'Lainnya',bahanAktif:o.bahanAktif||'',kode:o.kode||''},p); }); 
         lsSet('pestisida_list',JSON.stringify(pestisidaList)); 
       }
       if(data.inventory){ inventory=data.inventory; lsSet('pestisida_inventory',JSON.stringify(inventory)); }
@@ -826,7 +1114,7 @@
   function exportCSV(type) {
     let data, fn;
     if(type==='list'){
-      data=pestisidaList.map(p=>({nama:p.nama,kategori:p.kategori||'Lainnya',isi:p.isi,satuan:p.satuan,totalMasuk:getTotalMasuk(p.nama),stokSaatIni:getStokSekarang(p.nama)}));
+      data=pestisidaList.map(p=>({nama:p.nama,kategori:p.kategori||'Lainnya',isi:p.isi,satuan:p.satuan,bahanAktif:p.bahanAktif||'',kode:p.kode||'',totalMasuk:getTotalMasuk(p.nama),stokSaatIni:getStokSekarang(p.nama)}));
       fn='daftar-pestisida.csv';
     } else if(type==='inventory'){
       const saldo={}; pestisidaList.forEach(p=>saldo[p.nama]=parseFloat(p.stokAwal)||0);
@@ -844,15 +1132,17 @@
   const IMPORT_CONFIGS = {
     list: {
       title: '📥 Import Daftar Pestisida',
-      hint: 'Kolom: Nama, Kategori, Isi, Satuan, Stok Awal',
+      hint: 'Kolom: Nama, Kategori, Isi, Satuan, Stok Awal, Bahan Aktif, Kode IRAC/FRAC',
       columns: [
         { key: 'nama',     label: 'Nama',      required: true },
         { key: 'kategori', label: 'Kategori',  default: 'Lainnya' },
         { key: 'isi',      label: 'Isi',       type: 'number' },
         { key: 'satuan',   label: 'Satuan',    default: 'ML' },
-        { key: 'stokAwal', label: 'Stok Awal', type: 'number', default: 0 }
+        { key: 'stokAwal', label: 'Stok Awal', type: 'number', default: 0 },
+        { key: 'bahanAktif', label: 'Bahan Aktif' },
+        { key: 'kode',       label: 'Kode IRAC/FRAC' }
       ],
-      contoh: { nama: 'Matador', kategori: 'Insektisida', isi: 250, satuan: 'ML', stokAwal: 10 }
+      contoh: { nama: 'Matador', kategori: 'Insektisida', isi: 250, satuan: 'ML', stokAwal: 10, bahanAktif: 'Abamektin', kode: '6' }
     },
     inventory: {
       title: '📥 Import Mutasi Stok',
@@ -1211,7 +1501,9 @@
           kategori: r.kategori || 'Lainnya',
           isi: (r.isi === '' || r.isi === undefined) ? '' : (parseFloat(r.isi) || 0),
           satuan: r.satuan || 'ML',
-          stokAwal: parseFloat(r.stokAwal) || 0
+          stokAwal: parseFloat(r.stokAwal) || 0,
+          bahanAktif: r.bahanAktif || '',
+          kode: r.kode || ''
         });
         imported++;
       });
@@ -1282,6 +1574,8 @@
     document.getElementById('addUsageBtn').addEventListener('click', addUsage);
 
     document.getElementById('usageJenis').addEventListener('change', updateKategoriObat);
+    ['usageObat','usageGH','usageTanggal'].forEach(function(id){ document.getElementById(id).addEventListener('change', updateRotasiHint); });
+    ['iracGH','iracSis','iracDays'].forEach(function(id){ document.getElementById(id).addEventListener('change', renderIrac); });
 
     // FILTER BINDINGS (Event Listener Baru)
     document.getElementById('filterKategori').addEventListener('change', renderPestisidaList);
@@ -1309,6 +1603,11 @@
       if (t.getAttribute('data-action') === 'close-modal') {
         e.preventDefault(); closeImportModal(); return;
       }
+
+      const editPest = t.getAttribute('data-edit-pest');
+      if (editPest) { e.preventDefault(); editKode(Number(editPest)); return; }
+
+      if (t.getAttribute('data-action') === 'fill-ref') { e.preventDefault(); fillKodeRef(); return; }
 
       const delPest = t.getAttribute('data-del-pest');
       if (delPest) { e.preventDefault(); deletePestisida(Number(delPest)); return; }
