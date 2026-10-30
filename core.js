@@ -8,19 +8,31 @@ const DEFAULT_URLS = {
 const APP_VERSION_KEY = 'ipm_awb_app_version_v1';
 const WELCOMED_KEY    = 'ipm_awb_welcomed_v1';
 
-// AUTO-INJECT: Memasukkan URL ke localStorage secara paksa
+// AUTO-INJECT: URL Apps Script dari DEFAULT_URLS di atas jadi sumber utama.
+// - Perangkat baru: otomatis terisi.
+// - Key di FORCE_FROM_CORE: kalau URL di core.js diganti, semua perangkat ikut pindah
+//   ke URL baru saat core.js terbaru termuat (tidak perlu Putuskan/Connect manual lagi).
+// - Key lain: hanya diisi kalau masih kosong (URL manual di perangkat tidak ditimpa).
+const FORCE_FROM_CORE = ['pestisida'];
+const URL_SIG_PREFIX  = 'ipm_awb_urlsig_';
+
+function injectUrl(name, storageKey, authKey) {
+  const def = DEFAULT_URLS[name];
+  if (!def) return;
+  const forced = FORCE_FROM_CORE.indexOf(name) >= 0;
+  const sigKey = URL_SIG_PREFIX + name;
+  const stale  = forced && localStorage.getItem(sigKey) !== def;
+  if (stale || !localStorage.getItem(storageKey)) {
+    localStorage.setItem(storageKey, def);
+    if (authKey) localStorage.setItem(authKey, 'true');
+  }
+  if (forced) localStorage.setItem(sigKey, def);
+}
+
 function autoInjectUrls() {
-  if (DEFAULT_URLS.hpt && !localStorage.getItem('hpt_script_url')) {
-    localStorage.setItem('hpt_script_url', DEFAULT_URLS.hpt);
-    localStorage.setItem('hpt_auth', 'true');
-  }
-  if (DEFAULT_URLS.pestisida && !localStorage.getItem('pestisida_script_url')) {
-    localStorage.setItem('pestisida_script_url', DEFAULT_URLS.pestisida);
-    localStorage.setItem('pestisida_auth', 'true');
-  }
-  if (DEFAULT_URLS.suhu && !localStorage.getItem('suhu_url')) {
-    localStorage.setItem('suhu_url', DEFAULT_URLS.suhu);
-  }
+  injectUrl('hpt',       'hpt_script_url',       'hpt_auth');
+  injectUrl('pestisida', 'pestisida_script_url', 'pestisida_auth');
+  injectUrl('suhu',      'suhu_url');
 }
 
 function isWelcomed() { return localStorage.getItem(WELCOMED_KEY) === '1'; }
