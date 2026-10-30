@@ -181,6 +181,7 @@
         <input type="number" id="listStokAwal" placeholder="Stok Awal (jika ada)" min="0" step="0.1">
         <input type="text" id="listBahanAktif" placeholder="Bahan aktif (pakai + jika lebih dari 1)">
         <input type="text" id="listKode" class="span2" placeholder="Kode IRAC/FRAC (contoh: 6  atau  11 + 3)">
+        <input type="number" id="listJeda" class="span2" placeholder="Jeda minimum semprot ulang (hari)" min="0" step="1">
         <button type="button" class="btn btn-success span2" id="addPestisidaBtn">➕ Tambah</button>
       </div>
     </div>
@@ -409,7 +410,7 @@
     'Kuratif - Fungisida': ['Baycor','Thiram','Mancozeb','Karbendazim','Propineb']
   };
 
-  let pestisidaList = JSON.parse(lsGet('pestisida_list', '[]')).map(p => Object.assign({ stokAwal:0, isi:'', kategori:'Lainnya', bahanAktif:'', kode:'' }, p));
+  let pestisidaList = JSON.parse(lsGet('pestisida_list', '[]')).map(p => Object.assign({ stokAwal:0, isi:'', kategori:'Lainnya', bahanAktif:'', kode:'', jeda:0 }, p));
   let inventory     = JSON.parse(lsGet('pestisida_inventory', '[]'));
   let dailyUsage    = JSON.parse(lsGet('pestisida_usage', '[]'));
   
@@ -494,7 +495,8 @@
       satuan: document.getElementById('listSatuan').value,
       stokAwal: parseFloat(document.getElementById('listStokAwal').value)||0,
       bahanAktif: document.getElementById('listBahanAktif').value.trim(),
-      kode: document.getElementById('listKode').value.trim()
+      kode: document.getElementById('listKode').value.trim(),
+      jeda: parseInt(document.getElementById('listJeda').value,10)||0
     });
     lsSet('pestisida_list', JSON.stringify(pestisidaList));
     markDirty('list');
@@ -504,6 +506,7 @@
     document.getElementById('listStokAwal').value='';
     document.getElementById('listBahanAktif').value='';
     document.getElementById('listKode').value='';
+    document.getElementById('listJeda').value='';
     
     renderPestisidaList();
     showToast('✓ Pestisida ditambahkan', 'ok');
@@ -757,7 +760,7 @@
     
     const rotMap=buildRotation().map;
     const RC={good:'🟢',warn:'🟡',bad:'🔴',na:'⚪'};
-    const rc=function(id){ const r=rotMap[id]; return r?'<span title="'+esc(r.txt)+'">'+RC[r.lvl]+'</span>':'-'; };
+    const rc=function(id){ const r=rotMap[id]; return r?'<span title="'+esc(r.txt+(r.notes&&r.notes.length?' | '+r.notes.join(' '):''))+'">'+RC[r.lvl]+'</span>':'-'; };
     el.innerHTML='<div class="table-wrap"><table style="font-size:12px"><thead><tr>'+
       '<th>Tgl</th><th class="tc">GH</th><th>Jenis</th><th>Obat</th><th class="tc">Kons</th><th class="tc">Air</th><th class="tc">Vol</th><th>Sasaran</th><th class="tc">Buka</th><th class="tc">Rot</th><th class="tc">Aksi</th>'+
       '</tr></thead><tbody>'+filtered.map(i=>
@@ -793,30 +796,31 @@
 
   // ================= IRAC / FRAC =================
   const KODE_REF = {
-    'agrimec':       { ba:'Abamektin', kode:'6' },
-    'amistartop':    { ba:'Azoksistrobin + Difenokonazol', kode:'11 + 3' },
-    'daconil':       { ba:'Klorotalonil', kode:'M5' },
-    'merivon':       { ba:'Fluksapiroksad + Piraklostrobin', kode:'7 + 11' },
-    'movento':       { ba:'Spirotetramat', kode:'23' },
-    'oberon':        { ba:'Spiromesifen', kode:'23' },
-    'oberon speed':  { ba:'Abamektin + Spiromesifen', kode:'6 + 23' },
-    'orondis opti':  { ba:'Oksatiapiprolin + Klorotalonil', kode:'49 + M5' },
-    'prevathon':     { ba:'Klorantraniliprol', kode:'28' },
-    'ridomil gold':  { ba:'Metalaksil-M + Mankozeb', kode:'4 + M3' },
-    'sivanto':       { ba:'Flupiradifuron', kode:'4D' },
-    'pegasus':       { ba:'Diafentiuron', kode:'12A' },
-    'curacron':      { ba:'Profenofos', kode:'1B' },
-    'bion m':        { ba:'Asibenzolar-S-metil + Mankozeb', kode:'P1 + M3' },
-    'gracia':        { ba:'Fluksametamid', kode:'30' },
-    'atoza':         { ba:'Etoksazol', kode:'10B' },
-    'agus':          { ba:'Diafentiuron', kode:'12A' },
-    'bulfidor':      { ba:'Beta-siflutrin + Imidakloprid', kode:'3A + 4A' },
-    'toxiput':       { ba:'Metaldehida', kode:'' },
-    'azza':          { ba:'Karbendazim + Klorotalonil', kode:'1 + M5' },
-    'simodis':       { ba:'Isosikloseram', kode:'30' },
-    'endure':        { ba:'Spinetoram', kode:'5' },
-    'round up':      { ba:'Glifosat isopropilamina', kode:'' },
-    'agristik':      { ba:'Alkilaril poliglikol eter 400 g/l', kode:'' }
+    'agrimec':       { ba:'Abamektin', kode:'6', jeda:14 },
+    'amistartop':    { ba:'Azoksistrobin + Difenokonazol', kode:'11 + 3', jeda:14 },
+    'daconil':       { ba:'Klorotalonil', kode:'M5', jeda:7 },
+    'merivon':       { ba:'Fluksapiroksad + Piraklostrobin', kode:'7 + 11', jeda:14 },
+    'movento':       { ba:'Spirotetramat', kode:'23', jeda:14 },
+    'oberon':        { ba:'Spiromesifen', kode:'23', jeda:21 },
+    'oberon speed':  { ba:'Abamektin + Spiromesifen', kode:'6 + 23', jeda:21 },
+    'orondis opti':  { ba:'Oksatiapiprolin + Klorotalonil', kode:'49 + M5', jeda:14 },
+    'prevathon':     { ba:'Klorantraniliprol', kode:'28', jeda:14 },
+    'ridomil gold':  { ba:'Metalaksil-M + Mankozeb', kode:'4 + M3', jeda:14 },
+    'sivanto':       { ba:'Flupiradifuron', kode:'4D', jeda:14 },
+    'pegasus':       { ba:'Diafentiuron', kode:'12A', jeda:14 },
+    'curacron':      { ba:'Profenofos', kode:'1B', jeda:14 },
+    'curacron 250':  { ba:'Profenofos', kode:'1B', jeda:14 },
+    'bion m':        { ba:'Asibenzolar-S-metil + Mankozeb', kode:'P1 + M3', jeda:7 },
+    'gracia':        { ba:'Fluksametamid', kode:'30', jeda:14 },
+    'atoza':         { ba:'Etoksazol', kode:'10B', jeda:30 },
+    'agus':          { ba:'Diafentiuron', kode:'12A', jeda:14 },
+    'bulfidor':      { ba:'Beta-siflutrin + Imidakloprid', kode:'3A + 4A', jeda:14 },
+    'toxiput':       { ba:'Metaldehida', kode:'', jeda:0 },
+    'azza':          { ba:'Karbendazim + Klorotalonil', kode:'1 + M5', jeda:14 },
+    'simodis':       { ba:'Isosikloseram', kode:'30', jeda:14 },
+    'endure':        { ba:'Spinetoram', kode:'5', jeda:10 },
+    'round up':      { ba:'Glifosat isopropilamina', kode:'', jeda:0 },
+    'agristik':      { ba:'Alkilaril poliglikol eter 400 g/l', kode:'', jeda:0 }
   };
 
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -859,33 +863,76 @@
     return (sis?'<span class="sub" style="margin:0 0 2px">'+sis+'</span>':'')+
       annotate(sis,cs).map(function(c){
         return '<span class="badge '+(c.low?'badge-low':(sis==='FRAC'?'badge-frac':'badge-irac'))+'">'+esc(c.raw)+'</span>';
-      }).join(' ');
+      }).join(' ')+(p.jeda?'<span class="sub">jeda '+p.jeda+' hr</span>':'');
   }
 
-  // prev = [semprot terakhir, semprot sebelumnya], masing-masing {tanggal, items:[{nama, codes}]}
-  function assess(sis, codes, prev){
-    if(!codes.length) return { lvl:'na', txt:'Kode belum diisi' };
+  const RISIKO_TINGGI = { FRAC: { '1':'benzimidazol', '4':'fenilamida', '11':'strobilurin/QoI' } };
+
+  function dayDiff(a,b){ return Math.round((new Date(a)-new Date(b))/86400000); }
+  function addDays(d,n){ const x=new Date(d); x.setUTCDate(x.getUTCDate()+n); return x.toISOString().split('T')[0]; }
+
+  // prevAll = semua semprot sebelumnya (terbaru dulu): {tanggal, items:[{nama, codes}]}
+  function assess(sis, codes, prevAll, tgl, nama){
+    if(!codes.length) return { lvl:'na', txt:'Kode belum diisi', notes:[] };
     const cg=annotate(sis,codes);
     const risky=cg.filter(function(c){ return !c.unk && !c.low; });
-    if(!risky.length) return { lvl:'good', txt: cg.every(function(c){ return c.low; }) ? 'Multi-site / risiko resistensi rendah, tidak dibatasi rotasi' : 'Kode belum terklasifikasi (UN)' };
-    let partial=false;
-    for(let i=0;i<prev.length;i++){
-      const ev=prev[i]; if(!ev) continue;
-      for(let j=0;j<ev.items.length;j++){
+    if(!risky.length) return { lvl:'good', txt: cg.every(function(c){ return c.low; }) ? 'Multi-site / risiko resistensi rendah, tidak dibatasi rotasi' : 'Kode belum terklasifikasi (UN)', notes:[] };
+
+    const myJeda=Number((getMaster(nama)||{}).jeda)||0;
+    let partial=false, found=null;
+    for(let i=0;i<prevAll.length && !found;i++){
+      const ev=prevAll[i];
+      for(let j=0;j<ev.items.length && !found;j++){
         const it=ev.items[j];
-        if(!it.codes.length){ partial=true; continue; }
+        if(!it.codes.length){ if(i<2) partial=true; continue; }
         const pg=annotate(sis,it.codes).filter(function(c){ return !c.unk && !c.low; });
-        const hit=risky.find(function(c){ return pg.some(function(p){ return p.grp===c.grp; }); });
-        if(hit){
-          const lab=sis+' grup '+hit.grp;
-          return i===0
-            ? { lvl:'bad',  txt: lab+' sama dengan semprot terakhir ('+it.nama+', '+ev.tanggal+')' }
-            : { lvl:'warn', txt: lab+' sama dengan 2 semprot sebelumnya ('+it.nama+', '+ev.tanggal+')' };
-        }
+        const hits=risky.filter(function(c){ return pg.some(function(p){ return p.grp===c.grp; }); });
+        if(hits.length) found={ i:i, ev:ev, it:it, hits:hits };
       }
     }
-    if(!prev[0]) return { lvl:'good', txt:'Semprot pertama, belum ada pembanding' };
-    return { lvl:'good', txt:'Beda dari 2 semprot terakhir'+(partial?' (ada semprot sebelumnya tanpa kode)':'') };
+    if(!found){
+      if(!prevAll[0]) return { lvl:'good', txt:'Semprot pertama, belum ada pembanding', notes:[] };
+      return { lvl:'good', txt:'Beda dari 2 semprot terakhir'+(partial?' (ada semprot sebelumnya tanpa kode)':''), notes:[] };
+    }
+
+    const gap=dayDiff(tgl, found.ev.tanggal);
+    const jeda=Math.max(myJeda, Number((getMaster(found.it.nama)||{}).jeda)||0);
+    const lab=sis+' grup '+found.hits.map(function(h){ return h.grp; }).join(' + ');
+    const ref=found.it.nama+', '+found.ev.tanggal;
+    const notes=[];
+    let lvl, txt;
+
+    if(jeda && gap<jeda){
+      lvl='bad';
+      txt='Terlalu cepat: '+lab+' sama dengan '+ref+', baru '+gap+' hari lalu (jeda minimum '+jeda+' hari)';
+      notes.push('Boleh dipakai lagi mulai '+addDays(found.ev.tanggal,jeda)+'.');
+    } else if(found.i===0){
+      if(jeda){
+        lvl='warn';
+        txt=lab+' sama dengan semprot terakhir ('+ref+'), selang '+gap+' hari sudah lewat jeda minimum '+jeda+' hari';
+        notes.push('Berurutan dengan kode yang sama, sebaiknya selang-seling dengan kode lain.');
+      } else {
+        lvl='bad';
+        txt=lab+' sama dengan semprot terakhir ('+ref+')';
+        notes.push('Jeda minimum obat ini belum diisi, jadi dinilai dari urutan saja.');
+      }
+    } else if(found.i===1){
+      lvl='warn';
+      txt=lab+' sama dengan 2 semprot sebelumnya ('+ref+')';
+      if(jeda) notes.push('Selang '+gap+' hari, sudah lewat jeda minimum '+jeda+' hari.');
+    } else {
+      lvl='good';
+      txt='Beda dari 2 semprot terakhir ('+lab+' terakhir dipakai '+ref+', '+gap+' hari lalu)';
+    }
+
+    if((lvl==='bad'||lvl==='warn') && sis==='FRAC'){
+      found.hits.forEach(function(h){
+        const rt=RISIKO_TINGGI.FRAC[h.grp];
+        if(rt) notes.push('FRAC '+h.grp+' ('+rt+') berisiko resistensi tinggi, batasi pemakaian berurutan.');
+      });
+    }
+    if(partial && lvl==='good') txt+=' (ada semprot sebelumnya tanpa kode)';
+    return { lvl:lvl, txt:txt, notes:notes };
   }
 
   function eventsFor(gh, sis){
@@ -909,11 +956,11 @@
       const gh=combos[k][0], sis=combos[k][1];
       const evs=eventsFor(gh,sis);
       evs.forEach(function(ev,idx){
-        const prev=[evs[idx-1]||null, evs[idx-2]||null];
-        const gap=prev[0] ? Math.round((new Date(ev.tanggal)-new Date(prev[0].tanggal))/86400000) : null;
+        const prevAll=evs.slice(0,idx).reverse();
+        const gap=prevAll[0] ? dayDiff(ev.tanggal, prevAll[0].tanggal) : null;
         ev.items.forEach(function(it){
-          const a=assess(sis,it.codes,prev);
-          const r={ tanggal:ev.tanggal, gh:gh, sis:sis, nama:it.nama, kode:it.codes.map(function(c){ return c.raw; }).join(' + '), gap:gap, lvl:a.lvl, txt:a.txt, id:it.id };
+          const a=assess(sis,it.codes,prevAll,ev.tanggal,it.nama);
+          const r={ tanggal:ev.tanggal, gh:gh, sis:sis, nama:it.nama, kode:it.codes.map(function(c){ return c.raw; }).join(' + '), gap:gap, lvl:a.lvl, txt:a.txt, notes:a.notes||[], id:it.id };
           rows.push(r); map[it.id]=r;
         });
       });
@@ -928,11 +975,10 @@
     const gh=document.getElementById('usageGH').value;
     const tgl=document.getElementById('usageTanggal').value || new Date().toISOString().split('T')[0];
     const sis=sistemOf(nama, document.getElementById('usageJenis').value);
-    if(!sis) return { lvl:'none', txt:'Produk ini tidak masuk penilaian IRAC/FRAC (perekat, penunjang, atau herbisida).' };
+    if(!sis) return { lvl:'none', txt:'Produk ini tidak masuk penilaian IRAC/FRAC (perekat, penunjang, atau herbisida).', notes:[] };
     const m=getMaster(nama)||{};
-    const evs=eventsFor(gh,sis).filter(function(e){ return e.tanggal<tgl; });
-    const prev=[evs[evs.length-1]||null, evs[evs.length-2]||null];
-    return assess(sis,parseKode(m.kode),prev);
+    const prevAll=eventsFor(gh,sis).filter(function(e){ return e.tanggal<tgl; }).reverse();
+    return assess(sis,parseKode(m.kode),prevAll,tgl,nama);
   }
 
   function updateRotasiHint(){
@@ -941,7 +987,9 @@
     if(!r){ el.className='rotasi-hint'; el.innerHTML=''; return; }
     const st={ good:['#d1fae5','#065f46','🟢 Bagus'], warn:['#fef3c7','#92400e','🟡 Hati-hati'], bad:['#fee2e2','#b91c1c','🔴 Buruk'], na:['#f3f4f6','#4b5563','⚪ Kode kosong'], none:['#f3f4f6','#4b5563','ℹ️'] }[r.lvl];
     el.className='rotasi-hint show'; el.style.background=st[0]; el.style.color=st[1];
-    el.innerHTML='<b>'+st[2]+'</b> '+esc(r.txt)+((r.lvl==='bad'||r.lvl==='warn')?'<br><span style="opacity:.85">Ini saran saja, keputusan tetap di kamu.</span>':'');
+    el.innerHTML='<b>'+st[2]+'</b> '+esc(r.txt)+
+      (r.notes||[]).map(function(n){ return '<br>• '+esc(n); }).join('')+
+      ((r.lvl==='bad'||r.lvl==='warn')?'<br><span style="opacity:.85">Ini saran saja, keputusan tetap di kamu.</span>':'');
   }
 
   function renderIrac(){
@@ -991,7 +1039,7 @@
             '<td class="tc">'+(r.kode?'<span class="badge '+(r.sis==='FRAC'?'badge-frac':'badge-irac')+'">'+esc(r.kode)+'</span>':'-')+'</td>'+
             '<td class="tc">'+(r.gap==null?'-':r.gap+' hr')+'</td>'+
             '<td class="tc"><span class="rot '+l[0]+'">'+l[1]+'</span></td>'+
-            '<td style="min-width:200px;white-space:normal">'+esc(r.txt)+'</td></tr>';
+            '<td style="min-width:220px;white-space:normal">'+esc(r.txt)+(r.notes||[]).map(function(n){ return '<div class="sub" style="font-size:0.72rem">• '+esc(n)+'</div>'; }).join('')+'</td></tr>';
         }).join('')+'</tbody></table></div>'+(rows.length>shown.length?'<div class="muted" style="font-size:11px;margin-top:6px">Menampilkan '+shown.length+' dari '+rows.length+' baris terbaru.</div>':'')+'</div>'
       : '<div class="empty">Belum ada data penyemprotan insektisida/akarisida/fungisida di rentang ini.</div>';
   }
@@ -1003,11 +1051,13 @@
     if(ba===null) return;
     const kd=prompt('Kode IRAC/FRAC '+p.nama+'\n(contoh: 6   atau   11 + 3   atau   23 + 4A)', p.kode||'');
     if(kd===null) return;
-    p.bahanAktif=ba.trim(); p.kode=kd.trim();
+    const jd=prompt('Jeda minimum semprot ulang '+p.nama+' (hari)\n(kosongkan atau 0 kalau belum ditentukan)', p.jeda||'');
+    if(jd===null) return;
+    p.bahanAktif=ba.trim(); p.kode=kd.trim(); p.jeda=parseInt(jd,10)||0;
     lsSet('pestisida_list', JSON.stringify(pestisidaList));
     markDirty('list');
     renderPestisidaList();
-    showToast('✓ Kode disimpan','ok');
+    showToast('✓ Tersimpan','ok');
   }
 
   function fillKodeRef(){
@@ -1018,6 +1068,7 @@
       let ch=false;
       if(!p.bahanAktif && r.ba){ p.bahanAktif=r.ba; ch=true; }
       if(!p.kode && r.kode){ p.kode=r.kode; ch=true; }
+      if(!p.jeda && r.jeda){ p.jeda=r.jeda; ch=true; }
       if(ch) n++;
     });
     if(!n){ showToast('Tidak ada produk kosong yang cocok dengan referensi','info'); return; }
@@ -1104,9 +1155,10 @@
         const oldById={}; pestisidaList.forEach(o=>{ oldById[o.id]=o; });
         pestisidaList=data.list.map(p=>{
           const o=oldById[p.id]||{};
-          const q=Object.assign({stokAwal:0,isi:'',kategori:'Lainnya',bahanAktif:'',kode:''},p);
+          const q=Object.assign({stokAwal:0,isi:'',kategori:'Lainnya',bahanAktif:'',kode:'',jeda:0},p);
           if(!q.bahanAktif && o.bahanAktif){ q.bahanAktif=o.bahanAktif; keptLocal=true; }
           if(!q.kode && o.kode){ q.kode=o.kode; keptLocal=true; }
+          if(!q.jeda && o.jeda){ q.jeda=o.jeda; keptLocal=true; }
           return q;
         }); 
         lsSet('pestisida_list',JSON.stringify(pestisidaList)); 
@@ -1128,7 +1180,7 @@
   function exportCSV(type) {
     let data, fn;
     if(type==='list'){
-      data=pestisidaList.map(p=>({nama:p.nama,kategori:p.kategori||'Lainnya',isi:p.isi,satuan:p.satuan,bahanAktif:p.bahanAktif||'',kode:p.kode||'',totalMasuk:getTotalMasuk(p.nama),stokSaatIni:getStokSekarang(p.nama)}));
+      data=pestisidaList.map(p=>({nama:p.nama,kategori:p.kategori||'Lainnya',isi:p.isi,satuan:p.satuan,bahanAktif:p.bahanAktif||'',kode:p.kode||'',jeda:p.jeda||0,totalMasuk:getTotalMasuk(p.nama),stokSaatIni:getStokSekarang(p.nama)}));
       fn='daftar-pestisida.csv';
     } else if(type==='inventory'){
       const saldo={}; pestisidaList.forEach(p=>saldo[p.nama]=parseFloat(p.stokAwal)||0);
@@ -1146,7 +1198,7 @@
   const IMPORT_CONFIGS = {
     list: {
       title: '📥 Import Daftar Pestisida',
-      hint: 'Kolom: Nama, Kategori, Isi, Satuan, Stok Awal, Bahan Aktif, Kode IRAC/FRAC',
+      hint: 'Kolom: Nama, Kategori, Isi, Satuan, Stok Awal, Bahan Aktif, Kode IRAC/FRAC, Jeda (hari)',
       columns: [
         { key: 'nama',     label: 'Nama',      required: true },
         { key: 'kategori', label: 'Kategori',  default: 'Lainnya' },
@@ -1154,9 +1206,10 @@
         { key: 'satuan',   label: 'Satuan',    default: 'ML' },
         { key: 'stokAwal', label: 'Stok Awal', type: 'number', default: 0 },
         { key: 'bahanAktif', label: 'Bahan Aktif' },
-        { key: 'kode',       label: 'Kode IRAC/FRAC' }
+        { key: 'kode',       label: 'Kode IRAC/FRAC' },
+        { key: 'jeda',       label: 'Jeda (hari)', type: 'number', default: 0 }
       ],
-      contoh: { nama: 'Matador', kategori: 'Insektisida', isi: 250, satuan: 'ML', stokAwal: 10, bahanAktif: 'Abamektin', kode: '6' }
+      contoh: { nama: 'Matador', kategori: 'Insektisida', isi: 250, satuan: 'ML', stokAwal: 10, bahanAktif: 'Abamektin', kode: '6', jeda: 14 }
     },
     inventory: {
       title: '📥 Import Mutasi Stok',
@@ -1517,7 +1570,8 @@
           satuan: r.satuan || 'ML',
           stokAwal: parseFloat(r.stokAwal) || 0,
           bahanAktif: r.bahanAktif || '',
-          kode: r.kode || ''
+          kode: r.kode || '',
+          jeda: parseInt(r.jeda,10) || 0
         });
         imported++;
       });
