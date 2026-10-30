@@ -799,7 +799,7 @@
     'merivon':       { ba:'Fluksapiroksad + Piraklostrobin', kode:'7 + 11' },
     'movento':       { ba:'Spirotetramat', kode:'23' },
     'oberon':        { ba:'Spiromesifen', kode:'23' },
-    'oberon speed':  { ba:'Spiromesifen + Tiakloprid', kode:'23 + 4A' },
+    'oberon speed':  { ba:'Abamektin + Spiromesifen', kode:'6 + 23' },
     'orondis opti':  { ba:'Oksatiapiprolin + Klorotalonil', kode:'49 + M5' },
     'prevathon':     { ba:'Klorantraniliprol', kode:'28' },
     'ridomil gold':  { ba:'Metalaksil-M + Mankozeb', kode:'4 + M3' },
@@ -807,7 +807,16 @@
     'pegasus':       { ba:'Diafentiuron', kode:'12A' },
     'curacron':      { ba:'Profenofos', kode:'1B' },
     'bion m':        { ba:'Asibenzolar-S-metil + Mankozeb', kode:'P1 + M3' },
-    'gracia':        { ba:'Fluksametamid', kode:'30' }
+    'gracia':        { ba:'Fluksametamid', kode:'30' },
+    'atoza':         { ba:'Etoksazol', kode:'10B' },
+    'agus':          { ba:'Diafentiuron', kode:'12A' },
+    'bulfidor':      { ba:'Beta-siflutrin + Imidakloprid', kode:'3A + 4A' },
+    'toxiput':       { ba:'Metaldehida', kode:'' },
+    'azza':          { ba:'Karbendazim + Klorotalonil', kode:'1 + M5' },
+    'simodis':       { ba:'Isosikloseram', kode:'30' },
+    'endure':        { ba:'Spinetoram', kode:'5' },
+    'round up':      { ba:'Glifosat isopropilamina', kode:'' },
+    'agristik':      { ba:'Alkilaril poliglikol eter 400 g/l', kode:'' }
   };
 
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -1007,8 +1016,8 @@
       const r=KODE_REF[String(p.nama).trim().toLowerCase()];
       if(!r) return;
       let ch=false;
-      if(!p.bahanAktif){ p.bahanAktif=r.ba; ch=true; }
-      if(!p.kode){ p.kode=r.kode; ch=true; }
+      if(!p.bahanAktif && r.ba){ p.bahanAktif=r.ba; ch=true; }
+      if(!p.kode && r.kode){ p.kode=r.kode; ch=true; }
       if(ch) n++;
     });
     if(!n){ showToast('Tidak ada produk kosong yang cocok dengan referensi','info'); return; }
