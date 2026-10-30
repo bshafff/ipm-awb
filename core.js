@@ -1,7 +1,7 @@
 // core.js — Welcome, Auto-Connect, Auto-Update
 const DEFAULT_URLS = {
   hpt:       'https://script.google.com/macros/s/AKfycbyOtfKILBzOP_i7w9kTj0-tsJEQmhkW_tnmpF0MMdnRTlDDEctQ12uejKjR8Sbw0j4WTw/exec',
-  pestisida: 'https://script.google.com/macros/s/AKfycbzjGyCXZW9xnsa8mIc1_sybWYXe5b01SegIV7F4zgCqJtkLp7yoPDd3GtrMfhs6tJcA/exec',
+  pestisida: 'https://script.google.com/macros/s/AKfycbwrRcfT2V7qp_1oso5QTkgl6F6uin5M5_iVpUXa3YrjdB_3kdu65WwNWCafMBB7viTL/exec',
   suhu:      'https://script.google.com/macros/s/AKfycbzLqgDZHfeAjYZK88SupPa3LJs-39_8hsGDgzwmDRiiUdXUobhDUwVdqI1vYNpnd4EaxQ/exec'
 };
 
