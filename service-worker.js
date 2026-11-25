@@ -1,5 +1,5 @@
 /* AWB Apps — Service Worker v13 */
-const CACHE_NAME = 'awb-apps-v24'; // Naikkan versi agar browser memuat SW baru
+const CACHE_NAME = 'awb-apps-v25'; // Naikkan versi agar browser memuat SW baru
 
 const PRECACHE = [
   './',
@@ -8,11 +8,13 @@ const PRECACHE = [
   './pestisida.html',
   './suhu.html',
   './analisis.html',
-  './cm.html', // <-- TAMBAHKAN INI
+  './cm.html',
+  './laporan.html',
   './outbox.js',
   './core.js',
   'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
   './manifest.json',
   './LOGO_AWB.png',
   './icon-192.png',

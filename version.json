@@ -1,5 +1,5 @@
 {
-  "version": "1.4.4",
-  "released": "2026-10-30",
-    "notes": "Pestisida: URL otomatis dari core.js, IRAC/FRAC + jeda"
+  "version": "1.5.0",
+  "released": "2026-11-26",
+  "notes": "Laporan Manajemen IPM (mingguan/bulanan, simpan gambar WA)"
 }

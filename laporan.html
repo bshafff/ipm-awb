@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2d4a14">
+<title>Laporan Manajemen IPM - PT. Agri Wangi Berry</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="./core.js"></script>
+<style>
+:root{--p:#2d4a14;--bg:#f0f0ee;--card:#fff;--bd:#d8d8d0;--tx:#1a1a18;--mu:#666;--ok:#16a34a;--bad:#dc2626;--mid:#d97706}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--tx);line-height:1.45;font-size:14px;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+header{background:linear-gradient(135deg,#3f6b1e,#2d4a14);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 14px 14px}
+header a{color:#fff;text-decoration:none;font-size:13px;opacity:.9}
+header h1{font-size:18px;margin:4px 0 2px}
+header p{font-size:12px;opacity:.9}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{font-size:11px;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.2)}
+.chip.x{background:#fee2e2;color:#991b1b}
+.wrap{max-width:900px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px}
+.fl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+label{display:block;font-size:11px;font-weight:700;color:var(--mu);margin-bottom:2px}
+select,input{width:100%;padding:9px;border:1px solid var(--bd);border-radius:8px;font-size:14px;background:#fff}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button{background:var(--p);color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer}
+button.sec{background:#e5e7eb;color:#1a1a18}
+button:disabled{opacity:.6}
+
+/* ===== LAPORAN (area yang jadi gambar) ===== */
+#rptWrap{background:var(--bg)}
+#rptWrap:fullscreen{overflow:auto;padding:16px}
+#rpt{background:#f8fafc;border-radius:12px;overflow:hidden;max-width:860px;margin:0 auto;border:1px solid var(--bd)}
+.rh{background:#2d4a14;color:#fff;padding:20px 16px 12px}
+.rh .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.rh h2{font-size:20px}
+.rh .per{font-size:12px;color:#bbf7d0;margin-top:3px}
+.rh .co{font-size:12px;font-weight:700;color:#bbf7d0;white-space:nowrap}
+.rh hr{border:0;border-top:1px solid #86efac;margin-top:10px}
+.rb{padding:10px}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:10px}
+.k{background:#fff;border:1px solid var(--bd);border-top:3px solid #2d4a14;border-radius:8px;padding:9px 10px}
+.k.bad{border-top-color:#dc2626}.k.mid{border-top-color:#d97706}
+.k small{display:block;font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.4px}
+.k b{display:block;font-size:24px;line-height:1.2;margin:2px 0}
+.k b.bad{color:#dc2626}.k b.ok{color:#14532d}
+.k .s{font-size:11px;color:#475569}
+.up{color:#dc2626;font-weight:600}.dn{color:#16a34a;font-weight:600}.eq{color:#64748b}
+.bx{background:#fff;border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:10px}
+.bx h3{font-size:13px;color:#14532d;margin-bottom:8px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:6px 8px;border-bottom:1px solid #eee;text-align:right}
+th{background:#f1f5f9;font-size:10px;color:#64748b;font-weight:700}
+th:first-child,td:first-child{text-align:left;color:#475569}
+td.t{font-weight:700;color:#000}
+td.r{color:#dc2626;font-weight:700}
+td.z{color:#94a3b8}
+tr.sub td{background:#f8fafc;font-weight:700;font-size:11px;color:#14532d;text-align:left}
+.note{font-size:10px;color:#64748b;margin-top:6px}
+.cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.cg h4{font-size:11px;margin-bottom:4px}
+.cv{position:relative;height:200px}
+ul.ins{padding-left:18px;font-size:12px}ul.ins li{margin-bottom:3px}
+.empty{padding:14px;text-align:center;color:#64748b;font-size:12px}
+.foot{font-size:10px;color:#94a3b8;text-align:center;padding:4px 0 8px}
+</style>
+</head>
+<body>
+<header>
+  <a href="./index.html">‹ Portal IPM</a>
+  <h1>📋 Laporan Manajemen</h1>
+  <p>Ringkasan scouting, penyemprotan, suhu/RH & CM · siap kirim ke WA</p>
+  <div class="chips" id="chips"></div>
+</header>
+<div class="wrap">
+  <div class="card">
+    <div class="fl">
+      <div><label>Periode</label><select id="fMode"><option value="w">Mingguan (Senin–Sabtu)</option><option value="m">Bulanan</option></select></div>
+      <div><label>Tanggal di periode tsb</label><input type="date" id="fDate"></div>
+      <div><label>Target maks serangan (%)</label><input type="number" id="fTgt" value="3" min="0" step="0.5" inputmode="decimal"></div>
+    </div>
+    <div class="btns">
+      <button id="bShare" onclick="shareImg()">📷 Simpan / Kirim Gambar (WA)</button>
+      <button class="sec" onclick="fs()">🖥️ Layar Penuh</button>
+      <button class="sec" onclick="load()">🔄 Muat ulang</button>
+    </div>
+  </div>
+
+  <div id="rptWrap"><div id="rpt">
+    <div class="rh"><div class="row"><div><h2>Laporan Kinerja IPM</h2><div class="per" id="rPer"></div></div><div class="co">PT. Agri Wangi Berry</div></div><hr></div>
+    <div class="rb" id="rBody"><div class="empty">Memuat data…</div></div>
+    <div class="foot" id="rFoot"></div>
+  </div></div>
+</div>
+
+<script>
+const HPT_URL=()=>(LS('hpt_script_url')||DEFAULT_URLS.hpt), DAY=864e5, $=id=>document.getElementById(id);
+const PEST={spidermites:'Spidermites',aphids:'Aphids',thrips:'Thrips',ulat:'Ulat',kutu:'Kutu Kebul',mildew:'Mildew',botrytis:'Botrytis',antrak:'Antraknosa',layu:'Layu Mati'};
+const PK=Object.keys(PEST), HRS=['06','09','12','15'], GHS=['GH1','GH2'];
+const BLN=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+function LS(k){try{return localStorage.getItem(k)||''}catch(e){return ''}}
+const U=s=>{const[p,q,r]=s.split('-').map(Number);return Date.UTC(p,q-1,r)}, iso=ms=>new Date(ms).toISOString().slice(0,10);
+const nd=s=>{s=String(s||'').trim();if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;if(/^\d{4}-\d{2}-\d{2}T/.test(s))return iso(new Date(s).getTime()+7*36e5);const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);return m?m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0'):''};
+const nv=v=>(v===''||v==null||isNaN(v))?null:+v;
+const mean=a=>{a=a.filter(x=>x!=null&&!isNaN(x));return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
+const f=(v,d=1)=>v==null?'–':v.toFixed(d).replace('.',',');
+const sg=(v,d=1)=>v==null?'–':(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(d).replace('.',',');
+const gk=s=>String(s||'').replace(/\s/g,'').toUpperCase();
+const dlabel=d=>{const[y,m,x]=d.split('-').map(Number);return x+' '+BLN[m-1]+' '+y};
+let SC={},WX={},SP=[],CM={},ST={},charts={};
+
+async function jget(u){const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);try{const r=await fetch(u,{redirect:'follow',signal:c.signal});const j=JSON.parse(await r.text());if(j&&j.error)throw new Error(j.error);return j}finally{clearTimeout(t)}}
+
+async function load(){
+  ST={};
+  // Scouting HPT
+  try{let j;try{j=await jget(HPT_URL()+'?action=list');try{localStorage.setItem('ana_hpt_cache',JSON.stringify(j))}catch(x){}}catch(x){j=JSON.parse(LS('ana_hpt_cache')||'null');if(!j)throw x;ST.off=1}
+    const agg={};Object.keys(j).forEach(loc=>{const g=gk(loc.split('-')[0]);agg[g]=agg[g]||{};
+      (j[loc]||[]).forEach(it=>{const d=nd(it.date);if(!d)return;const o=agg[g][d]=agg[g][d]||{n:0,s:{}};o.n++;PK.forEach(k=>o.s[k]=(o.s[k]||0)+(+it[k]||0))})});
+    SC={};Object.keys(agg).forEach(g=>SC[g]=Object.keys(agg[g]).sort().map(d=>{const o=agg[g][d],v={};PK.forEach(k=>v[k]=o.s[k]/o.n*100);return{d,ms:U(d),v}}));
+    ST.s='Scouting'+(ST.off?' (data terakhir)':'');
+  }catch(e){SC={}}
+  // Pestisida
+  try{const u=LS('pestisida_script_url')||DEFAULT_URLS.pestisida;SP=(await jget(u+'?action=getAll')).usage||[];ST.p='Pestisida'}
+  catch(e){SP=[];try{SP=JSON.parse(LS('pestisida_usage')||'[]')}catch(x){}if(SP.length)ST.p='Pestisida (lokal)'}
+  // Suhu
+  try{const u=LS('suhu_url')||DEFAULT_URLS.suhu;const j=await jget(u);WX={};GHS.forEach(g=>{WX[g]={};(j[g]||[]).forEach(r=>{const d=nd(r.tanggal);if(d)WX[g][d]=r})});ST.w='Suhu & RH'}
+  catch(e){try{WX=JSON.parse(LS('suhu_cache')||'{}')}catch(x){WX={}}if(Object.values(WX).some(o=>o&&Object.keys(o).length))ST.w='Suhu & RH (lokal)'}
+  // CM
+  try{CM=await jget(HPT_URL()+'?action=getCM');ST.c='CM'}
+  catch(e){try{CM=JSON.parse(LS('cm_cache')||'{}')}catch(x){CM={}}if(Object.keys(CM).length)ST.c='CM (lokal)'}
+  $('chips').innerHTML=[['s','Scouting'],['p','Pestisida'],['w','Suhu & RH'],['c','CM']].map(([k,n])=>ST[k]?`<span class="chip">✓ ${ST[k]}</span>`:`<span class="chip x">✗ ${n} belum tersambung</span>`).join('');
+  if(!$('fDate').value)$('fDate').value=iso(Date.now()+7*36e5);
+  run();
+}
+
+/* ---------- periode ---------- */
+function range(mode,d,shift){
+  const ms=U(d);
+  if(mode==='w'){const dow=new Date(ms).getUTCDay(),mon=ms-((dow+6)%7)*DAY+shift*7*DAY;return[iso(mon),iso(mon+5*DAY)]}
+  const dt=new Date(ms),y=dt.getUTCFullYear(),m=dt.getUTCMonth()+shift;
+  return[iso(Date.UTC(y,m,1)),iso(Date.UTC(y,m+1,0))];
+}
+function days(a,b){const L=[];for(let m=U(a);m<=U(b);m+=DAY)L.push(iso(m));return L}
+function wd(g,d){const r=(WX[g]||{})[d];if(!r)return null;return{t:mean(HRS.map(h=>nv(r['t'+h]))),rh:mean(HRS.map(h=>nv(r['rh'+h])))}}
+
+/* ---------- statistik per GH ---------- */
+function stats(g,a,b){
+  const sc=(SC[g]||[]).filter(x=>x.d>=a&&x.d<=b);
+  const p={};PK.forEach(k=>p[k]=mean(sc.map(x=>x.v[k])));
+  const mx=mean(sc.map(x=>Math.max(...PK.map(k=>x.v[k]))));
+  const sp=SP.filter(u=>gk(u.gh)===g&&nd(u.tanggal)>=a&&nd(u.tanggal)<=b);
+  const W=days(a,b).map(d=>wd(g,d)).filter(Boolean);
+  const cmList=[];Object.keys(CM).filter(d=>d>=a&&d<=b).sort().forEach(d=>{Object.keys(CM[d]||{}).forEach(x=>{if(gk(x)===g)cmList.push({d,...CM[d][x]})})});
+  const cm=cmList.length?cmList[cmList.length-1]:null;
+  return{n:sc.length,p,mx,sp,spN:sp.length,open:sp.reduce((s,u)=>s+(+u.bukaObatBaru||0),0),
+    t:mean(W.map(w=>w.t)),rh:mean(W.map(w=>w.rh)),rhHi:W.filter(w=>w.rh!=null&&w.rh>=85).length,wn:W.length,cm};
+}
+function combine(A,B){
+  const p={};PK.forEach(k=>p[k]=mean([A.p[k],B.p[k]]));
+  return{n:A.n+B.n,p,mx:mean([A.mx,B.mx]),sp:A.sp.concat(B.sp),spN:A.spN+B.spN,open:A.open+B.open,
+    t:mean([A.t,B.t]),rh:mean([A.rh,B.rh]),rhHi:A.rhHi+B.rhHi,wn:A.wn+B.wn,
+    cm:(A.cm||B.cm)?{popUpdate:(A.cm?+A.cm.popUpdate||0:0)+(B.cm?+B.cm.popUpdate||0:0)}:null};
+}
+function dlt(cur,prev,lowerBetter=true,d=2,unit=' poin'){
+  if(cur==null||prev==null)return'';
+  const x=cur-prev;if(Math.abs(x)<Math.pow(10,-d)/2)return'<span class="eq">▬ sama dgn sebelumnya</span>';
+  const bad=lowerBetter?x>0:x<0;
+  return`<span class="${bad?'up':'dn'}">${x>0?'▲':'▼'} ${f(Math.abs(x),d)}${unit}</span> vs sebelumnya`;
+}
+
+/* ---------- render ---------- */
+function run(){
+  const mode=$('fMode').value,d=$('fDate').value,T=parseFloat($('fTgt').value);const tgt=isNaN(T)?3:T;
+  if(!d)return;
+  const[a,b]=range(mode,d,0),[pa,pb]=range(mode,d,-1);
+  $('rPer').textContent=(mode==='w'?'Mingguan':'Bulanan')+' · '+dlabel(a)+' – '+dlabel(b);
+  $('rFoot').textContent='Dibuat '+dlabel(iso(Date.now()+7*36e5))+' · Sumber: Monitoring HPT, Pestisida, Suhu & RH, CM';
+  const S={},P={};GHS.forEach(g=>{S[g]=stats(g,a,b);P[g]=stats(g,pa,pb)});
+  const SG=combine(S.GH1,S.GH2),PG=combine(P.GH1,P.GH2);
+  if(!SG.n&&!SG.spN&&SG.wn===0){$('rBody').innerHTML='<div class="empty">Belum ada data di periode ini. Pastikan Sheets sudah tersambung di menu Monitoring HPT / Pestisida / Suhu, atau pilih tanggal lain.</div>';Object.keys(charts).forEach(kill);return}
+
+  // KPI
+  const rank=PK.filter(k=>SG.p[k]!=null).sort((x,y)=>SG.p[y]-SG.p[x]),top=rank[0];
+  const over=PK.filter(k=>SG.p[k]!=null&&SG.p[k]>tgt);
+  const k1=top?`<div class="k ${SG.p[top]>tgt?'bad':''}"><small>Serangan tertinggi</small><b class="${SG.p[top]>tgt?'bad':'ok'}">${f(SG.p[top],2)}%</b><div class="s">${PEST[top]} · ${SG.p[top]>tgt?'✗ di atas':'✓ di bawah'} target ≤ ${f(tgt,1)}%</div><div class="s">${dlt(SG.p[top],PG.p[top])}</div></div>`
+    :`<div class="k"><small>Serangan tertinggi</small><b>–</b><div class="s">Belum ada scouting</div></div>`;
+  const k2=`<div class="k ${over.length?'bad':''}"><small>Hama di atas target</small><b class="${over.length?'bad':'ok'}">${over.length} <span style="font-size:13px;font-weight:600">dari ${PK.length}</span></b><div class="s">${over.length?over.map(k=>PEST[k]).join(', '):'Semua terkendali'}</div><div class="s">${SG.n} hari-scouting (GH1 ${S.GH1.n} · GH2 ${S.GH2.n})</div></div>`;
+  const k3=`<div class="k"><small>Penyemprotan</small><b>${SG.spN} <span style="font-size:13px;font-weight:600">kali</span></b><div class="s">${SG.open} obat dibuka baru</div><div class="s">${dlt(SG.spN,PG.spN,false,0,' kali')}</div></div>`;
+  const k4=`<div class="k ${SG.rhHi?'mid':''}"><small>Suhu / RH rata-rata</small><b>${f(SG.t,1)}°C <span style="font-size:15px">· ${f(SG.rh,0)}%</span></b><div class="s">${SG.rhHi} hari RH ≥ 85% (risiko penyakit)</div><div class="s">${dlt(SG.rh,PG.rh,true,0,'% RH')}</div></div>`;
+
+  // Tabel
+  const cell=(v,k)=>v==null?'<td class="z">–</td>':`<td class="${v>tgt?'r':v===0?'z':''}">${f(v,2)}%</td>`;
+  const rows=PK.map(k=>`<tr><td>${PEST[k]}</td>${cell(S.GH1.p[k])}${cell(S.GH2.p[k])}${SG.p[k]==null?'<td class="z">–</td>':`<td class="${SG.p[k]>tgt?'r':'t'}">${f(SG.p[k],2)}%</td>`}</tr>`).join('');
+  const tbl=`<div class="bx"><h3>Perbandingan GH 1 vs GH 2</h3><table>
+    <tr><th></th><th>GH 1</th><th>GH 2</th><th>Gabungan</th></tr>
+    <tr class="sub"><td colspan="4">Rata-rata serangan per hama/penyakit (scouting)</td></tr>${rows}
+    <tr><td>Serangan maks (rata-rata harian)</td>${cell(S.GH1.mx)}${cell(S.GH2.mx)}<td class="t">${f(SG.mx,2)}%</td></tr>
+    <tr><td>Hari scouting</td><td>${S.GH1.n}</td><td>${S.GH2.n}</td><td class="t">${SG.n}</td></tr>
+    <tr class="sub"><td colspan="4">Penyemprotan</td></tr>
+    <tr><td>Penyemprotan (kali)</td><td>${S.GH1.spN}</td><td>${S.GH2.spN}</td><td class="t">${SG.spN}</td></tr>
+    <tr><td>Obat dibuka baru</td><td>${S.GH1.open}</td><td>${S.GH2.open}</td><td class="t">${SG.open}</td></tr>
+    <tr class="sub"><td colspan="4">Iklim mikro</td></tr>
+    <tr><td>Suhu rata-rata (°C)</td><td>${f(S.GH1.t)}</td><td>${f(S.GH2.t)}</td><td class="t">${f(SG.t)}</td></tr>
+    <tr><td>RH rata-rata (%)</td><td>${f(S.GH1.rh,0)}</td><td>${f(S.GH2.rh,0)}</td><td class="t">${f(SG.rh,0)}</td></tr>
+    <tr><td>Hari RH ≥ 85%</td><td class="${S.GH1.rhHi?'r':''}">${S.GH1.rhHi}</td><td class="${S.GH2.rhHi?'r':''}">${S.GH2.rhHi}</td><td class="t">${SG.rhHi}</td></tr>
+    <tr class="sub"><td colspan="4">Cyclamen Mite (update terakhir di periode)</td></tr>
+    <tr><td>Populasi CM</td><td>${S.GH1.cm?f(+S.GH1.cm.popUpdate,0):'–'}</td><td>${S.GH2.cm?f(+S.GH2.cm.popUpdate,0):'–'}</td><td class="t">${SG.cm?f(SG.cm.popUpdate,0):'–'}</td></tr>
+    ${(S.GH1.cm&&S.GH1.cm.tindakan)||(S.GH2.cm&&S.GH2.cm.tindakan)?`<tr><td>Tindakan CM</td><td style="font-size:10px">${S.GH1.cm&&S.GH1.cm.tindakan||'–'}</td><td style="font-size:10px">${S.GH2.cm&&S.GH2.cm.tindakan||'–'}</td><td></td></tr>`:''}
+  </table><p class="note">Sel merah = rata-rata di atas target ${f(tgt,1)}%. Gabungan = rata-rata GH 1 dan GH 2. Perbandingan "sebelumnya" memakai ${mode==='w'?'minggu':'bulan'} sebelumnya (${dlabel(pa)} – ${dlabel(pb)}).</p></div>`;
+
+  // Penyemprotan
+  const spRows=SG.sp.slice().sort((x,y)=>nd(y.tanggal).localeCompare(nd(x.tanggal))).slice(0,12);
+  const spT=`<div class="bx"><h3>Penyemprotan periode ini</h3>${spRows.length?`<table><tr><th>Tgl</th><th>GH</th><th>Obat</th><th>Sasaran</th><th>Konsentrasi</th><th>Vol air (L)</th></tr>${spRows.map(u=>`<tr><td>${nd(u.tanggal).slice(5)}</td><td style="text-align:left">${gk(u.gh)}</td><td style="text-align:left">${u.namaObat||'?'}</td><td style="text-align:left">${u.sasaran||u.jenisPenyemprotan||'–'}</td><td>${u.konsentrasi||'–'}</td><td>${u.volAirBaku||'–'}</td></tr>`).join('')}</table>${SG.sp.length>12?`<p class="note">Menampilkan 12 terbaru dari ${SG.sp.length}.</p>`:''}`:'<div class="empty">Tidak ada penyemprotan tercatat.</div>'}</div>`;
+
+  // Catatan otomatis
+  const L=[];
+  const rise=PK.filter(k=>SG.p[k]!=null&&PG.p[k]!=null&&SG.p[k]-PG.p[k]>=0.5).sort((x,y)=>(SG.p[y]-PG.p[y])-(SG.p[x]-PG.p[x]));
+  const fall=PK.filter(k=>SG.p[k]!=null&&PG.p[k]!=null&&PG.p[k]-SG.p[k]>=0.5).sort((x,y)=>(PG.p[y]-SG.p[y])-(PG.p[x]-SG.p[x]));
+  if(rise.length)L.push('Naik dibanding sebelumnya: '+rise.slice(0,3).map(k=>`<b>${PEST[k]}</b> (${sg(SG.p[k]-PG.p[k],2)} poin)`).join(', '));
+  if(fall.length)L.push('Turun dibanding sebelumnya: '+fall.slice(0,3).map(k=>`<b>${PEST[k]}</b> (${sg(SG.p[k]-PG.p[k],2)} poin)`).join(', '));
+  if(S.GH1.mx!=null&&S.GH2.mx!=null&&Math.abs(S.GH1.mx-S.GH2.mx)>=1)L.push(`<b>${S.GH1.mx>S.GH2.mx?'GH 1':'GH 2'}</b> lebih tinggi serangannya (${f(Math.max(S.GH1.mx,S.GH2.mx),2)}% vs ${f(Math.min(S.GH1.mx,S.GH2.mx),2)}%)`);
+  if(SG.rhHi>0)L.push(`RH ≥ 85% terjadi ${SG.rhHi} hari-GH — waspada Mildew/Botrytis`);
+  if(SG.cm&&SG.cm.popUpdate>0)L.push(`Populasi Cyclamen Mite terakhir: <b>${f(SG.cm.popUpdate,0)}</b>`);
+  const ins=`<div class="bx"><h3>Catatan otomatis</h3>${L.length?'<ul class="ins">'+L.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'<div class="empty">Tidak ada perubahan berarti.</div>'}</div>`;
+
+  const trend=`<div class="bx"><h3>Tren</h3><div class="cg"><div><h4>Serangan maks per hari (%)</h4><div class="cv"><canvas id="c1"></canvas></div></div><div><h4>Suhu (°C) & RH (%) per hari</h4><div class="cv"><canvas id="c2"></canvas></div></div></div></div>`;
+
+  $('rBody').innerHTML=`<div class="kp">${k1}${k2}${k3}${k4}</div>${tbl}${trend}${ins}${spT}`;
+  draw(a,b,tgt);
+}
+
+function kill(id){if(charts[id]){charts[id].destroy();delete charts[id]}}
+function draw(a,b,tgt){
+  const L=days(a,b);kill('c1');kill('c2');
+  const mx=g=>{const m={};(SC[g]||[]).forEach(x=>m[x.d]=Math.max(...PK.map(k=>x.v[k])));return L.map(d=>m[d]??null)};
+  const common={responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}}};
+  charts.c1=new Chart($('c1'),{type:'line',data:{labels:L.map(d=>d.slice(8)+'/'+d.slice(5,7)),datasets:[
+    {label:'GH 1',data:mx('GH1'),borderColor:'#2563eb',backgroundColor:'#2563eb',spanGaps:true,pointRadius:3,borderWidth:2,tension:.15},
+    {label:'GH 2',data:mx('GH2'),borderColor:'#16a34a',backgroundColor:'#16a34a',spanGaps:true,pointRadius:3,borderWidth:2,tension:.15},
+    {label:'Target '+f(tgt,1)+'%',data:L.map(()=>tgt),borderColor:'#dc2626',borderDash:[5,4],pointRadius:0,borderWidth:1.5}]},
+    options:{...common,scales:{y:{beginAtZero:true,ticks:{font:{size:10}}},x:{ticks:{font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:10}}}}});
+  const wv=(g,k)=>L.map(d=>{const w=wd(g,d);return w?w[k]:null});
+  charts.c2=new Chart($('c2'),{type:'line',data:{labels:L.map(d=>d.slice(8)+'/'+d.slice(5,7)),datasets:[
+    {label:'Suhu GH1',data:wv('GH1','t'),borderColor:'#f59e0b',yAxisID:'y',pointRadius:2,borderWidth:2,spanGaps:true},
+    {label:'Suhu GH2',data:wv('GH2','t'),borderColor:'#b45309',yAxisID:'y',pointRadius:2,borderWidth:2,spanGaps:true},
+    {label:'RH GH1',data:wv('GH1','rh'),borderColor:'#38bdf8',yAxisID:'y2',pointRadius:2,borderWidth:2,spanGaps:true},
+    {label:'RH GH2',data:wv('GH2','rh'),borderColor:'#0369a1',yAxisID:'y2',pointRadius:2,borderWidth:2,spanGaps:true}]},
+    options:{...common,scales:{y:{ticks:{font:{size:10}}},y2:{position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:10}}},x:{ticks:{font:{size:10},maxRotation:0,autoSkip:true,maxTicksLimit:10}}}}});
+}
+
+/* ---------- gambar & layar penuh ---------- */
+async function shareImg(){
+  const btn=$('bShare'),old=btn.textContent;btn.disabled=true;btn.textContent='⏳ Membuat gambar…';
+  try{
+    if(typeof html2canvas==='undefined')throw new Error('Library gambar belum termuat (cek koneksi).');
+    const cv=await html2canvas($('rpt'),{scale:2,backgroundColor:'#f8fafc',useCORS:true});
+    const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
+    const name='Laporan-IPM-AWB-'+($('fDate').value||'')+'.png',file=new File([blob],name,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Laporan Kinerja IPM'});return}catch(e){if(e&&e.name==='AbortError')return}}
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  }catch(e){alert('Gagal membuat gambar: '+e.message)}
+  finally{btn.disabled=false;btn.textContent=old}
+}
+function fs(){const el=$('rptWrap');(el.requestFullscreen||el.webkitRequestFullscreen||function(){alert('Layar penuh tidak didukung di perangkat ini.')}).call(el)}
+document.addEventListener('fullscreenchange',()=>{Object.values(charts).forEach(c=>c.resize())});
+
+['fMode','fDate','fTgt'].forEach(id=>$(id).addEventListener('change',run));
+$('fTgt').addEventListener('input',run);
+addEventListener('online',load);
+load();
+</script>
+</body>
+</html>
