@@ -1,5 +1,5 @@
 /* AWB Apps — Service Worker v13 */
-const CACHE_NAME = 'awb-apps-v27'; // Naikkan versi agar browser memuat SW baru
+const CACHE_NAME = 'awb-apps-v28'; // Naikkan versi agar browser memuat SW baru
 
 const PRECACHE = [
   './',
