@@ -231,7 +231,7 @@ function loadStore(){
   IMG={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('pimg:'+PKEY+':'))IMG[k.slice(('pimg:'+PKEY+':').length)]=localStorage.getItem(k)}
 }
 const ed=(k,def,cls='')=>`<div class="ed ${cls}" contenteditable="true" spellcheck="false" data-k="${k}">${EDIT[k]!=null?EDIT[k]:def}</div>`;
-const slot=(k,w,h,hint)=>`<div class="imgslot ${IMG[k]?'has':''}" data-k="${k}" style="width:${w}px;height:${h}px">${IMG[k]?`<img src="${IMG[k]}"><span class="rm" data-rm="1">✕</span>`:`<div class="ph">${hint}<br><small>Klik untuk pilih gambar · atau Ctrl+V</small></div>`}</div>`;
+const slot=(k,w,h,hint,st='')=>`<div class="imgslot ${IMG[k]?'has':''}" data-k="${k}" style="width:${w}px;height:${h}px;${st}">${IMG[k]?`<img src="${IMG[k]}"><span class="rm" data-rm="1">✕</span>`:`<div class="ph">${hint}<br><small>Klik untuk pilih gambar · atau Ctrl+V</small></div>`}</div>`;
 
 /* ---------- konten slide ---------- */
 function slideHTML(title,inner){
@@ -313,8 +313,8 @@ function buildSlides(a,b,pa,pb,mode){
     }
   });
 
-  /* Lebah */
-  GHS.forEach(g=>S.push(['Lebah Polinasi '+GHN[g],`<div style="display:flex;gap:12px"><div>${slot('lebah_'+g+'_1',430,545,'Tempel grafik tren & kunjungan per bay')}</div><div>${slot('lebah_'+g+'_2',450,545,'Tempel tabel kunjungan per cuaca')}</div></div>`]));
+  /* Lebah: 3 gambar (tren harian, kunjungan per bay, berdasarkan cuaca/suhu) */
+  GHS.forEach(g=>S.push(['Lebah Polinasi '+GHN[g],`<div style="display:flex;gap:12px"><div style="display:flex;flex-direction:column;gap:10px">${slot('lebah_'+g+'_tren',440,235,'Tren harian')}${slot('lebah_'+g+'_bay',440,300,'Kunjungan per bay')}</div><div>${slot('lebah_'+g+'_cuaca',440,545,'Berdasarkan cuaca &amp; rentang suhu','align-items:flex-start')}</div></div>`]));
 
   /* Gagasan */
   S.push(['Gagasan & Issue HPT',ed('gagasan','<ul><li>Klik untuk menulis gagasan atau issue HPT</li></ul>','big')]);
@@ -398,8 +398,8 @@ function putImg(k,file){
 }
 function refreshSlot(k){
   document.querySelectorAll('.imgslot[data-k="'+k+'"]').forEach(el=>{
-    const w=el.style.width,h=el.style.height,hint=el.querySelector('.ph')?el.querySelector('.ph').innerHTML.split('<br>')[0]:'Gambar';
-    const tmp=document.createElement('div');tmp.innerHTML=slot(k,parseInt(w),parseInt(h),hint);el.replaceWith(tmp.firstElementChild)});
+    const w=el.style.width,h=el.style.height,st=el.style.alignItems?'align-items:'+el.style.alignItems:'',hint=el.querySelector('.ph')?el.querySelector('.ph').innerHTML.split('<br>')[0]:'Gambar';
+    const tmp=document.createElement('div');tmp.innerHTML=slot(k,parseInt(w),parseInt(h),hint,st);el.replaceWith(tmp.firstElementChild)});
 }
 
 /* ---------- ekspor ---------- */
