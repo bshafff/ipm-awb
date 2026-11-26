@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4b5a2b">
+<title>Presentasi Mingguan IPM - PT. Agri Wangi Berry</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<script src="./core.js"></script>
+<style>
+:root{--ol:#4b5a2b;--sb:#e6ebd5;--bg:#f0f0ee;--bd:#d8d8d0;--mu:#666}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:#1a1a18;line-height:1.45;font-size:14px;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+header{background:linear-gradient(135deg,#6b7f3a,#4b5a2b);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 14px 14px}
+header a{color:#fff;text-decoration:none;font-size:13px;opacity:.9}
+header h1{font-size:18px;margin:4px 0 2px}header p{font-size:12px;opacity:.9}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{font-size:11px;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.2)}.chip.x{background:#fee2e2;color:#991b1b}
+.wrap{max-width:1000px;margin:0 auto;padding:12px}
+.card{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px}
+.fl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+label{display:block;font-size:11px;font-weight:700;color:var(--mu);margin-bottom:2px}
+select,input[type=date]{width:100%;padding:9px;border:1px solid var(--bd);border-radius:8px;font-size:14px;background:#fff}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button{background:var(--ol);color:#fff;border:0;border-radius:8px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer}
+button.sec{background:#e5e7eb;color:#1a1a18}button:disabled{opacity:.6}
+.tip{font-size:12px;color:var(--mu);margin-top:8px}
+.item{margin-bottom:14px}
+.cap{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mu);margin-bottom:4px}
+.cap button{padding:4px 10px;font-size:11px}
+.sw{position:relative;overflow:hidden;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.15);background:#fff}
+
+/* ===== SLIDE 1280x720 ===== */
+.sl{width:1280px;height:720px;position:relative;background:#fff;overflow:hidden;transform-origin:0 0;font-family:Arial,Helvetica,sans-serif;color:#1f2937}
+.sl .side{position:absolute;left:921px;top:0;width:359px;height:720px;background:var(--sb)}
+.sl .logo{position:absolute;left:980px;top:14px;width:240px}
+.sl .leafR{position:absolute;left:935px;top:160px;width:360px;transform:rotate(8deg)}
+.sl .leafL{position:absolute;left:-30px;top:560px;width:260px;transform:rotate(200deg) scaleX(-1)}
+.sl .straw{position:absolute;left:0;top:0;width:84px}
+.sl .ttl{position:absolute;left:104px;top:62px;font-size:58px;line-height:1;font-weight:800;color:var(--ol);white-space:nowrap}
+.sl .hr{position:absolute;left:0;top:128px;width:964px;height:2px;background:var(--ol)}
+.sl .nx{position:absolute;left:1168px;top:652px;width:60px;height:60px;border:3px solid var(--ol);border-radius:50%;color:var(--ol);font-size:34px;line-height:52px;text-align:center}
+.sl .ct{position:absolute;left:24px;top:146px;width:892px;height:545px}
+.ed{outline:none;border-radius:4px}
+.ed:hover,.ed:focus{background:rgba(255,235,59,.18)}
+.ed ul{padding-left:20px}.ed li{margin-bottom:4px}
+.imgslot{position:relative;border:2px dashed #b9c29a;border-radius:8px;background:#fafbf5;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer}
+.imgslot.has{border:none;background:#fff}
+.imgslot img{max-width:100%;max-height:100%;object-fit:contain}
+.imgslot .ph{text-align:center;color:#7a8560;font-size:17px;padding:10px}.imgslot .ph small{font-size:12px}
+.imgslot .rm{position:absolute;top:4px;right:6px;background:rgba(0,0,0,.55);color:#fff;border-radius:99px;width:24px;height:24px;line-height:24px;text-align:center;font-size:13px;display:none}
+.imgslot.has:hover .rm{display:block}
+/* action plan */
+.ap{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.apb{background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:12px 14px;height:262px;overflow:hidden}
+.pill{display:inline-block;background:#d6e0f5;color:#1f2d4d;font-weight:700;font-size:12px;padding:6px 36px;border-radius:6px;margin-bottom:10px}
+.apb h4{font-size:20px;margin-bottom:6px;color:#111}
+.apb .ed{font-size:17px;line-height:1.4}
+/* ringkasan */
+.kp3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+.kb{background:#f8fafc;border:1px solid #e5e7eb;border-radius:4px;padding:14px 18px;height:150px}
+.kb small{font-size:17px;color:#374151}.kb b{display:block;font-size:44px;line-height:1.25;margin:8px 0 4px}
+.kb span{font-size:15px;color:#4b5563}
+.c-ok{color:#166534}.c-wp{color:#b7791f}.c-sg{color:#c2410c}.c-aw{color:#b91c1c}.c-na{color:#6b7280}
+.nc3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.nc{background:#fff;border:1px solid #e5e7eb;border-top:12px solid var(--ol);padding:14px 16px;height:372px;overflow:hidden}
+.nc.dn{border-top-color:#0f766e}.nc.up{border-top-color:#b7791f}.nc.hi{border-top-color:#b91c1c}
+.nc .h{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.nc .ar{font-size:34px;font-weight:700;line-height:1}
+.nc.dn .ar{color:#0f766e}.nc.up .ar{color:#b7791f}.nc.hi .ar{color:#b91c1c}.nc .ar{color:var(--ol)}
+.nc .t{font-weight:700;color:#1e3a5f;font-size:21px;text-decoration:underline}
+.nc .ed{font-size:19px;line-height:1.45}
+/* chart */
+.cbox{background:#fff;border:1px solid #eee;border-radius:6px;padding:6px 10px;width:892px;height:262px;margin-bottom:10px;position:relative}
+/* tabel history */
+table.h{width:892px;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;font-size:18px}
+table.h th{background:#f8f8f6;text-align:left;padding:12px 8px;font-size:17px;color:#111}
+table.h td{padding:12px 8px;border-top:1px solid #eee;vertical-align:middle}
+table.h td.c,table.h th.c{text-align:center}
+.dot{display:inline-block;width:18px;height:18px;border-radius:50%}
+.lg{font-size:13px;color:#4b5563;margin-top:10px}.lg .dot{width:12px;height:12px;vertical-align:-1px;margin:0 4px 0 12px}
+.note{font-size:15px;color:#6b7280;padding:20px}
+.big{font-size:24px;line-height:1.7}.big li{margin-bottom:10px}
+/* mode presentasi */
+#deck.pres{position:fixed;inset:0;z-index:99999;background:#000;display:flex;align-items:center;justify-content:center}
+#deck.pres .item{margin:0}#deck.pres .cap{display:none}
+#deck.pres .item:not(.act){display:none}
+#deck.pres .ed,#deck.pres .imgslot{pointer-events:none}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;color:#fff;padding:8px 14px;border-radius:99px;font-size:13px;display:none;z-index:100000}
+</style>
+</head>
+<body>
+<header>
+  <a href="./index.html">‹ Portal IPM</a>
+  <h1>🎞️ Presentasi Mingguan IPM</h1>
+  <p>Slide otomatis dari data scouting, pestisida & CM · teks bisa diedit · unduh PPTX</p>
+  <div class="chips" id="chips"></div>
+</header>
+<div class="wrap">
+  <div class="card">
+    <div class="fl">
+      <div><label>Periode</label><select id="fMode"><option value="w">Mingguan (Senin–Sabtu)</option><option value="m">Bulanan</option></select></div>
+      <div><label>Tanggal di periode tsb</label><input type="date" id="fDate"></div>
+    </div>
+    <div class="btns">
+      <button onclick="startPres()">▶ Presentasi</button>
+      <button id="bPptx" onclick="exportPptx()">📥 Unduh PPTX</button>
+      <button class="sec" onclick="load()">🔄 Muat ulang data</button>
+    </div>
+    <p class="tip">Klik teks di slide untuk mengedit (tersimpan otomatis per periode). Slide <b>Reject Buah</b>, <b>Lebah Polinasi</b>, dan <b>Dokumentasi</b> berisi kotak gambar: klik kotaknya lalu pilih gambar, atau arahkan kursor ke kotak dan tekan <b>Ctrl+V</b> untuk menempel screenshot dari app lain.</p>
+  </div>
+  <div id="deck"><div class="card" style="text-align:center">Memuat data…</div></div>
+</div>
+<input type="file" id="fileIn" accept="image/*" style="display:none">
+<div class="toast" id="toast"></div>
+
+<script>
+const HPT_URL=()=>(LS('hpt_script_url')||DEFAULT_URLS.hpt), DAY=864e5, $=id=>document.getElementById(id);
+const PEST={spidermites:'Spidermites',aphids:'Aphids',thrips:'Thrips',ulat:'Ulat',kutu:'Kutu Kebul',mildew:'Mildew',botrytis:'Botrytis',antrak:'Antraknosa',layu:'Layu Mati'};
+const ABBR={spidermites:'SM'};
+const PRE={spidermites:/spider|tungau|mite|sm\b/,aphids:/aphid|kutu daun/,thrips:/thrips/,ulat:/ulat|penggerek/,kutu:/kebul|whitefly|bemisia/,mildew:/mildew|embun|powder|tepung/,botrytis:/botrytis|kelabu|busuk/,antrak:/antrak/,layu:/layu|fusarium|phytoph/};
+const PK=Object.keys(PEST), GHS=['GH1','GH2'], GHN={GH1:'GH 1',GH2:'GH 2'};
+const BULAN=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const BCOL=['#3b82f6','#ea580c','#15803d','#7c3aed','#0891b2'];
+function LS(k){try{return localStorage.getItem(k)||''}catch(e){return ''}}
+function LSset(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}}
+const U=s=>{const[p,q,r]=s.split('-').map(Number);return Date.UTC(p,q-1,r)}, iso=ms=>new Date(ms).toISOString().slice(0,10);
+const nd=s=>{s=String(s||'').trim();if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;if(/^\d{4}-\d{2}-\d{2}T/.test(s))return iso(new Date(s).getTime()+7*36e5);const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);return m?m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0'):''};
+const mean=a=>{a=a.filter(x=>x!=null&&!isNaN(x));return a.length?a.reduce((x,y)=>x+y,0)/a.length:null};
+const f=(v,d=2)=>v==null?'–':v.toFixed(d);
+const gk=s=>String(s||'').replace(/\s/g,'').toUpperCase();
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const dm=d=>d.slice(8)+'/'+d.slice(5,7);
+const toast=m=>{const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',2600)};
+let SB={},SP=[],CM={},MASTER={},ST={},EDIT={},IMG={},PKEY='',charts=[],post=[];
+
+async function jget(u){const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);try{const r=await fetch(u,{redirect:'follow',signal:c.signal});const j=JSON.parse(await r.text());if(j&&j.error)throw new Error(j.error);return j}finally{clearTimeout(t)}}
+async function load(){
+  ST={};
+  try{let j;try{j=await jget(HPT_URL()+'?action=list');try{localStorage.setItem('ana_hpt_cache',JSON.stringify(j))}catch(x){}}catch(x){j=JSON.parse(LS('ana_hpt_cache')||'null');if(!j)throw x;ST.off=1}
+    SB={};Object.keys(j).forEach(loc=>{SB[loc]=(j[loc]||[]).map(it=>{const d=nd(it.date),v={};PK.forEach(k=>v[k]=(+it[k]||0)*100);return{d,v}}).filter(x=>x.d).sort((a,b)=>a.d.localeCompare(b.d))});
+    ST.s='Scouting'+(ST.off?' (data terakhir)':'');
+  }catch(e){SB={}}
+  let list=[];
+  try{const u=LS('pestisida_script_url')||DEFAULT_URLS.pestisida;const j=await jget(u+'?action=getAll');SP=j.usage||[];list=j.list||[];ST.p='Pestisida'}
+  catch(e){SP=[];try{SP=JSON.parse(LS('pestisida_usage')||'[]');list=JSON.parse(LS('pestisida_list')||'[]')}catch(x){}if(SP.length)ST.p='Pestisida (lokal)'}
+  MASTER={};list.forEach(p=>{MASTER[String(p.nama||'').trim().toLowerCase()]=p});
+  try{CM=await jget(HPT_URL()+'?action=getCM');ST.c='CM'}
+  catch(e){try{CM=JSON.parse(LS('cm_cache')||'{}')}catch(x){CM={}}if(Object.keys(CM).length)ST.c='CM (lokal)'}
+  $('chips').innerHTML=[['s','Scouting'],['p','Pestisida'],['c','CM']].map(([k,n])=>ST[k]?`<span class="chip">✓ ${ST[k]}</span>`:`<span class="chip x">✗ ${n} belum tersambung</span>`).join('');
+  if(!$('fDate').value)$('fDate').value=iso(Date.now()+7*36e5);
+  render();
+}
+
+/* ---------- periode & statistik ---------- */
+function range(mode,d,shift){
+  const ms=U(d);
+  if(mode==='w'){const dow=new Date(ms).getUTCDay(),mon=ms-((dow+6)%7)*DAY+shift*7*DAY;return[iso(mon),iso(mon+5*DAY)]}
+  const dt=new Date(ms),y=dt.getUTCFullYear(),m=dt.getUTCMonth()+shift;
+  return[iso(Date.UTC(y,m,1)),iso(Date.UTC(y,m+1,0))];
+}
+const locsOf=g=>Object.keys(SB).filter(l=>gk(l.split('-')[0])===g).sort();
+function ghAvg(g,a,b){
+  const all=[];locsOf(g).forEach(l=>SB[l].filter(x=>x.d>=a&&x.d<=b).forEach(x=>all.push(x)));
+  const p={};PK.forEach(k=>p[k]=all.length?mean(all.map(x=>x.v[k])):null);return{n:all.length,p};
+}
+function blockAvg(g,k,a,b){
+  return locsOf(g).map(l=>({l,v:mean(SB[l].filter(x=>x.d>=a&&x.d<=b).map(x=>x.v[k]))})).filter(x=>x.v!=null).sort((x,y)=>y.v-x.v);
+}
+function stat(v){
+  if(v==null)return['Belum ada data','na'];
+  return v<1?['Aman','ok']:v<3?['Aman - Waspada','wp']:v<5?['Siaga','sg']:['Siaga - Awas','aw'];
+}
+function sprayTargets(u){
+  const s=String(u.sasaran||'').toLowerCase(),t=PK.filter(k=>PRE[k].test(s));if(t.length)return t;
+  const j=String(u.jenisPenyemprotan||'').toLowerCase();
+  if(j.includes('akarisida'))return['spidermites'];if(j.includes('fungisida'))return['mildew','botrytis','antrak'];return[];
+}
+function lastSpray(g,k,b){
+  const arr=SP.filter(u=>gk(u.gh)===g&&nd(u.tanggal)<=b&&sprayTargets(u).includes(k)).sort((x,y)=>nd(y.tanggal).localeCompare(nd(x.tanggal)));
+  return arr[0]||null;
+}
+function cmLatest(g,b){
+  const ds=Object.keys(CM).filter(d=>d<=b).sort().reverse();
+  for(const d of ds){for(const x of Object.keys(CM[d]||{})){if(gk(x)===g)return{d,...CM[d][x]}}}return null;
+}
+function cmBays(c){return Object.keys(c.bays||{}).map(k=>({k,v:+c.bays[k]||0})).filter(x=>x.v>0).sort((x,y)=>y.v-x.v)}
+const bayNum=k=>k.replace(/BAY\s*/i,'Bay ');
+
+/* ---------- rotasi IRAC/FRAC (sama dengan menu Pestisida) ---------- */
+const gm=n=>MASTER[String(n||'').trim().toLowerCase()]||{};
+function parseKode(str){return String(str||'').split(/[+,;\/&]|\bdan\b/i).map(s=>s.trim()).filter(Boolean).map(s=>{const raw=s.replace(/^(IRAC|FRAC)\s*[:\-]?\s*/i,'').trim();const key=raw.toUpperCase().replace(/\s+/g,'').replace(/^([A-Z]+)0+(?=\d)/,'$1');return{raw,key}}).filter(c=>c.key)}
+function sistemOf(nama,jenis){let kat=gm(nama).kategori||'';if(/^(Perekat|Penunjang|Herbisida)$/.test(kat))return'';if(!/^(Insektisida|Akarisida|Fungisida)$/.test(kat)){const mm=String(jenis||'').match(/(Insektisida|Akarisida|Fungisida)/);kat=mm?mm[1]:''}return kat==='Insektisida'||kat==='Akarisida'?'IRAC':kat==='Fungisida'?'FRAC':''}
+function annotate(sis,codes){return codes.map(c=>{const unk=/^(UN[A-Z]?|U\d*|NC|NA)$/.test(c.key);const low=sis==='FRAC'&&/^(M\d+|P\d+|BM\d+)$/.test(c.key);let grp=c.key;if(sis==='IRAC'){const m=c.key.match(/^(\d+)[A-Z]?$/);if(m)grp=m[1]}return{raw:c.raw,key:c.key,grp,unk,low}})}
+const dayDiff=(a,b)=>Math.round((U(a)-U(b))/DAY);
+function assess(sis,codes,prevAll,tgl,nama){
+  if(!codes.length)return'na';
+  const risky=annotate(sis,codes).filter(c=>!c.unk&&!c.low);if(!risky.length)return'good';
+  const myJeda=Number(gm(nama).jeda)||0;let found=null;
+  for(let i=0;i<prevAll.length&&!found;i++){const ev=prevAll[i];
+    for(let j=0;j<ev.items.length&&!found;j++){const it=ev.items[j];if(!it.codes.length)continue;
+      const pg=annotate(sis,it.codes).filter(c=>!c.unk&&!c.low);
+      const hits=risky.filter(c=>pg.some(p=>p.grp===c.grp));if(hits.length)found={i,ev,it,hits}}}
+  if(!found)return'good';
+  const gap=dayDiff(tgl,found.ev.tanggal),jeda=Math.max(myJeda,Number(gm(found.it.nama).jeda)||0);
+  if(jeda&&gap<jeda)return'bad';
+  if(found.i===0)return jeda?'warn':'bad';
+  if(found.i===1)return'warn';
+  return'good';
+}
+function buildRotation(){
+  const map={},by={};
+  SP.forEach(u=>{const s=sistemOf(u.namaObat,u.jenisPenyemprotan);if(!s)return;const g=gk(u.gh),d=nd(u.tanggal);if(!d)return;
+    const key=g+'|'+s;by[key]=by[key]||{g,s,ev:{}};(by[key].ev[d]=by[key].ev[d]||[]).push({id:u.id,nama:u.namaObat,codes:parseKode(gm(u.namaObat).kode)})});
+  Object.values(by).forEach(c=>{const evs=Object.keys(c.ev).sort().map(d=>({tanggal:d,items:c.ev[d]}));
+    evs.forEach((ev,idx)=>{const prevAll=evs.slice(0,idx).reverse();ev.items.forEach(it=>{map[it.id]=assess(c.s,it.codes,prevAll,ev.tanggal,it.nama)})})});
+  return map;
+}
+const DOTC={good:'#10b981',warn:'#f5b942',bad:'#ef4444',na:'#d1d5db'};
+
+/* ---------- penyimpanan edit & gambar ---------- */
+function loadStore(){
+  try{EDIT=JSON.parse(LS('pedit:'+PKEY)||'{}')}catch(e){EDIT={}}
+  IMG={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('pimg:'+PKEY+':'))IMG[k.slice(('pimg:'+PKEY+':').length)]=localStorage.getItem(k)}
+}
+const ed=(k,def,cls='')=>`<div class="ed ${cls}" contenteditable="true" spellcheck="false" data-k="${k}">${EDIT[k]!=null?EDIT[k]:def}</div>`;
+const slot=(k,w,h,hint)=>`<div class="imgslot ${IMG[k]?'has':''}" data-k="${k}" style="width:${w}px;height:${h}px">${IMG[k]?`<img src="${IMG[k]}"><span class="rm" data-rm="1">✕</span>`:`<div class="ph">${hint}<br><small>Klik untuk pilih gambar · atau Ctrl+V</small></div>`}</div>`;
+
+/* ---------- konten slide ---------- */
+function slideHTML(title,inner){
+  return `<div class="sl"><div class="side"></div><img class="leafR" src="./assets/leaf.png"><img class="leafL" src="./assets/leaf.png"><img class="logo" src="./assets/logo.png"><img class="straw" src="./assets/strawberry.png"><div class="hr"></div><div class="ttl">${esc(title)}</div><div class="ct">${inner}</div><div class="nx">→</div></div>`;
+}
+function trendWord(cur,prev){
+  if(cur==null)return'';if(prev==null)return'';
+  const d=cur-prev;return d>0.05?`, naik ${f(d)} poin dari periode lalu`:d<-0.05?`, turun ${f(-d)} poin dari periode lalu`:', stabil dibanding periode lalu';
+}
+function pestLine(g,k,a,b,pa,pb){
+  const cur=ghAvg(g,a,b).p[k],prev=ghAvg(g,pa,pb).p[k],bl=blockAvg(g,k,a,b),ls=lastSpray(g,k,b);
+  let s=`${GHN[g]}: rata-rata ${f(cur)}%${trendWord(cur,prev)}.`;
+  if(bl.length&&bl[0].v>0)s+=` Tertinggi di ${bl[0].l} (${f(bl[0].v)}%).`;
+  if(ls)s+=` Semprot terakhir ${esc(ls.namaObat)} (${dm(nd(ls.tanggal))}).`;
+  return s;
+}
+function topPests(g,a,b){
+  const p=ghAvg(g,a,b).p;return PK.filter(k=>p[k]!=null).sort((x,y)=>p[y]-p[x]);
+}
+
+function buildSlides(a,b,pa,pb,mode){
+  const S=[];post=[];
+  const bln=BULAN[new Date(U(b)).getUTCMonth()];
+  const T={};GHS.forEach(g=>T[g]=topPests(g,a,b));
+  const comb={};PK.forEach(k=>comb[k]=Math.max(...GHS.map(g=>ghAvg(g,a,b).p[k]??-1)));
+  const rank=PK.filter(k=>comb[k]>=0).sort((x,y)=>comb[y]-comb[x]);
+
+  /* 1. Action plan (draft otomatis, bisa diedit) */
+  const mk=(n,title,lines)=>`<div class="apb"><span class="pill">PRIORITAS ${n}</span>${ed('ap'+n+'t','<h4>'+title+'</h4>')}${ed('ap'+n,'<ul>'+lines.map(x=>'<li>'+x+'</li>').join('')+'</ul>')}</div>`;
+  const pestBox=(k)=>{const gs=GHS.filter(g=>(ghAvg(g,a,b).p[k]||0)>0);const use=gs.length?gs:[GHS.find(g=>ghAvg(g,a,b).p[k]!=null)||'GH1'];return[PEST[k]+' '+use.map(g=>GHN[g]).join(' dan '),use.map(g=>pestLine(g,k,a,b,pa,pb))]};
+  const used=[];const boxes=[];
+  if(rank[0]){used.push(rank[0]);const[t,l]=pestBox(rank[0]);boxes.push([t,l])}
+  const cmG=GHS.map(g=>({g,c:cmLatest(g,b)})).filter(x=>x.c&&(+x.c.popUpdate||0)>0).sort((x,y)=>(+y.c.popUpdate)-(+x.c.popUpdate))[0];
+  if(cmG){const bays=cmBays(cmG.c).slice(0,2).map(x=>bayNum(x.k)+' ('+x.v+')');
+    boxes.push(['Cyclamen Mite '+GHN[cmG.g],[`Populasi ${cmG.c.popAwal||0} → ${cmG.c.popUpdate} (update ${dm(cmG.c.d)}).`,bays.length?`Terbanyak di ${bays.join(' dan ')}.`:'Belum ada rincian per bay.',cmG.c.tindakan?`Tindakan: ${esc(cmG.c.tindakan)}.`:'Treatment dan monitoring difokuskan ke bay terbanyak.']])}
+  for(const k of rank){if(boxes.length>=3)break;if(used.includes(k)||comb[k]<=0)continue;used.push(k);boxes.push(pestBox(k))}
+  while(boxes.length<3)boxes.push(['Hama / penyakit lain',['Tulis catatan di sini.']]);
+  const apHtml=mk(1,...[boxes[0][0],boxes[0][1]])+mk(2,boxes[1][0],boxes[1][1])+mk(3,boxes[2][0],boxes[2][1])+mk(4,'Biosecurity dan Lebah Polinasi',['Tulis catatan biosecurity di sini.','Tulis catatan data kunjungan lebah polinasi di sini.']);
+  S.push(['Action Plan IPM '+(mode==='m'?bln:bln),`<div class="ap">${apHtml}</div>`]);
+
+  /* 2. Reject */
+  S.push(['Reject Buah - HPT',slot('reject',892,545,'Tempel grafik Reject Buah - HPT<br>(dari app Processing)')]);
+
+  /* GH 1 & GH 2 */
+  GHS.forEach(g=>{
+    const cur=ghAvg(g,a,b),prev=ghAvg(g,pa,pb),top=T[g].slice(0,3);
+    while(top.length<3)top.push(null);
+    const kp=top.map(k=>{if(!k)return`<div class="kb"><small>–</small><b class="c-na">–</b><span>Belum ada data</span></div>`;
+      const v=cur.p[k],[lab,c]=stat(v);return`<div class="kb"><small>${PEST[k]}${k==='spidermites'?' (rata-rata)':''}</small><b class="c-${c}">${f(v)}%</b><span>${lab}</span></div>`}).join('');
+    const nc=top.map((k,i)=>{
+      if(!k)return`<div class="nc"><div class="h"><span class="ar">✓</span><span class="t">–</span></div>${ed(g+'n'+i,'Belum ada data scouting di periode ini.')}</div>`;
+      const v=cur.p[k],pv=prev.p[k],d=(v!=null&&pv!=null)?v-pv:0,[,c]=stat(v);
+      const cls=c==='sg'||c==='aw'?'hi':d<-0.1?'dn':d>0.1?'up':'',ar=d<-0.1?'↓':d>0.1?'↑':'✓';
+      let txt=pestLine(g,k,a,b,pa,pb).replace(/^GH \d: r/,'R');
+      let title=PEST[k];
+      if(k==='spidermites'){const cm=cmLatest(g,b);if(cm&&(+cm.popUpdate||0)>0){title='Spidermites dan Cyclamen Mite';const bays=cmBays(cm).slice(0,3).map(x=>bayNum(x.k));txt+=`<br>CM: populasi ${cm.popUpdate}${bays.length?', terbanyak di '+bays.join(', '):''}.`}}
+      return`<div class="nc ${cls}"><div class="h"><span class="ar">${ar}</span><span class="t">${title}</span></div>${ed(g+'n'+i,txt)}</div>`}).join('');
+    S.push(['Ringkasan HPT '+GHN[g],cur.n?`<div class="kp3">${kp}</div><div class="nc3">${nc}</div>`:`<div class="note">Belum ada data scouting ${GHN[g]} di periode ini. Pastikan Sheets Monitoring HPT sudah tersambung atau pilih tanggal lain.</div>`]);
+
+    /* tren */
+    const t2=top.filter(Boolean).slice(0,2);
+    if(t2.length){
+      const labs=[...new Set(locsOf(g).flatMap(l=>SB[l].filter(x=>x.d>=a&&x.d<=b).map(x=>x.d)))].sort();
+      const boxes=t2.map((k,i)=>{const id='ch_'+g+'_'+i;
+        post.push(()=>{const ds=locsOf(g).map((l,j)=>{const m={};SB[l].filter(x=>x.d>=a&&x.d<=b).forEach(x=>{(m[x.d]=m[x.d]||[]).push(x.v[k])});return{label:l,data:labs.map(d=>m[d]?mean(m[d]):null),borderColor:BCOL[j%5],backgroundColor:BCOL[j%5],spanGaps:true,pointRadius:4,borderWidth:2.5,tension:0}}).filter(d=>d.data.some(v=>v!=null));
+          charts.push(new Chart(document.getElementById(id),{type:'line',data:{labels:labs.map(d=>d.slice(5)),datasets:ds},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{title:{display:true,text:'Tren Multi-Lokasi: '+PEST[k]+' (%)',font:{size:15}},legend:{position:'top',labels:{boxWidth:40,font:{size:13}}}},scales:{y:{beginAtZero:true,title:{display:true,text:'Persentase (%)',font:{size:12}},ticks:{font:{size:12}}},x:{ticks:{font:{size:12}}}}}}))});
+        return`<div class="cbox"><canvas id="${id}"></canvas></div>`}).join('');
+      S.push([t2.map(k=>ABBR[k]||PEST[k]).join(' dan ')+' '+GHN[g],boxes]);
+    }
+
+    /* history penyemprotan */
+    const rot=buildRotation();
+    const rows=SP.filter(u=>gk(u.gh)===g&&nd(u.tanggal)>=a&&nd(u.tanggal)<=b).sort((x,y)=>nd(x.tanggal).localeCompare(nd(y.tanggal)));
+    const per=7,pages=Math.max(1,Math.ceil(rows.length/per));
+    for(let p=0;p<pages;p++){
+      const part=rows.slice(p*per,p*per+per);
+      const body=part.length?`<table class="h"><thead><tr><th>Tgl</th><th class="c">GH</th><th>Jenis</th><th>Obat</th><th class="c">Kons</th><th class="c">Air</th><th class="c">Vol</th><th>Sasaran</th><th class="c">Buka</th><th class="c">Rot</th></tr></thead><tbody>${part.map(u=>`<tr><td>${nd(u.tanggal)}</td><td class="c">${esc(u.gh)}</td><td>${esc(u.jenisPenyemprotan)}</td><td><b>${esc(u.namaObat)}</b></td><td class="c">${esc(u.konsentrasi)}</td><td class="c">${esc(u.volAirBaku)}</td><td class="c">${esc(u.volObat)}</td><td>${esc(u.sasaran)}</td><td class="c">${u.bukaObatBaru||0}</td><td class="c"><span class="dot" style="background:${DOTC[rot[u.id]||'na']}"></span></td></tr>`).join('')}</tbody></table><div class="lg">Rotasi IRAC/FRAC:<span class="dot" style="background:${DOTC.good}"></span>Bagus<span class="dot" style="background:${DOTC.warn}"></span>Hati-hati<span class="dot" style="background:${DOTC.bad}"></span>Buruk<span class="dot" style="background:${DOTC.na}"></span>Kode kosong / non-IRAC-FRAC</div>`:`<div class="note">Tidak ada penyemprotan ${GHN[g]} yang tercatat di periode ini.</div>`;
+      S.push(['History Penyemprotan '+GHN[g]+(pages>1?' ('+(p+1)+'/'+pages+')':''),body]);
+    }
+  });
+
+  /* Lebah */
+  GHS.forEach(g=>S.push(['Lebah Polinasi '+GHN[g],`<div style="display:flex;gap:12px"><div>${slot('lebah_'+g+'_1',430,545,'Tempel grafik tren & kunjungan per bay')}</div><div>${slot('lebah_'+g+'_2',450,545,'Tempel tabel kunjungan per cuaca')}</div></div>`]));
+
+  /* Gagasan */
+  S.push(['Gagasan & Issue HPT',ed('gagasan','<ul><li>Klik untuk menulis gagasan atau issue HPT</li></ul>','big')]);
+
+  /* Dokumentasi */
+  S.push(['Dokumentasi',`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${[1,2,3,4,5,6].map(i=>slot('doc'+i,288,262,'Foto '+i)).join('')}</div>`]);
+  return S;
+}
+
+/* ---------- render, skala, navigasi ---------- */
+let SL=[],cur=0;
+function render(){
+  const mode=$('fMode').value,d=$('fDate').value;if(!d)return;
+  const[a,b]=range(mode,d,0),[pa,pb]=range(mode,d,-1);
+  PKEY=mode+'|'+a;loadStore();
+  charts.forEach(c=>c.destroy());charts=[];
+  SL=buildSlides(a,b,pa,pb,mode);
+  $('deck').innerHTML=SL.map((s,i)=>`<div class="item" data-i="${i}"><div class="cap"><span>Slide ${i+1} · ${esc(s[0])}</span><button class="sec" onclick="savePng(${i})">📷 PNG</button></div><div class="sw">${slideHTML(s[0],s[1])}</div></div>`).join('');
+  post.forEach(fn=>fn());fit();
+}
+function fit(){
+  const pres=$('deck').classList.contains('pres');
+  document.querySelectorAll('.item').forEach(it=>{
+    const sw=it.querySelector('.sw'),sl=it.querySelector('.sl');
+    const s=pres?Math.min(innerWidth/1280,innerHeight/720):Math.min(1,(Math.min(innerWidth,1000)-24)/1280);
+    sw.style.width=1280*s+'px';sw.style.height=720*s+'px';sl.style.transform='scale('+s+')';
+  });
+  charts.forEach(c=>{try{c.resize()}catch(e){}});
+}
+addEventListener('resize',fit);
+function startPres(){
+  const dk=$('deck');dk.classList.add('pres');cur=0;showCur();
+  (dk.requestFullscreen||dk.webkitRequestFullscreen||function(){}).call(dk);fit();
+}
+function showCur(){document.querySelectorAll('.item').forEach((it,i)=>it.classList.toggle('act',i===cur))}
+function endPres(){$('deck').classList.remove('pres');document.querySelectorAll('.item').forEach(i=>i.classList.remove('act'));fit();if(document.fullscreenElement)document.exitFullscreen()}
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&$('deck').classList.contains('pres'))endPres()});
+document.addEventListener('keydown',e=>{
+  if(!$('deck').classList.contains('pres'))return;
+  if(e.key==='Escape'){endPres();return}
+  if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){cur=Math.min(SL.length-1,cur+1);showCur();e.preventDefault()}
+  if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){cur=Math.max(0,cur-1);showCur();e.preventDefault()}
+});
+$('deck').addEventListener('click',e=>{
+  if(!$('deck').classList.contains('pres'))return;
+  const x=e.clientX/innerWidth;if(x>.5)cur=Math.min(SL.length-1,cur+1);else cur=Math.max(0,cur-1);showCur();
+});
+
+/* ---------- edit teks ---------- */
+$('deck').addEventListener('input',e=>{const el=e.target.closest('.ed');if(!el)return;EDIT[el.dataset.k]=el.innerHTML;LSset('pedit:'+PKEY,JSON.stringify(EDIT))});
+$('deck').addEventListener('paste',e=>{const el=e.target.closest&&e.target.closest('.ed');if(!el)return;
+  const cd=e.clipboardData;if(cd&&[...cd.items].some(i=>i.type.startsWith('image/')))return;
+  e.preventDefault();document.execCommand('insertText',false,cd.getData('text/plain'))});
+
+/* ---------- gambar ---------- */
+let curSlot=null,pickKey=null;
+$('deck').addEventListener('mouseover',e=>{const s=e.target.closest('.imgslot');if(s)curSlot=s.dataset.k});
+$('deck').addEventListener('touchstart',e=>{const s=e.target.closest('.imgslot');if(s)curSlot=s.dataset.k},{passive:true});
+$('deck').addEventListener('click',e=>{
+  if($('deck').classList.contains('pres'))return;
+  const s=e.target.closest('.imgslot');if(!s)return;
+  if(e.target.dataset.rm){delete IMG[s.dataset.k];try{localStorage.removeItem('pimg:'+PKEY+':'+s.dataset.k)}catch(x){}refreshSlot(s.dataset.k);return}
+  pickKey=s.dataset.k;$('fileIn').value='';$('fileIn').click();
+});
+$('fileIn').addEventListener('change',()=>{const fl=$('fileIn').files[0];if(fl&&pickKey)putImg(pickKey,fl)});
+document.addEventListener('paste',e=>{
+  if(e.target.closest&&e.target.closest('.ed'))return;
+  const it=[...(e.clipboardData||{items:[]}).items].find(i=>i.type.startsWith('image/'));if(!it)return;
+  let k=curSlot;if(!k){const emp=[...document.querySelectorAll('.imgslot:not(.has)')][0];k=emp&&emp.dataset.k}
+  if(!k){toast('Arahkan kursor ke kotak gambar dulu');return}
+  e.preventDefault();putImg(k,it.getAsFile());
+});
+function putImg(k,file){
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
+    const m=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*m;c.height=im.height*m;
+    const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);
+    IMG[k]=c.toDataURL('image/jpeg',.85);
+    if(!LSset('pimg:'+PKEY+':'+k,IMG[k]))toast('Gambar tampil, tapi penyimpanan perangkat penuh (tidak tersimpan permanen)');
+    refreshSlot(k)};im.src=r.result};r.readAsDataURL(file);
+}
+function refreshSlot(k){
+  document.querySelectorAll('.imgslot[data-k="'+k+'"]').forEach(el=>{
+    const w=el.style.width,h=el.style.height,hint=el.querySelector('.ph')?el.querySelector('.ph').innerHTML.split('<br>')[0]:'Gambar';
+    const tmp=document.createElement('div');tmp.innerHTML=slot(k,parseInt(w),parseInt(h),hint);el.replaceWith(tmp.firstElementChild)});
+}
+
+/* ---------- ekspor ---------- */
+async function snap(i,scale){
+  const el=document.querySelectorAll('.item')[i].querySelector('.sl');
+  return html2canvas(el,{scale,backgroundColor:'#ffffff',useCORS:true,logging:false,onclone:doc=>{
+    doc.querySelectorAll('.sw').forEach(w=>{w.style.width='1280px';w.style.height='720px';w.style.overflow='visible';w.style.boxShadow='none';w.style.borderRadius='0'});
+    doc.querySelectorAll('.sl').forEach(s=>s.style.transform='none');
+    doc.querySelectorAll('.imgslot .ph,.imgslot .rm').forEach(p=>p.style.display='none');
+    doc.querySelectorAll('.imgslot:not(.has)').forEach(p=>{p.style.border='none';p.style.background='transparent'});
+    doc.querySelectorAll('.ed').forEach(p=>{p.style.background='transparent'});
+  }});
+}
+async function savePng(i){
+  try{const cv=await snap(i,2);const a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='IPM-slide-'+String(i+1).padStart(2,'0')+'.png';document.body.appendChild(a);a.click();a.remove()}
+  catch(e){toast('Gagal membuat gambar: '+e.message)}
+}
+async function exportPptx(){
+  if($('deck').classList.contains('pres'))endPres();
+  if(typeof PptxGenJS==='undefined'||typeof html2canvas==='undefined'){toast('Library belum termuat (cek koneksi)');return}
+  const btn=$('bPptx'),old=btn.textContent;btn.disabled=true;
+  try{
+    const pres=new PptxGenJS();pres.layout='LAYOUT_WIDE';pres.title='Presentasi IPM AWB';pres.company='PT. Agri Wangi Berry';
+    for(let i=0;i<SL.length;i++){
+      btn.textContent='⏳ Slide '+(i+1)+'/'+SL.length;
+      const cv=await snap(i,1.5);
+      pres.addSlide().addImage({data:cv.toDataURL('image/jpeg',.92),x:0,y:0,w:13.333,h:7.5});
+    }
+    const mode=$('fMode').value,d=$('fDate').value;
+    await pres.writeFile({fileName:'IPM-AWB-'+(mode==='w'?'Minggu-':'Bulan-')+range(mode,d,0)[0]+'.pptx'});
+  }catch(e){toast('Gagal membuat PPTX: '+e.message)}
+  finally{btn.disabled=false;btn.textContent=old}
+}
+
+['fMode','fDate'].forEach(id=>$(id).addEventListener('change',render));
+addEventListener('online',load);
+load();
+</script>
+</body>
+</html>
