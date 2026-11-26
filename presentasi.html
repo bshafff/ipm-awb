@@ -101,8 +101,13 @@ table.h td.c,table.h th.c{text-align:center}
 <div class="wrap">
   <div class="card">
     <div class="fl">
-      <div><label>Periode</label><select id="fMode"><option value="w">Mingguan (Senin–Sabtu)</option><option value="m">Bulanan</option></select></div>
-      <div><label>Tanggal di periode tsb</label><input type="date" id="fDate"></div>
+      <div><label>Dari tanggal</label><input type="date" id="fFrom"></div>
+      <div><label>Sampai tanggal</label><input type="date" id="fTo"></div>
+    </div>
+    <div class="btns" style="margin-top:8px">
+      <button class="sec" onclick="preset('w',0)">Minggu ini</button>
+      <button class="sec" onclick="preset('w',-1)">Minggu lalu</button>
+      <button class="sec" onclick="preset('m',0)">Bulan ini</button>
     </div>
     <div class="btns">
       <button onclick="startPres()">▶ Presentasi</button>
@@ -150,16 +155,16 @@ async function load(){
   try{CM=await jget(HPT_URL()+'?action=getCM');ST.c='CM'}
   catch(e){try{CM=JSON.parse(LS('cm_cache')||'{}')}catch(x){CM={}}if(Object.keys(CM).length)ST.c='CM (lokal)'}
   $('chips').innerHTML=[['s','Scouting'],['p','Pestisida'],['c','CM']].map(([k,n])=>ST[k]?`<span class="chip">✓ ${ST[k]}</span>`:`<span class="chip x">✗ ${n} belum tersambung</span>`).join('');
-  if(!$('fDate').value)$('fDate').value=iso(Date.now()+7*36e5);
+  if(!$('fFrom').value||!$('fTo').value){preset('w',0);return}
   render();
 }
 
 /* ---------- periode & statistik ---------- */
-function range(mode,d,shift){
-  const ms=U(d);
-  if(mode==='w'){const dow=new Date(ms).getUTCDay(),mon=ms-((dow+6)%7)*DAY+shift*7*DAY;return[iso(mon),iso(mon+5*DAY)]}
-  const dt=new Date(ms),y=dt.getUTCFullYear(),m=dt.getUTCMonth()+shift;
-  return[iso(Date.UTC(y,m,1)),iso(Date.UTC(y,m+1,0))];
+function preset(mode,shift){
+  const ms=U(iso(Date.now()+7*36e5));let a,b;
+  if(mode==='w'){const dow=new Date(ms).getUTCDay(),mon=ms-((dow+6)%7)*DAY+shift*7*DAY;a=iso(mon);b=iso(mon+5*DAY)}
+  else{const dt=new Date(ms),y=dt.getUTCFullYear(),m=dt.getUTCMonth()+shift;a=iso(Date.UTC(y,m,1));b=iso(Date.UTC(y,m+1,0))}
+  $('fFrom').value=a;$('fTo').value=b;render();
 }
 const locsOf=g=>Object.keys(SB).filter(l=>gk(l.split('-')[0])===g).sort();
 function ghAvg(g,a,b){
@@ -322,9 +327,10 @@ function buildSlides(a,b,pa,pb,mode){
 /* ---------- render, skala, navigasi ---------- */
 let SL=[],cur=0;
 function render(){
-  const mode=$('fMode').value,d=$('fDate').value;if(!d)return;
-  const[a,b]=range(mode,d,0),[pa,pb]=range(mode,d,-1);
-  PKEY=mode+'|'+a;loadStore();
+  let a=$('fFrom').value,b=$('fTo').value;if(!a||!b)return;
+  if(a>b){[a,b]=[b,a];$('fFrom').value=a;$('fTo').value=b}
+  const len=Math.round((U(b)-U(a))/DAY)+1,pb=iso(U(a)-DAY),pa=iso(U(a)-len*DAY);
+  const mode='r';PKEY=a+'|'+b;loadStore();
   charts.forEach(c=>c.destroy());charts=[];
   SL=buildSlides(a,b,pa,pb,mode);
   $('deck').innerHTML=SL.map((s,i)=>`<div class="item" data-i="${i}"><div class="cap"><span>Slide ${i+1} · ${esc(s[0])}</span><button class="sec" onclick="savePng(${i})">📷 PNG</button></div><div class="sw">${slideHTML(s[0],s[1])}</div></div>`).join('');
@@ -422,13 +428,12 @@ async function exportPptx(){
       const cv=await snap(i,1.5);
       pres.addSlide().addImage({data:cv.toDataURL('image/jpeg',.92),x:0,y:0,w:13.333,h:7.5});
     }
-    const mode=$('fMode').value,d=$('fDate').value;
-    await pres.writeFile({fileName:'IPM-AWB-'+(mode==='w'?'Minggu-':'Bulan-')+range(mode,d,0)[0]+'.pptx'});
+    await pres.writeFile({fileName:'IPM-AWB-'+$('fFrom').value+'_sd_'+$('fTo').value+'.pptx'});
   }catch(e){toast('Gagal membuat PPTX: '+e.message)}
   finally{btn.disabled=false;btn.textContent=old}
 }
 
-['fMode','fDate'].forEach(id=>$(id).addEventListener('change',render));
+['fFrom','fTo'].forEach(id=>$(id).addEventListener('change',render));
 addEventListener('online',load);
 load();
 </script>
